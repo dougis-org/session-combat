@@ -134,6 +134,15 @@ const isValidDiceMaterial = isValidEnumOrNull(DICE_MATERIAL_VALUES);
 
 const isValidDockSize = (v: unknown): v is DockSize => {
   if (!isPlainObject(v)) return false;
+  const keys = Object.keys(v);
+  if (
+    keys.length !== 3 ||
+    !keys.includes("height") ||
+    !keys.includes("screenWidth") ||
+    !keys.includes("screenHeight")
+  ) {
+    return false;
+  }
   return (
     isFiniteNumber(v.height) &&
     v.height >= DOCK_MIN_HEIGHT &&

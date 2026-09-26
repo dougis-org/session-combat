@@ -225,6 +225,11 @@ describe('resolvePreferences', () => {
     const size = dockSize()
     expect(resolvePreferences({ chat: { size } }).chat.size).toEqual(size)
   })
+
+  it('rejects an otherwise-valid DockSize carrying an extra key', () => {
+    expect(isValidPreferenceValue('chat.size', { ...dockSize(), extra: 1 })).toBe(false)
+    expect(resolvePreferences({ chat: { size: { ...dockSize(), extra: 1 } } }).chat.size).toBeNull()
+  })
 })
 
 describe('validatePreferencePatch — rejections', () => {
