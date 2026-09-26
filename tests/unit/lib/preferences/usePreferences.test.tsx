@@ -182,6 +182,35 @@ describe('usePreferences — debounced persistence', () => {
       chat: { size: { height: 400 } },
     })
   })
+
+  it('a set dice.material survives foldDelta alongside a sibling key (ALL_PATHS includes it)', async () => {
+    const spy = okServer()
+    const { result } = renderHook(() => usePreferences(), {
+      wrapper: makePreferencesWrapper('u1'),
+    })
+    await waitFor(() => expect(result.current.ready).toBe(true))
+    await act(async () => { await Promise.resolve() })
+    const before = patchCalls(spy).length
+
+    jest.useFakeTimers()
+    act(() => {
+      // Two different domains in the same debounce window — foldDelta must merge both
+      // into the pending patch rather than one clobbering the other (regression coverage
+      // for ALL_PATHS omitting the new 'dice.material' path).
+      result.current.setPreference('dice.material', 'wood')
+      result.current.setPreference('chat.pinned', true)
+    })
+    await act(async () => { jest.runOnlyPendingTimers() })
+    jest.useRealTimers()
+    await act(async () => { await Promise.resolve() })
+
+    const after = patchCalls(spy).slice(before)
+    expect(after).toHaveLength(1)
+    expect(JSON.parse((after[0][1] as RequestInit).body as string)).toMatchObject({
+      dice: { material: 'wood' },
+      chat: { pinned: true },
+    })
+  })
 })
 
 describe('usePreferences — cross-tab sync', () => {

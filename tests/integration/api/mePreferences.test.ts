@@ -52,17 +52,17 @@ describe("/api/me/preferences Integration Tests", () => {
 
   it("PATCH dice.surface persists a supported value and round-trips via GET", async () => {
     const user = (await registerTestUser(baseUrl, "meprefs-surface")).cookie;
-    const res = await patch({ dice: { surface: "wood-table" } }, user);
+    const res = await patch({ dice: { surface: "mahogany" } }, user);
     expect(res.status).toBe(200);
-    expect((await res.json()).values.dice.surface).toBe("wood-table");
+    expect((await res.json()).values.dice.surface).toBe("mahogany");
     const after = await (await get(user)).json();
-    expect(after.values.dice.surface).toBe("wood-table");
-    expect(after.stored.dice.surface).toBe("wood-table");
+    expect(after.values.dice.surface).toBe("mahogany");
+    expect(after.stored.dice.surface).toBe("mahogany");
   });
 
   it("PATCH dice.surface null clears a stored value", async () => {
     const user = (await registerTestUser(baseUrl, "meprefs-surface-clear")).cookie;
-    await patch({ dice: { surface: "wood-tray" } }, user);
+    await patch({ dice: { surface: "stainless" } }, user);
     const res = await patch({ dice: { surface: null } }, user);
     expect(res.status).toBe(200);
     const after = await (await get(user)).json();

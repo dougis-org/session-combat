@@ -22,7 +22,7 @@ describe('isValidPreferenceValue', () => {
     expect(isValidPreferenceValue('dice.disableAnimation', null)).toBe(true)
     expect(isValidPreferenceValue('chat.size', dockSize())).toBe(true)
     expect(isValidPreferenceValue('dice.color', { foreground: '#000', background: '#fff' })).toBe(true)
-    expect(isValidPreferenceValue('dice.surface', 'wood-table')).toBe(true)
+    expect(isValidPreferenceValue('dice.surface', 'green-felt')).toBe(true)
     expect(isValidPreferenceValue('dice.surface', null)).toBe(true)
   })
 
@@ -63,6 +63,17 @@ describe('dice.color', () => {
     expect(isValidPreferenceValue('dice.color', { foreground: 'red', background: '#fff' })).toBe(false)
   })
 
+  it('rejects an otherwise-valid object carrying an extra key', () => {
+    // Extra keys must not reach persistence or the rendering engine unfiltered —
+    // useDiceAnimation.ts spreads this object verbatim into theme_customColorset.
+    expect(
+      isValidPreferenceValue('dice.color', { foreground: '#000', background: '#fff', material: 'wood' }),
+    ).toBe(false)
+    expect(
+      isValidPreferenceValue('dice.color', { foreground: '#000', background: '#fff', outline: '#fff' }),
+    ).toBe(false)
+  })
+
   it('rejects the old single-hex-string shape', () => {
     expect(isValidPreferenceValue('dice.color', '#ff0000')).toBe(false)
   })
@@ -78,7 +89,7 @@ describe('dice.color', () => {
 })
 
 describe('dice.surface', () => {
-  it.each(['green-felt', 'wood-table', 'wood-tray', 'metal'])('accepts %s', (v) => {
+  it.each(['default', 'blue-felt', 'red-felt', 'green-felt', 'taverntable', 'mahogany', 'stainless', 'cyberpunk', 'cagetown'])('accepts %s', (v) => {
     expect(isValidPreferenceValue('dice.surface', v)).toBe(true)
   })
 
@@ -258,7 +269,7 @@ describe('validatePreferencePatch — acceptances', () => {
     expect(validatePreferencePatch({ dice: { color: { foreground: '#a1b', background: '#fff' } } }).ok).toBe(true)
     expect(validatePreferencePatch({ dice: { color: { foreground: '#aabbcc', background: '#000' } } }).ok).toBe(true)
     expect(validatePreferencePatch({ dice: { surface: null } }).ok).toBe(true)
-    expect(validatePreferencePatch({ dice: { surface: 'wood-table' } }).ok).toBe(true)
+    expect(validatePreferencePatch({ dice: { surface: 'mahogany' } }).ok).toBe(true)
   })
 
   it('accepts a valid DockSize and chat.size null', () => {

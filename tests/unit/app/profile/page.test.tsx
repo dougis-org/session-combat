@@ -145,27 +145,27 @@ describe('ProfilePage', () => {
       const user = userEvent.setup();
       const setPreference = mockPreferences();
       render(<ProfilePage />);
-      await user.selectOptions(screen.getByLabelText('Dice Surface'), 'Wood Table');
-      expect(setPreference).toHaveBeenCalledWith('dice.surface', 'wood-table');
+      await user.selectOptions(screen.getByLabelText('Dice Surface'), 'Mahogany');
+      expect(setPreference).toHaveBeenCalledWith('dice.surface', 'mahogany');
     });
 
-    it('maps the "Default" option back to null', async () => {
+    it('maps the "No preference" option back to null', async () => {
       const user = userEvent.setup();
-      const setPreference = mockPreferences({ dice: { surface: 'metal' } });
+      const setPreference = mockPreferences({ dice: { surface: 'stainless' } });
       render(<ProfilePage />);
-      await user.selectOptions(screen.getByLabelText('Dice Surface'), 'Default');
+      await user.selectOptions(screen.getByLabelText('Dice Surface'), 'No preference (engine default)');
       expect(setPreference).toHaveBeenCalledWith('dice.surface', null);
     });
 
     it('renders a stored surface as the selected option', () => {
-      mockPreferences({ dice: { surface: 'wood-tray' } });
+      mockPreferences({ dice: { surface: 'stainless' } });
       render(<ProfilePage />);
-      expect(screen.getByLabelText<HTMLSelectElement>('Dice Surface').value).toBe('wood-tray');
+      expect(screen.getByLabelText<HTMLSelectElement>('Dice Surface').value).toBe('stainless');
     });
 
-    it('renders a null surface as "Default"', () => {
+    it('renders a null surface as "No preference"', () => {
       render(<ProfilePage />);
-      expect(screen.getByLabelText<HTMLSelectElement>('Dice Surface').value).toBe('default');
+      expect(screen.getByLabelText<HTMLSelectElement>('Dice Surface').value).toBe('');
     });
 
     it('offers exactly the supported surfaces', () => {
@@ -173,7 +173,18 @@ describe('ProfilePage', () => {
       const options = Array.from(
         screen.getByLabelText<HTMLSelectElement>('Dice Surface').options,
       ).map((o) => o.value);
-      expect(options).toEqual(['default', 'green-felt', 'wood-table', 'wood-tray', 'metal']);
+      expect(options).toEqual([
+        '',
+        'default',
+        'blue-felt',
+        'red-felt',
+        'green-felt',
+        'taverntable',
+        'mahogany',
+        'stainless',
+        'cyberpunk',
+        'cagetown',
+      ]);
     });
   });
 
@@ -186,11 +197,11 @@ describe('ProfilePage', () => {
       expect(setPreference).toHaveBeenCalledWith('dice.material', 'wood');
     });
 
-    it('maps the "Default" option back to null', async () => {
+    it('maps the "No preference" option back to null', async () => {
       const user = userEvent.setup();
       const setPreference = mockPreferences({ dice: { material: 'metal' } });
       render(<ProfilePage />);
-      await user.selectOptions(screen.getByLabelText('Dice Material'), 'Default');
+      await user.selectOptions(screen.getByLabelText('Dice Material'), 'No preference (engine default)');
       expect(setPreference).toHaveBeenCalledWith('dice.material', null);
     });
 
@@ -205,7 +216,7 @@ describe('ProfilePage', () => {
       const options = Array.from(
         screen.getByLabelText<HTMLSelectElement>('Dice Material').options,
       ).map((o) => o.value);
-      expect(options).toEqual(['default', 'glass', 'none', 'metal', 'wood']);
+      expect(options).toEqual(['', 'glass', 'none', 'metal', 'wood']);
     });
   });
 
@@ -234,7 +245,7 @@ describe('ProfilePage', () => {
     });
 
     it('does not persist an invalid foreground entry and shows a visible error', () => {
-      const setPreference = mockPreferences();
+      const setPreference = mockPreferences({ dice: { color: { foreground: '#000', background: '#fff' } } });
       render(<ProfilePage />);
       const field = screen.getByLabelText(/Dice Color — Foreground/i);
       fireEvent.change(field, { target: { value: '#zz' } });
@@ -244,11 +255,24 @@ describe('ProfilePage', () => {
       expect((field as HTMLInputElement).value).toBe('#zz');
     });
 
-    it('does not persist while only one field is filled in', () => {
+    it('does not persist an invalid background entry and shows a visible error', () => {
+      const setPreference = mockPreferences({ dice: { color: { foreground: '#000', background: '#fff' } } });
+      render(<ProfilePage />);
+      const field = screen.getByLabelText(/Dice Color — Background/i);
+      fireEvent.change(field, { target: { value: '#zz' } });
+      expect(setPreference).not.toHaveBeenCalled();
+      expect(field).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByRole('alert')).toHaveTextContent(/short hex colour/i);
+      expect((field as HTMLInputElement).value).toBe('#zz');
+    });
+
+    it('does not persist while only one field is filled in, and flags the empty sibling', () => {
       const setPreference = mockPreferences();
       render(<ProfilePage />);
       fireEvent.change(screen.getByLabelText(/Dice Color — Foreground/i), { target: { value: '#000' } });
       expect(setPreference).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(/Dice Color — Background/i)).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByRole('alert')).toHaveTextContent(/set both foreground and background/i);
     });
   });
 

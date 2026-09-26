@@ -190,11 +190,27 @@ export function useDiceAnimation(
           sounds: false,
           shadows: false,
           iterationLimit: ITERATION_LIMIT,
+          // The engine's loadTheme() only consults theme_material via its getColorSet(e)
+          // branch (named colorsets); a set theme_customColorset instead goes through
+          // makeColorSet(theme_customColorset), which reads `material` off that object
+          // itself. So theme_material must be folded into theme_customColorset here, or it
+          // is silently ignored whenever a custom colorset is also set.
           ...(appearance.customColorset !== null && {
-            theme_customColorset: appearance.customColorset,
+            theme_customColorset: {
+              ...appearance.customColorset,
+              ...(appearance.material !== null && { material: appearance.material }),
+            },
           }),
           ...(appearance.material !== null && { theme_material: appearance.material }),
-          ...(appearance.surface !== null && { theme_surface: appearance.surface }),
+          // Cast: @drdreo/dice-box-threejs's shipped .d.ts declares theme_surface as
+          // 'green-felt' | 'wood-table' | 'wood-tray' | 'metal', but those last three are
+          // not real keys in the engine's theme table (verified against the vendored
+          // bundle — see DICE_SURFACE_VALUES in lib/preferences/schema.ts and the tripwire
+          // test in tests/unit/lib/preferences/diceEnumEngineFacts.test.ts). Our DiceSurface
+          // type is the correct one; the cast bridges past the wrong .d.ts.
+          ...(appearance.surface !== null && {
+            theme_surface: appearance.surface as unknown as 'green-felt',
+          }),
         }) as unknown as DiceBoxLike
         await withTimeout(box.initialize(), INIT_TIMEOUT_MS)
       } catch (err) {

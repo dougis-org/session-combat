@@ -53,7 +53,7 @@ describe('GlobalDiceFab — appearance retired, wired from preferences (task 2.4
         ...DEFAULT_PREFERENCES.dice,
         color: { foreground: '#000', background: '#fff' },
         material: 'wood',
-        surface: 'metal',
+        surface: 'stainless',
       },
     })
     await openPanel()
@@ -61,7 +61,7 @@ describe('GlobalDiceFab — appearance retired, wired from preferences (task 2.4
       expect(useDiceAnimationMock).toHaveBeenLastCalledWith({
         customColorset: { foreground: '#000', background: '#fff' },
         material: 'wood',
-        surface: 'metal',
+        surface: 'stainless',
       }),
     )
   })

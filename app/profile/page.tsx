@@ -6,19 +6,23 @@ import { usePreferences } from '@/lib/preferences/usePreferences';
 import {
   DICE_SURFACE_VALUES,
   DICE_MATERIAL_VALUES,
+  HEX_COLOR,
   isValidPreferenceValue,
   type DiceSurface,
   type DiceMaterial,
 } from '@/lib/preferences/schema';
 import { NavBar } from '@/lib/components/NavBar';
 
-const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-
 const SURFACE_LABELS: Record<DiceSurface, string> = {
+  default: 'Default',
+  'blue-felt': 'Blue Felt',
+  'red-felt': 'Red Felt',
   'green-felt': 'Green Felt',
-  'wood-table': 'Wood Table',
-  'wood-tray': 'Wood Tray',
-  metal: 'Metal',
+  taverntable: 'Old Tavern Table',
+  mahogany: 'Mahogany',
+  stainless: 'Stainless Steel',
+  cyberpunk: 'Cyberpunk',
+  cagetown: 'Cage Town',
 };
 
 const MATERIAL_LABELS: Record<DiceMaterial, string> = {
@@ -38,8 +42,16 @@ export default function ProfilePage() {
   const storedColor = preferences.dice.color;
   const foregroundValue = foregroundDraft ?? storedColor?.foreground ?? '';
   const backgroundValue = backgroundDraft ?? storedColor?.background ?? '';
-  const foregroundInvalid = foregroundValue !== '' && !HEX_COLOR.test(foregroundValue);
-  const backgroundInvalid = backgroundValue !== '' && !HEX_COLOR.test(backgroundValue);
+  // Exactly one field filled (and otherwise hex-valid) is also invalid: isValidDiceColor
+  // requires both fields or neither, with no partial repair — without this, that state
+  // silently fails to commit with no visible feedback.
+  const pairIncomplete = (foregroundValue === '') !== (backgroundValue === '');
+  const foregroundInvalid =
+    (foregroundValue !== '' && !HEX_COLOR.test(foregroundValue)) ||
+    (pairIncomplete && foregroundValue === '');
+  const backgroundInvalid =
+    (backgroundValue !== '' && !HEX_COLOR.test(backgroundValue)) ||
+    (pairIncomplete && backgroundValue === '');
 
   const commitColor = (foreground: string, background: string) => {
     if (foreground === '' && background === '') {
@@ -119,7 +131,9 @@ export default function ProfilePage() {
                   />
                   {foregroundInvalid && (
                     <p id="dice-color-foreground-error" role="alert" className="text-sm text-red-400">
-                      Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.
+                      {pairIncomplete && foregroundValue === ''
+                        ? 'Set both foreground and background, or clear both.'
+                        : <>Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.</>}
                     </p>
                   )}
                 </div>
@@ -139,7 +153,9 @@ export default function ProfilePage() {
                   />
                   {backgroundInvalid && (
                     <p id="dice-color-background-error" role="alert" className="text-sm text-red-400">
-                      Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.
+                      {pairIncomplete && backgroundValue === ''
+                        ? 'Set both foreground and background, or clear both.'
+                        : <>Enter a short hex colour like <code>#f00</code> or <code>#ff0000</code>.</>}
                     </p>
                   )}
                 </div>
@@ -149,13 +165,15 @@ export default function ProfilePage() {
                   <select
                     id="dice-surface"
                     className={inputClass}
-                    value={preferences.dice.surface || 'default'}
+                    value={preferences.dice.surface ?? ''}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setPreference('dice.surface', val === 'default' ? null : val);
+                      setPreference('dice.surface', val === '' ? null : val);
                     }}
                   >
-                    <option value="default">Default</option>
+                    {/* Empty-string sentinel for "no preference" — 'default' is itself a real,
+                        selectable engine theme (DICE_SURFACE_VALUES), so it can't double as this. */}
+                    <option value="">No preference (engine default)</option>
                     {DICE_SURFACE_VALUES.map((v) => (
                       <option key={v} value={v}>{SURFACE_LABELS[v]}</option>
                     ))}
@@ -167,13 +185,13 @@ export default function ProfilePage() {
                   <select
                     id="dice-material"
                     className={inputClass}
-                    value={preferences.dice.material || 'default'}
+                    value={preferences.dice.material ?? ''}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setPreference('dice.material', val === 'default' ? null : val);
+                      setPreference('dice.material', val === '' ? null : val);
                     }}
                   >
-                    <option value="default">Default</option>
+                    <option value="">No preference (engine default)</option>
                     {DICE_MATERIAL_VALUES.map((v) => (
                       <option key={v} value={v}>{MATERIAL_LABELS[v]}</option>
                     ))}

@@ -50,12 +50,12 @@ describe('useDiceAnimation — appearance pass-through (task 2.3)', () => {
   it('a set surface appears verbatim in the constructed DiceConfig', async () => {
     const container = document.createElement('div')
     const { result } = renderHook(() =>
-      useDiceAnimation({ customColorset: null, material: null, surface: 'wood-tray' }),
+      useDiceAnimation({ customColorset: null, material: null, surface: 'mahogany' }),
     )
     await act(async () => {
       await result.current.run(built, container)
     })
-    expect(lastOptions().theme_surface).toBe('wood-tray')
+    expect(lastOptions().theme_surface).toBe('mahogany')
   })
 
   it('a set material appears verbatim in the constructed DiceConfig', async () => {
@@ -102,7 +102,7 @@ describe('useDiceAnimation — appearance pass-through (task 2.3)', () => {
       useDiceAnimation({
         customColorset: { foreground: '#000', background: '#f00' },
         material: 'metal',
-        surface: 'wood-tray',
+        surface: 'mahogany',
       }),
     )
     await act(async () => {
@@ -114,6 +114,23 @@ describe('useDiceAnimation — appearance pass-through (task 2.3)', () => {
     expect(opts.shadows).toBe(false)
     expect(typeof opts.baseScale).toBe('number')
     expect(typeof opts.iterationLimit).toBe('number')
+  })
+
+  it('folds material into theme_customColorset when both are set (engine ignores a bare theme_material once a custom colorset is set)', async () => {
+    const container = document.createElement('div')
+    const { result } = renderHook(() =>
+      useDiceAnimation({
+        customColorset: { foreground: '#000', background: '#f00' },
+        material: 'wood',
+        surface: null,
+      }),
+    )
+    await act(async () => {
+      await result.current.run(built, container)
+    })
+    const opts = lastOptions()
+    expect(opts.theme_customColorset).toEqual({ foreground: '#000', background: '#f00', material: 'wood' })
+    expect(opts.theme_material).toBe('wood')
   })
 
   it('appearance mapping does not affect lazy-load timing (import only fires on run())', () => {

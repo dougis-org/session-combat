@@ -28,11 +28,30 @@ export interface DiceColor {
   background: string;
 }
 
-/** Backing tuple for `PreferenceValues.dice.surface` — matches the engine's `theme_surface`. */
-export const DICE_SURFACE_VALUES = ['green-felt', 'wood-table', 'wood-tray', 'metal'] as const;
+/**
+ * Backing tuple for `PreferenceValues.dice.surface` — the engine's `theme_surface` table
+ * (`j_` in the vendored bundle, `node_modules/@drdreo/dice-box-threejs/dist/dice-box-threejs.es.js`).
+ * The package's shipped `.d.ts` claims `'green-felt' | 'wood-table' | 'wood-tray' | 'metal'`,
+ * but those last three are not valid keys (an unguarded `j_[theme_surface]` lookup throws for
+ * them) — this tuple is the real key set, verified against the bundle, not the `.d.ts`.
+ */
+export const DICE_SURFACE_VALUES = [
+  'default',
+  'blue-felt',
+  'red-felt',
+  'green-felt',
+  'taverntable',
+  'mahogany',
+  'stainless',
+  'cyberpunk',
+  'cagetown',
+] as const;
 export type DiceSurface = (typeof DICE_SURFACE_VALUES)[number];
 
-/** Backing tuple for `PreferenceValues.dice.material` — matches the engine's `theme_material`. */
+/** Backing tuple for `PreferenceValues.dice.material` — matches the engine's `theme_material`
+ *  (verified against `MATERIAL_PRESET_KEYS` in the vendored bundle). `'none'` is the engine's
+ *  own literal value for "no material" (its display label is "Plastic") — distinct from this
+ *  preference being `null`, which means "unset, use the engine's default material" instead. */
 export const DICE_MATERIAL_VALUES = ['glass', 'none', 'metal', 'wood'] as const;
 export type DiceMaterial = (typeof DICE_MATERIAL_VALUES)[number];
 
@@ -72,7 +91,9 @@ export const DEFAULT_PREFERENCES: PreferenceValues = Object.freeze({
   combat: Object.freeze({ autoScrollToNextCombatant: true }),
 }) as PreferenceValues;
 
-const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+/** Short/long hex color, e.g. `#f00` or `#ff0000`. Single source of truth for the pattern —
+ *  exported so `/profile`'s per-field UI validation stays in sync with schema validation. */
+export const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -80,10 +101,18 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
 const isFiniteNumber = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
 
-/** Accepts only `null` or a plain object with both fields matching `HEX_COLOR` — no partial repair. */
+/** Accepts only `null` or a plain object with exactly `foreground`/`background`, both
+ *  matching `HEX_COLOR` — no partial repair, and no extra keys. Rejecting extra keys matters
+ *  beyond input hygiene: `useDiceAnimation.ts` spreads this object verbatim into the engine's
+ *  `theme_customColorset` construction option, so an unvalidated extra key would reach the
+ *  rendering engine unfiltered. */
 const isValidDiceColor = (v: unknown): v is DiceColor | null => {
   if (v === null) return true;
   if (!isPlainObject(v)) return false;
+  const keys = Object.keys(v);
+  if (keys.length !== 2 || !keys.includes("foreground") || !keys.includes("background")) {
+    return false;
+  }
   return (
     typeof v.foreground === "string" &&
     HEX_COLOR.test(v.foreground) &&
@@ -92,7 +121,9 @@ const isValidDiceColor = (v: unknown): v is DiceColor | null => {
   );
 };
 
-/** Builds a `null | <closed-set member>` validator from a backing tuple. */
+/** Builds a `null | <closed-set member>` validator from a backing tuple. The cast to
+ *  `readonly string[]` is required only because `Array.prototype.includes` isn't
+ *  contravariant-friendly with a generic `T` — it does not weaken the runtime check. */
 const isValidEnumOrNull = <T extends string>(values: readonly T[]) =>
   (v: unknown): v is T | null =>
     v === null || (typeof v === "string" && (values as readonly string[]).includes(v));
