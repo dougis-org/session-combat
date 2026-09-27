@@ -32,21 +32,34 @@ const boundedRecord = <V extends z.ZodTypeAny>(value: V) =>
       message: `must have at most ${UPLOAD_LIMITS.listLength} entries`,
     });
 
-const creatureAbilitySchema = z.object({
-  name: z.string().trim().min(1).max(UPLOAD_LIMITS.abilityName),
-  description: z.string().trim().max(UPLOAD_LIMITS.abilityText),
-  // Persisted Monster/MonsterTemplate documents store unset optional fields as
-  // explicit `null`, not an absent key — every optional field here must accept
-  // both (`.nullish()`), not just `.optional()` (same rule as the top-level
-  // encounterMonsterSchema below).
-  attackBonus: z.number().nullish(),
-  damageDescription: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
-  saveDC: z.number().nullish(),
-  saveType: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
-  recharge: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
-  cost: z.number().nullish(),
-  usesRemaining: z.number().nullish(),
-});
+// Drops every null/undefined-valued key from an object (rather than keeping
+// the key with an `undefined` value) so parsed output matches `field?: T`
+// shapes exactly and round-trips cleanly through MongoDB: the driver
+// serializes an explicit `undefined` value back to BSON `null` (no
+// `ignoreUndefined` option is set), which would otherwise re-introduce the
+// null-vs-absent ambiguity these schemas exist to remove.
+const stripNullish = <T extends object>(value: T): T =>
+  Object.fromEntries(
+    Object.entries(value).filter(([, v]) => v !== null && v !== undefined)
+  ) as T;
+
+const creatureAbilitySchema = z
+  .object({
+    name: z.string().trim().min(1).max(UPLOAD_LIMITS.abilityName),
+    description: z.string().trim().max(UPLOAD_LIMITS.abilityText),
+    // Persisted Monster/MonsterTemplate documents store unset optional fields as
+    // explicit `null`, not an absent key — every optional field here must accept
+    // both (`.nullish()`), not just `.optional()` (same rule as the top-level
+    // encounterMonsterSchema below).
+    attackBonus: z.number().nullish(),
+    damageDescription: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+    saveDC: z.number().nullish(),
+    saveType: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+    recharge: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+    cost: z.number().nullish(),
+    usesRemaining: z.number().nullish(),
+  })
+  .transform(stripNullish);
 
 const abilityArray = () =>
   z.array(creatureAbilitySchema).max(UPLOAD_LIMITS.listLength);
@@ -109,16 +122,7 @@ export const encounterMonsterSchema = z
     }
   })
   .transform((value) => {
-    // Drop every `null`/`undefined` optional field entirely (rather than
-    // keeping the key with an `undefined` value) so the output matches
-    // Monster's `field?: T` shape (an absent key, never `field: T | null`)
-    // AND round-trips cleanly through MongoDB: the driver serializes an
-    // explicit `undefined` value back to BSON `null` (no `ignoreUndefined`
-    // option is set), which would otherwise re-introduce the exact
-    // null-vs-absent ambiguity this schema exists to remove.
-    const normalized = Object.fromEntries(
-      Object.entries(value).filter(([, v]) => v !== null && v !== undefined)
-    ) as typeof value;
+    const normalized = stripNullish(value);
     return { ...normalized, hp: normalized.hp ?? normalized.maxHp };
   });
 
