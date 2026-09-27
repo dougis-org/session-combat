@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
+import * as partyRepo from '@/lib/storage/partyRepo';
 import { CAMPAIGN_STATUSES } from '@/lib/types';
 import type { Campaign, Party } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId } from '@/lib/utils/campaign';
@@ -76,7 +77,7 @@ export const POST = withAuth(async (request, auth) => {
     };
 
     try {
-      await storage.saveParty(party);
+      await partyRepo.saveParty(party);
     } catch (partyError) {
       try {
         await campaignRepo.deleteCampaign(campaign.id, auth.userId);
@@ -97,7 +98,7 @@ export const POST = withAuth(async (request, auth) => {
       });
     } catch (memberError) {
       try {
-        await storage.deleteParty(party.id, auth.userId);
+        await partyRepo.deleteParty(party.id, auth.userId);
       } catch (rollbackError) {
         console.error('Failed to rollback party creation:', rollbackError);
       }

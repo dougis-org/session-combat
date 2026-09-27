@@ -3,6 +3,7 @@
  */
 import { GET } from "@/app/api/campaigns/[id]/parties/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import {
   makeRouteRequest,
   itReturns401WithParams,
@@ -14,11 +15,15 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadPartiesByCampaign: jest.fn(),
   },
 }));
 
+jest.mock("@/lib/storage/partyRepo", () => ({
+  loadPartiesByCampaign: jest.fn(),
+}));
+
 const mockedStorage = jest.mocked(storage);
+const mockedPartyRepo = jest.mocked(partyRepo);
 
 const BASE_URL = "http://localhost/api/campaigns/camp-1/parties";
 const makeGetRequest = () => makeRouteRequest(BASE_URL, "GET");
@@ -28,7 +33,7 @@ describe("GET /api/campaigns/[id]/parties", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedStorage.getMember.mockResolvedValue({ status: "active", role: "player" } as any);
-    mockedStorage.loadPartiesByCampaign.mockResolvedValue([
+    mockedPartyRepo.loadPartiesByCampaign.mockResolvedValue([
       { id: "party-1", members: [] },
       { id: "party-2", members: [] },
     ] as any);
@@ -63,7 +68,7 @@ describe("GET /api/campaigns/[id]/parties", () => {
   });
 
   it("returns 200 with an empty array when the campaign has no parties", async () => {
-    mockedStorage.loadPartiesByCampaign.mockResolvedValue([]);
+    mockedPartyRepo.loadPartiesByCampaign.mockResolvedValue([]);
     const response = await GET(makeGetRequest(), { params: PARAMS });
     expect(response.status).toBe(200);
     const body = await response.json();

@@ -3,6 +3,7 @@
  */
 import { DELETE } from "@/app/api/campaigns/[id]/characters/[cid]/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import * as characterRepo from "@/lib/storage/characterRepo";
 import { CampaignMember, Character } from "@/lib/types";
 import {
@@ -20,8 +21,11 @@ jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
     removeShare: jest.fn(),
-    setPartyMemberLeftAt: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/partyRepo", () => ({
+  setPartyMemberLeftAt: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/characterRepo", () => ({
@@ -31,8 +35,8 @@ jest.mock("@/lib/storage/characterRepo", () => ({
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   removeShare: jest.MockedFunction<typeof storage.removeShare>;
-  setPartyMemberLeftAt: jest.MockedFunction<typeof storage.setPartyMemberLeftAt>;
 };
+const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const CAMPAIGN_ID = "camp-1";
@@ -111,7 +115,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
-    mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
+    mockedPartyRepo.setPartyMemberLeftAt.mockResolvedValue();
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
     expect(response.status).toBe(204);
   });
@@ -120,9 +124,9 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
-    mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
+    mockedPartyRepo.setPartyMemberLeftAt.mockResolvedValue();
     await DELETE(makeDeleteRequest(), { params: PARAMS });
-    expect(mockedStorage.setPartyMemberLeftAt).toHaveBeenCalledWith(
+    expect(mockedPartyRepo.setPartyMemberLeftAt).toHaveBeenCalledWith(
       CAMPAIGN_ID,
       CHARACTER_ID,
       expect.any(Date)
@@ -133,7 +137,7 @@ describe("DELETE /api/campaigns/[id]/characters/[cid]", () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedCharacterRepo.loadCharacterById.mockResolvedValue(OWN_CHARACTER);
     mockedStorage.removeShare.mockResolvedValue(true);
-    mockedStorage.setPartyMemberLeftAt.mockRejectedValue(new Error("cleanup failed"));
+    mockedPartyRepo.setPartyMemberLeftAt.mockRejectedValue(new Error("cleanup failed"));
     const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
     expect(response.status).toBe(204);
   });

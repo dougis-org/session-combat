@@ -3,7 +3,7 @@
  */
 import { GET, POST } from "@/app/api/parties/route";
 import { GET as GET_ONE, PUT, DELETE } from "@/app/api/parties/[id]/route";
-import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -16,21 +16,17 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadParties: jest.fn(),
-    saveParty: jest.fn(),
-    deleteParty: jest.fn(),
-    canAddToCampaignParty: jest.fn(),
-    loadCampaignByIdAny: jest.fn(),
-    saveCampaign: jest.fn(),
-    addPartyToCampaign: jest.fn(),
-    removePartyFromCampaign: jest.fn(),
-    removePartyFromAllCampaigns: jest.fn(),
-  },
+jest.mock("@/lib/storage/partyRepo", () => ({
+  loadParties: jest.fn(),
+  saveParty: jest.fn(),
+  deleteParty: jest.fn(),
+  canAddToCampaignParty: jest.fn(),
+  addPartyToCampaign: jest.fn(),
+  removePartyFromCampaign: jest.fn(),
+  removePartyFromAllCampaigns: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedPartyRepo = jest.mocked(partyRepo);
 
 const MOCK_PARTIES = [
   { id: "party-1", userId: "user-123", name: "Fellowship", members: [] },
@@ -47,7 +43,7 @@ describe("GET /api/parties", () => {
 
   it("returns list of parties", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadParties.mockResolvedValue(MOCK_PARTIES as any);
+    mockedPartyRepo.loadParties.mockResolvedValue(MOCK_PARTIES as any);
 
     const response = await GET(makeRequest());
     expect(response.status).toBe(200);
@@ -59,7 +55,7 @@ describe("GET /api/parties", () => {
   itReturns500(
     GET,
     () => makeRequest(),
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("Storage error"))
+    () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("Storage error"))
   );
 });
 
@@ -88,7 +84,7 @@ describe("POST /api/parties", () => {
 
   it("creates party and returns 201", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
       makeRequest({
@@ -104,8 +100,8 @@ describe("POST /api/parties", () => {
     expect(body.userId).toBe("user-123");
     expect(body.members).toHaveLength(2);
     expect(body.members.map((m: { characterId: string }) => m.characterId)).toEqual(["char-1", "char-2"]);
-    expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
-    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(mockedPartyRepo.saveParty).toHaveBeenCalledTimes(1);
+    const savedParty = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty._id).toBeUndefined();
     expect(savedParty.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
@@ -113,13 +109,13 @@ describe("POST /api/parties", () => {
   itReturns500(
     POST,
     () => makeRequest({ name: "Doomed Party" }),
-    () => mockedStorage.saveParty.mockRejectedValue(new Error("Storage error"))
+    () => mockedPartyRepo.saveParty.mockRejectedValue(new Error("Storage error"))
   );
 
   it("B2-1: returns 403 when campaignId set and character not shared", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(false);
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(false);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
       makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-foreign"] })
@@ -132,8 +128,8 @@ describe("POST /api/parties", () => {
 
   it("B2-2: returns 201 when campaignId set and shared character allowed", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(true);
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
       makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-shared"] })
@@ -144,12 +140,12 @@ describe("POST /api/parties", () => {
 
   it("B2-3: no share check when campaignId absent", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(makeRequest({ name: "No Campaign", characterIds: ["char-1"] }));
 
     expect(response.status).toBe(201);
-    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
   });
 });
 
@@ -167,8 +163,8 @@ describe("PUT /api/parties/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
   });
 
   it("updates party fields and returns 200", async () => {
@@ -182,8 +178,8 @@ describe("PUT /api/parties/[id]", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(mockedStorage.saveParty).toHaveBeenCalledTimes(1);
-    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    expect(mockedPartyRepo.saveParty).toHaveBeenCalledTimes(1);
+    const savedParty = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty).toMatchObject({
       id: "party-123",
       userId: "user-123",
@@ -205,7 +201,7 @@ describe("PUT /api/parties/[id]", () => {
       { params: Promise.resolve({ id: "party-123" }) }
     );
 
-    const savedParty = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    const savedParty = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
     expect(savedParty._id).toBeUndefined();
   });
 
@@ -225,12 +221,12 @@ describe("PUT /api/parties/[id]", () => {
       }),
       { params: Promise.resolve({ id: "party-123" }) }
     );
-    const saved = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
     expect(saved.campaignId).toBeUndefined();
   });
 
   it("removes campaignId when empty string provided", async () => {
-    mockedStorage.loadParties.mockResolvedValue([
+    mockedPartyRepo.loadParties.mockResolvedValue([
       { ...EXISTING_PARTY, campaignId: "old-camp" },
     ] as any);
     await PUT(
@@ -240,12 +236,12 @@ describe("PUT /api/parties/[id]", () => {
       }),
       { params: Promise.resolve({ id: "party-123" }) }
     );
-    const saved = (mockedStorage.saveParty as jest.Mock).mock.calls[0][0];
+    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
     expect(saved.campaignId).toBeUndefined();
   });
 
   it("returns 404 when party not found", async () => {
-    mockedStorage.loadParties.mockResolvedValue([]);
+    mockedPartyRepo.loadParties.mockResolvedValue([]);
     const response = await PUT(
       makeRouteRequest("http://localhost/api/parties/missing", "PUT", { name: "X" }),
       { params: Promise.resolve({ id: "missing" }) }
@@ -255,8 +251,8 @@ describe("PUT /api/parties/[id]", () => {
 
   it("B3-1: returns 403 when adding unshared character to campaign party", async () => {
     const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
-    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(false);
+    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(false);
 
     const response = await PUT(
       makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
@@ -271,8 +267,8 @@ describe("PUT /api/parties/[id]", () => {
 
   it("B3-2: returns 200 when adding shared character to campaign party", async () => {
     const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
-    (mockedStorage as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
 
     const response = await PUT(
       makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
@@ -287,7 +283,7 @@ describe("PUT /api/parties/[id]", () => {
 
   it("B3-3: re-adding existing active member does not trigger share check", async () => {
     const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedStorage.loadParties.mockResolvedValue([partyWithCampaign] as any);
+    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
 
     const response = await PUT(
       makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
@@ -298,11 +294,11 @@ describe("PUT /api/parties/[id]", () => {
     );
 
     expect(response.status).toBe(200);
-    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
   });
 
   it("B3-4: no share check when party has no campaignId", async () => {
-    mockedStorage.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
+    mockedPartyRepo.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
 
     const response = await PUT(
       makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
@@ -313,7 +309,7 @@ describe("PUT /api/parties/[id]", () => {
     );
 
     expect(response.status).toBe(200);
-    expect((mockedStorage as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
   });
 });
 
@@ -324,7 +320,7 @@ describe("GET /api/parties/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadParties.mockResolvedValue([
+    mockedPartyRepo.loadParties.mockResolvedValue([
       { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
   });
@@ -341,14 +337,14 @@ describe("GET /api/parties/[id]", () => {
     GET_ONE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockResolvedValue([])
+    () => mockedPartyRepo.loadParties.mockResolvedValue([])
   );
 
   itReturns500WithParams(
     GET_ONE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error"))
+    () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
   );
 });
 
@@ -359,10 +355,10 @@ describe("DELETE /api/parties/[id]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadParties.mockResolvedValue([
+    mockedPartyRepo.loadParties.mockResolvedValue([
       { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
-    mockedStorage.deleteParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(DELETE, makeReq, PARAMS);
@@ -370,20 +366,20 @@ describe("DELETE /api/parties/[id]", () => {
   it("deletes party and returns 200", async () => {
     const response = await DELETE(makeReq(), { params: PARAMS });
     expect(response.status).toBe(200);
-    expect(mockedStorage.deleteParty).toHaveBeenCalledWith("party-123", "user-123");
+    expect(mockedPartyRepo.deleteParty).toHaveBeenCalledWith("party-123", "user-123");
   });
 
   itReturns404WithParams(
     DELETE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockResolvedValue([])
+    () => mockedPartyRepo.loadParties.mockResolvedValue([])
   );
 
   itReturns500WithParams(
     DELETE,
     makeReq,
     PARAMS,
-    () => mockedStorage.loadParties.mockRejectedValue(new Error("DB error"))
+    () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
   );
 });

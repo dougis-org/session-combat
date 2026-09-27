@@ -112,56 +112,11 @@ export const storage = {
   // Save campaign (upsert)
   async saveCampaign(campaign: Campaign): Promise<void> { return campaignRepo.saveCampaign(campaign); },
 
-  async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> {
-    return runStorageOp({ name: "addPartyToCampaign", collection: "campaigns" }, async () => {
-      const db = await getDatabase();
-      const campaign = await db.collection("campaigns").findOne({ id: campaignId });
-      if (campaign && campaign.partyIds === undefined) {
-        const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
-        const migratedIds = legacyParties.map((p: any) => p.id);
-        migratedIds.push(partyId);
-        await db.collection("campaigns").updateOne(
-          { id: campaignId },
-          { $set: { partyIds: migratedIds } }
-        );
-      } else {
-        await db.collection("campaigns").updateOne(
-          { id: campaignId },
-          { $addToSet: { partyIds: partyId } }
-        );
-      }
-    });
-  },
+  async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> { return partyRepo.addPartyToCampaign(campaignId, partyId); },
 
-  async removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
-    return runStorageOp({ name: "removePartyFromCampaign", collection: "campaigns" }, async () => {
-      const db = await getDatabase();
-      const campaign = await db.collection("campaigns").findOne({ id: campaignId });
-      if (campaign && campaign.partyIds === undefined) {
-        const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
-        const migratedIds = legacyParties.map((p: any) => p.id).filter((id: string) => id !== partyId);
-        await db.collection("campaigns").updateOne(
-          { id: campaignId },
-          { $set: { partyIds: migratedIds } }
-        );
-      } else {
-        await db.collection("campaigns").updateOne(
-          { id: campaignId },
-          { $pull: { partyIds: partyId } as any }
-        );
-      }
-    });
-  },
+  async removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> { return partyRepo.removePartyFromCampaign(campaignId, partyId); },
 
-  async removePartyFromAllCampaigns(partyId: string): Promise<void> {
-    return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
-      const db = await getDatabase();
-      await db.collection("campaigns").updateMany(
-        { partyIds: partyId },
-        { $pull: { partyIds: partyId } as any }
-      );
-    });
-  },
+  async removePartyFromAllCampaigns(partyId: string): Promise<void> { return partyRepo.removePartyFromAllCampaigns(partyId); },
 
   // Delete campaign
   async deleteCampaign(id: string, userId: string): Promise<void> { return campaignRepo.deleteCampaign(id, userId); },

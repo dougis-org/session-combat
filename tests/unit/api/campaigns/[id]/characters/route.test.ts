@@ -3,6 +3,7 @@
  */
 import { POST, GET } from "@/app/api/campaigns/[id]/characters/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import * as characterRepo from "@/lib/storage/characterRepo";
 import { DuplicateShareError } from "@/lib/errors";
 import { CampaignMember, CampaignCharacterShare, Character } from "@/lib/types";
@@ -22,8 +23,11 @@ jest.mock("@/lib/storage", () => ({
     getMember: jest.fn(),
     addShare: jest.fn(),
     listSharesForCampaign: jest.fn(),
-    buildSharedCharacterEntries: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/partyRepo", () => ({
+  buildSharedCharacterEntries: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/characterRepo", () => ({
@@ -34,8 +38,8 @@ const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   addShare: jest.MockedFunction<typeof storage.addShare>;
   listSharesForCampaign: jest.MockedFunction<typeof storage.listSharesForCampaign>;
-  buildSharedCharacterEntries: jest.MockedFunction<typeof storage.buildSharedCharacterEntries>;
 };
+const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const CAMPAIGN_ID = "camp-1";
@@ -217,7 +221,7 @@ describe("GET /api/campaigns/[id]/characters", () => {
       character: makeCharacter("char-2", "Arya"),
     };
     mockedStorage.getMember.mockResolvedValue(dmMember);
-    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([entry]);
+    mockedPartyRepo.buildSharedCharacterEntries.mockResolvedValue([entry]);
     const response = await GET(makeGetRequest(), { params: PARAMS });
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -230,7 +234,7 @@ describe("GET /api/campaigns/[id]/characters", () => {
   it("B1-2: DM gets empty array when no shares exist", async () => {
     const dmMember = { ...ACTIVE_PLAYER, role: "dm" as const };
     mockedStorage.getMember.mockResolvedValue(dmMember);
-    mockedStorage.buildSharedCharacterEntries.mockResolvedValue([]);
+    mockedPartyRepo.buildSharedCharacterEntries.mockResolvedValue([]);
     const response = await GET(makeGetRequest(), { params: PARAMS });
     expect(response.status).toBe(200);
     const body = await response.json();

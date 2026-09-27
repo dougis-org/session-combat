@@ -12,64 +12,64 @@
 ## Execution
 
 - [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 683 --repo dougis-org/session-combat --add-label "in-progress"`. Discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **Confirm working directory:** all remaining steps run inside `.worktrees/migrate-party-callers-to-narrow-imports/`, never the primary checkout.
-- [ ] **Relocate campaign-party linking functions (do this first — callers below depend on it):**
-  - [ ] In `lib/storage/partyRepo.ts`, add named exports `addPartyToCampaign`, `removePartyFromCampaign`, `removePartyFromAllCampaigns`, copied verbatim from their current bodies in `lib/storage.ts` (same `runStorageOp({ name, collection: "campaigns" }, ...)` wrapper, same `getDatabase()` / `db.collection(...)` calls). Add any missing imports (`runStorageOp` from `./runOp`, `getDatabase` from wherever `lib/storage.ts` currently imports it) to `partyRepo.ts`.
-  - [ ] In `lib/storage.ts`, replace the inline bodies of `addPartyToCampaign`, `removePartyFromCampaign`, `removePartyFromAllCampaigns` on the `storage` object with one-line delegations to `partyRepo.addPartyToCampaign(...)` / `partyRepo.removePartyFromCampaign(...)` / `partyRepo.removePartyFromAllCampaigns(...)`, matching the existing delegation style used for `saveParty`/`deleteParty`.
-  - [ ] Verify: `git diff` shows the 3 relocated function bodies are byte-identical between their old location (removed) and new location (added), apart from surrounding import/export syntax.
-- [ ] **Migrate `app/api/parties/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch the `canAddToCampaignParty` call inside `ids.map(charId => storage.canAddToCampaignParty(...))` to `partyRepo.canAddToCampaignParty(...)`.
-  - [ ] Switch `storage.saveParty(party)` to `partyRepo.saveParty(party)`.
-  - [ ] Switch `storage.addPartyToCampaign(...)` to `partyRepo.addPartyToCampaign(...)`.
-  - [ ] Switch `storage.deleteParty(...)` (in the compensating-delete catch path) to `partyRepo.deleteParty(...)`.
-  - [ ] Switch `storage.loadParties(auth.userId)` (GET handler) to `partyRepo.loadParties(auth.userId)`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/parties/[id]/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch all 3 `storage.loadParties(...)` calls (GET, PUT, DELETE handlers) to `partyRepo.loadParties(...)`.
-  - [ ] Switch `storage.canAddToCampaignParty(...)` inside the `charsToCheck.map(...)` callback to `partyRepo.canAddToCampaignParty(...)`.
-  - [ ] Switch `storage.removePartyFromAllCampaigns(...)` to `partyRepo.removePartyFromAllCampaigns(...)`.
-  - [ ] Switch both `storage.addPartyToCampaign(...)` calls (including the rollback-on-error path) to `partyRepo.addPartyToCampaign(...)`.
-  - [ ] Switch `storage.saveParty(updatedParty)` to `partyRepo.saveParty(updatedParty)`.
-  - [ ] Switch `storage.deleteParty(...)` (DELETE handler) to `partyRepo.deleteParty(...)`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.saveParty(...)` to `partyRepo.saveParty(...)`.
-  - [ ] Switch `storage.deleteParty(...)` to `partyRepo.deleteParty(...)`.
-  - [ ] Leave `storage.addMember(...)` on `storage` (membershipRepo domain, out of scope).
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/[id]/parties/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.loadPartiesByCampaign(...)` to `partyRepo.loadPartiesByCampaign(...)`.
-  - [ ] Leave `storage.getMember(...)` on `storage`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.saveParty(...)` to `partyRepo.saveParty(...)`.
-  - [ ] Switch `storage.loadPartiesByCampaign(...)` to `partyRepo.loadPartiesByCampaign(...)`.
-  - [ ] Leave both `storage.getMember(...)` calls on `storage`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/[id]/members/[userId]/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.setPartyMemberLeftAt(...)` inside `targetShares.map(share => storage.setPartyMemberLeftAt(...))` to `partyRepo.setPartyMemberLeftAt(...)`.
-  - [ ] Leave `storage.getMember(...)` (both calls), `storage.updateMemberStatus(...)`, and `storage.listAllSharesForCampaign(...)` on `storage`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/[id]/characters/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.buildSharedCharacterEntries(...)` to `partyRepo.buildSharedCharacterEntries(...)`.
-  - [ ] Leave `storage.getMember(...)` (both calls), `storage.addShare(...)`, and `storage.listSharesForCampaign(...)` on `storage`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Migrate `app/api/campaigns/[id]/characters/[cid]/route.ts`:**
-  - [ ] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
-  - [ ] Switch `storage.setPartyMemberLeftAt(...)` to `partyRepo.setPartyMemberLeftAt(...)`.
-  - [ ] Leave `storage.getMember(...)` and `storage.removeShare(...)` on `storage`.
-  - [ ] Confirm no remaining party-method calls reference `storage.` in this file.
-- [ ] **Update tests mocking the migrated call sites:** for each test file covering the 8 routes above (under `tests/unit/api/parties/`, `tests/unit/api/campaigns/`, and equivalents), update `jest.mock('@/lib/storage', ...)` / `jest.mock('@/lib/storage/partyRepo', ...)` setups so mocked party-method calls target `partyRepo`, leaving non-party mocks on `storage` unchanged.
-- [ ] **Repo-wide verification grep:** run `grep -rn "storage\.\(loadParties\|saveParty\b\|saveParties\|deleteParty\|loadPartiesByCampaign\|buildSharedCharacterEntries\|setPartyMemberLeftAt\|canAddToCampaignParty\|addPartyToCampaign\|removePartyFromCampaign\|removePartyFromAllCampaigns\)" --include="*.ts" --include="*.tsx" app lib components` and confirm the only remaining matches are `lib/storage.ts`'s own delegation lines (`partyRepo.X(...)` calls, not `storage.X`) — i.e. zero matches of `storage.<party-method>` outside `lib/storage.ts` itself.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (n/a here — this task is a pure relocation/import change, no new logic is introduced).
-- [ ] Confirm acceptance criteria in `specs/party-callers-narrow-imports/spec.md` are covered by the changes above.
+- [x] **Confirm working directory:** all remaining steps run inside `.worktrees/migrate-party-callers-to-narrow-imports/`, never the primary checkout.
+- [x] **Relocate campaign-party linking functions (do this first — callers below depend on it):**
+  - [x] In `lib/storage/partyRepo.ts`, add named exports `addPartyToCampaign`, `removePartyFromCampaign`, `removePartyFromAllCampaigns`, copied verbatim from their current bodies in `lib/storage.ts` (same `runStorageOp({ name, collection: "campaigns" }, ...)` wrapper, same `getDatabase()` / `db.collection(...)` calls). Add any missing imports (`runStorageOp` from `./runOp`, `getDatabase` from wherever `lib/storage.ts` currently imports it) to `partyRepo.ts`.
+  - [x] In `lib/storage.ts`, replace the inline bodies of `addPartyToCampaign`, `removePartyFromCampaign`, `removePartyFromAllCampaigns` on the `storage` object with one-line delegations to `partyRepo.addPartyToCampaign(...)` / `partyRepo.removePartyFromCampaign(...)` / `partyRepo.removePartyFromAllCampaigns(...)`, matching the existing delegation style used for `saveParty`/`deleteParty`.
+  - [x] Verify: `git diff` shows the 3 relocated function bodies are byte-identical between their old location (removed) and new location (added), apart from surrounding import/export syntax.
+- [x] **Migrate `app/api/parties/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch the `canAddToCampaignParty` call inside `ids.map(charId => storage.canAddToCampaignParty(...))` to `partyRepo.canAddToCampaignParty(...)`.
+  - [x] Switch `storage.saveParty(party)` to `partyRepo.saveParty(party)`.
+  - [x] Switch `storage.addPartyToCampaign(...)` to `partyRepo.addPartyToCampaign(...)`.
+  - [x] Switch `storage.deleteParty(...)` (in the compensating-delete catch path) to `partyRepo.deleteParty(...)`.
+  - [x] Switch `storage.loadParties(auth.userId)` (GET handler) to `partyRepo.loadParties(auth.userId)`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/parties/[id]/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch all 3 `storage.loadParties(...)` calls (GET, PUT, DELETE handlers) to `partyRepo.loadParties(...)`.
+  - [x] Switch `storage.canAddToCampaignParty(...)` inside the `charsToCheck.map(...)` callback to `partyRepo.canAddToCampaignParty(...)`.
+  - [x] Switch `storage.removePartyFromAllCampaigns(...)` to `partyRepo.removePartyFromAllCampaigns(...)`.
+  - [x] Switch both `storage.addPartyToCampaign(...)` calls (including the rollback-on-error path) to `partyRepo.addPartyToCampaign(...)`.
+  - [x] Switch `storage.saveParty(updatedParty)` to `partyRepo.saveParty(updatedParty)`.
+  - [x] Switch `storage.deleteParty(...)` (DELETE handler) to `partyRepo.deleteParty(...)`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.saveParty(...)` to `partyRepo.saveParty(...)`.
+  - [x] Switch `storage.deleteParty(...)` to `partyRepo.deleteParty(...)`.
+  - [x] Leave `storage.addMember(...)` on `storage` (membershipRepo domain, out of scope).
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/[id]/parties/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.loadPartiesByCampaign(...)` to `partyRepo.loadPartiesByCampaign(...)`.
+  - [x] Leave `storage.getMember(...)` on `storage`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.saveParty(...)` to `partyRepo.saveParty(...)`.
+  - [x] Switch `storage.loadPartiesByCampaign(...)` to `partyRepo.loadPartiesByCampaign(...)`.
+  - [x] Leave both `storage.getMember(...)` calls on `storage`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/[id]/members/[userId]/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.setPartyMemberLeftAt(...)` inside `targetShares.map(share => storage.setPartyMemberLeftAt(...))` to `partyRepo.setPartyMemberLeftAt(...)`.
+  - [x] Leave `storage.getMember(...)` (both calls), `storage.updateMemberStatus(...)`, and `storage.listAllSharesForCampaign(...)` on `storage`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/[id]/characters/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.buildSharedCharacterEntries(...)` to `partyRepo.buildSharedCharacterEntries(...)`.
+  - [x] Leave `storage.getMember(...)` (both calls), `storage.addShare(...)`, and `storage.listSharesForCampaign(...)` on `storage`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Migrate `app/api/campaigns/[id]/characters/[cid]/route.ts`:**
+  - [x] Add `import * as partyRepo from '@/lib/storage/partyRepo'`.
+  - [x] Switch `storage.setPartyMemberLeftAt(...)` to `partyRepo.setPartyMemberLeftAt(...)`.
+  - [x] Leave `storage.getMember(...)` and `storage.removeShare(...)` on `storage`.
+  - [x] Confirm no remaining party-method calls reference `storage.` in this file.
+- [x] **Update tests mocking the migrated call sites:** for each test file covering the 8 routes above (under `tests/unit/api/parties/`, `tests/unit/api/campaigns/`, and equivalents), update `jest.mock('@/lib/storage', ...)` / `jest.mock('@/lib/storage/partyRepo', ...)` setups so mocked party-method calls target `partyRepo`, leaving non-party mocks on `storage` unchanged.
+- [x] **Repo-wide verification grep:** run `grep -rn "storage\.\(loadParties\|saveParty\b\|saveParties\|deleteParty\|loadPartiesByCampaign\|buildSharedCharacterEntries\|setPartyMemberLeftAt\|canAddToCampaignParty\|addPartyToCampaign\|removePartyFromCampaign\|removePartyFromAllCampaigns\)" --include="*.ts" --include="*.tsx" app lib components` and confirm the only remaining matches are `lib/storage.ts`'s own delegation lines (`partyRepo.X(...)` calls, not `storage.X`) — i.e. zero matches of `storage.<party-method>` outside `lib/storage.ts` itself.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch (n/a here — this task is a pure relocation/import change, no new logic is introduced).
+- [x] Confirm acceptance criteria in `specs/party-callers-narrow-imports/spec.md` are covered by the changes above.
 
 ## Pre-Commit Code Review
 
@@ -77,10 +77,10 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests
+- [x] Run unit/integration tests (4043/4044 pass; 1 unrelated pre-existing failure in `tests/unit/lib/dice/d4EnginePatch.test.ts`, a node_modules patch-marker check unaffected by this change)
 - [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
+- [x] Run type checks (`tsc --noEmit` clean)
+- [ ] Run build (blocked in this worktree: `next build`'s `turbopack.root` is pinned to the worktree dir, which has no local `node_modules`/`next` package — a worktree-tooling limitation, not a code issue; needs verification from an environment with a full install, e.g. CI)
 - [ ] Run security/code quality checks required by project standards
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]

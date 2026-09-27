@@ -3,6 +3,7 @@
  */
 import { PUT } from "@/app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import * as characterRepo from "@/lib/storage/characterRepo";
 import {
   makeRouteRequest,
@@ -15,9 +16,12 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadPartiesByCampaign: jest.fn(),
-    saveParty: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/partyRepo", () => ({
+  loadPartiesByCampaign: jest.fn(),
+  saveParty: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/characterRepo", () => ({
@@ -25,6 +29,7 @@ jest.mock("@/lib/storage/characterRepo", () => ({
 }));
 
 const mockedStorage = jest.mocked(storage);
+const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCharacterRepo = jest.mocked(characterRepo);
 
 const BASE_URL = "http://localhost/api/campaigns/camp-1/members/user-1/parties/party-1";
@@ -35,11 +40,11 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedStorage.getMember.mockResolvedValue({ status: "active", role: "player" } as any);
-    mockedStorage.loadPartiesByCampaign.mockResolvedValue([
+    mockedPartyRepo.loadPartiesByCampaign.mockResolvedValue([
       { id: "party-1", userId: "user-1", members: [{ characterId: "char-1" }] }
     ] as any);
     mockedCharacterRepo.loadCharacters.mockResolvedValue([{ id: "char-2" }] as any);
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(PUT, () => makePutRequest({}), PARAMS);
@@ -72,7 +77,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
   it("returns 404 if party not found", async () => {
     mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "dm" } as any); // for caller
     mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "player" } as any); // for member
-    mockedStorage.loadPartiesByCampaign.mockResolvedValue([]);
+    mockedPartyRepo.loadPartiesByCampaign.mockResolvedValue([]);
 
     const response = await PUT(makePutRequest({ characterIds: [] }), { params: PARAMS });
     expect(response.status).toBe(404);
@@ -94,7 +99,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.members.find((m: any) => m.characterId === "char-2")).toBeDefined();
-    expect(mockedStorage.saveParty).toHaveBeenCalled();
+    expect(mockedPartyRepo.saveParty).toHaveBeenCalled();
   });
 
   itReturns500WithParams(
@@ -105,7 +110,7 @@ describe("PUT /api/campaigns/[id]/members/[userId]/parties/[partyId]", () => {
       // Mock getMember for authorization checks to pass
       mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "dm" } as any); // caller
       mockedStorage.getMember.mockResolvedValueOnce({ status: "active", role: "player" } as any); // member
-      mockedStorage.saveParty.mockRejectedValueOnce(new Error("DB error"));
+      mockedPartyRepo.saveParty.mockRejectedValueOnce(new Error("DB error"));
     },
     "returns 500 when saveParty throws"
   );

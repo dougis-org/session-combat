@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
 import { DuplicateShareError } from '@/lib/errors';
 import { validateString } from '@/lib/validation/core';
@@ -65,7 +66,7 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campai
     }
 
     if (member.role === 'dm') {
-      const entries: SharedCharacterEntry[] = await storage.buildSharedCharacterEntries(campaignId);
+      const entries: SharedCharacterEntry[] = await partyRepo.buildSharedCharacterEntries(campaignId);
       return NextResponse.json(entries);
     }
 

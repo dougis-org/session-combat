@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacters } from '@/lib/storage/characterRepo';
 import type { PartyMember } from '@/lib/types';
 import { validateStringArray } from '@/lib/validation/core';
@@ -84,7 +85,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       return NextResponse.json({ error: 'Member not found or not active' }, { status: 404 });
     }
 
-    const parties = await storage.loadPartiesByCampaign(campaignId);
+    const parties = await partyRepo.loadPartiesByCampaign(campaignId);
     const existingParty = parties.find(p => p.id === partyId);
     if (!existingParty) {
       return NextResponse.json({ error: 'Party not found in campaign' }, { status: 404 });
@@ -105,7 +106,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       updatedAt: now,
     };
 
-    await storage.saveParty(updatedParty);
+    await partyRepo.saveParty(updatedParty);
 
     return NextResponse.json(updatedParty);
   } catch (error) {

@@ -164,6 +164,57 @@ export async function canAddToCampaignParty(campaignId: string, characterId: str
   );
 }
 
+export async function addPartyToCampaign(campaignId: string, partyId: string): Promise<void> {
+  return runStorageOp({ name: "addPartyToCampaign", collection: "campaigns" }, async () => {
+    const db = await getDatabase();
+    const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+    if (campaign && campaign.partyIds === undefined) {
+      const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
+      const migratedIds = legacyParties.map((p: any) => p.id);
+      migratedIds.push(partyId);
+      await db.collection("campaigns").updateOne(
+        { id: campaignId },
+        { $set: { partyIds: migratedIds } }
+      );
+    } else {
+      await db.collection("campaigns").updateOne(
+        { id: campaignId },
+        { $addToSet: { partyIds: partyId } }
+      );
+    }
+  });
+}
+
+export async function removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
+  return runStorageOp({ name: "removePartyFromCampaign", collection: "campaigns" }, async () => {
+    const db = await getDatabase();
+    const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+    if (campaign && campaign.partyIds === undefined) {
+      const legacyParties = await db.collection("parties").find({ campaignId } as any).toArray();
+      const migratedIds = legacyParties.map((p: any) => p.id).filter((id: string) => id !== partyId);
+      await db.collection("campaigns").updateOne(
+        { id: campaignId },
+        { $set: { partyIds: migratedIds } }
+      );
+    } else {
+      await db.collection("campaigns").updateOne(
+        { id: campaignId },
+        { $pull: { partyIds: partyId } as any }
+      );
+    }
+  });
+}
+
+export async function removePartyFromAllCampaigns(partyId: string): Promise<void> {
+  return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
+    const db = await getDatabase();
+    await db.collection("campaigns").updateMany(
+      { partyIds: partyId },
+      { $pull: { partyIds: partyId } as any }
+    );
+  });
+}
+
 export async function buildSharedCharacterEntries(campaignId: string): Promise<SharedCharacterEntry[]> {
   return runStorageOp(
     { name: "buildSharedCharacterEntries", collection: "campaignCharacterShares" },
