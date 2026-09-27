@@ -34,14 +34,18 @@ const boundedRecord = <V extends z.ZodTypeAny>(value: V) =>
 
 const creatureAbilitySchema = z.object({
   name: z.string().trim().min(1).max(UPLOAD_LIMITS.abilityName),
-  description: z.string().trim().min(1).max(UPLOAD_LIMITS.abilityText),
-  attackBonus: z.number().optional(),
-  damageDescription: z.string().max(UPLOAD_LIMITS.abilityShort).optional(),
-  saveDC: z.number().optional(),
-  saveType: z.string().max(UPLOAD_LIMITS.abilityShort).optional(),
-  recharge: z.string().max(UPLOAD_LIMITS.abilityShort).optional(),
-  cost: z.number().optional(),
-  usesRemaining: z.number().optional(),
+  description: z.string().trim().max(UPLOAD_LIMITS.abilityText),
+  // Persisted Monster/MonsterTemplate documents store unset optional fields as
+  // explicit `null`, not an absent key — every optional field here must accept
+  // both (`.nullish()`), not just `.optional()` (same rule as the top-level
+  // encounterMonsterSchema below).
+  attackBonus: z.number().nullish(),
+  damageDescription: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+  saveDC: z.number().nullish(),
+  saveType: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+  recharge: z.string().max(UPLOAD_LIMITS.abilityShort).nullish(),
+  cost: z.number().nullish(),
+  usesRemaining: z.number().nullish(),
 });
 
 const abilityArray = () =>
@@ -105,10 +109,15 @@ export const encounterMonsterSchema = z
     }
   })
   .transform((value) => {
-    // Normalize every `null` to `undefined` so the output matches Monster's
-    // `field?: T` shape (never `field: T | null`), and default hp to maxHp.
+    // Drop every `null`/`undefined` optional field entirely (rather than
+    // keeping the key with an `undefined` value) so the output matches
+    // Monster's `field?: T` shape (an absent key, never `field: T | null`)
+    // AND round-trips cleanly through MongoDB: the driver serializes an
+    // explicit `undefined` value back to BSON `null` (no `ignoreUndefined`
+    // option is set), which would otherwise re-introduce the exact
+    // null-vs-absent ambiguity this schema exists to remove.
     const normalized = Object.fromEntries(
-      Object.entries(value).map(([k, v]) => [k, v === null ? undefined : v])
+      Object.entries(value).filter(([, v]) => v !== null && v !== undefined)
     ) as typeof value;
     return { ...normalized, hp: normalized.hp ?? normalized.maxHp };
   });

@@ -45,7 +45,10 @@ export function validateEncounterFields(
   if (monsters !== undefined) {
     const monstersResult = validateEncounterMonsters(monsters);
     if (!monstersResult.valid) {
-      return { valid: false, error: monstersResult.errors[0].message };
+      const [first, ...rest] = monstersResult.errors;
+      const prefix = first.field ? `${first.field}: ` : '';
+      const suffix = rest.length > 0 ? ` (and ${rest.length} more error${rest.length === 1 ? '' : 's'})` : '';
+      return { valid: false, error: `${prefix}${first.message}${suffix}` };
     }
     validatedMonsters = monstersResult.value;
   }
