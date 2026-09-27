@@ -55,12 +55,12 @@ If **ANY** required step fails, iterate and fix before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `wire-roll-validator-client-712` to `main`. PR body **must** include `Closes #712`.
-- [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 712 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (repo ruleset only allows squash merges — never `--merge`; NEVER use `--admin` to force the merge)
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `wire-roll-validator-client-712` to `main`. PR body **must** include `Closes #712`.
+- [x] **Issue lifecycle: mark in-review** — run `gh issue edit 712 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings listed and wait for human guidance before continuing.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (repo ruleset only allows squash merges — never `--merge`; NEVER use `--admin` to force the merge)
 - [ ] **Iterate until merged** — repeat the following priority loop continuously until `gh pr view <PR-URL> --json state` returns `MERGED`; if it returns `CLOSED` exit and notify the user — never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix any failures, commit, and push before doing anything else in this iteration
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; for every unresolved thread, address the feedback, reply, resolve the thread via the `resolveReviewThread` GraphQL mutation, commit fixes, run [Remote push validation], push, wait 180 seconds; continue until all threads are resolved
@@ -82,14 +82,14 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change — none expected beyond this change's own artifacts (no README/CLAUDE.md content references `useRollSubmission`'s internal validation behavior)
-- [ ] Sync approved spec deltas into `openspec/specs/roll-submission-validation/spec.md`: append the ADDED requirement "Client hook mirrors server-side roll-submission validation" from this change's `specs/roll-submission-validation/spec.md` into the archived global spec, and update its relative links — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/design.md`
-- [ ] Archive the change: move `openspec/changes/wire-roll-validator-client-712/` to `openspec/changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/` and stage both the new location and the deletion of the old location in a single commit
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/` exists and `openspec/changes/wire-roll-validator-client-712/` is gone
-- [ ] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-wire-roll-validator-client-712` then `git push -u origin doc/archive-YYYY-MM-DD-wire-roll-validator-client-712`
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout, not the worktree)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change — none expected beyond this change's own artifacts (no README/CLAUDE.md content references `useRollSubmission`'s internal validation behavior)
+- [x] Sync approved spec deltas into `openspec/specs/roll-submission-validation/spec.md`: append the ADDED requirement "Client hook mirrors server-side roll-submission validation" from this change's `specs/roll-submission-validation/spec.md` into the archived global spec, and update its relative links — replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/design.md`
+- [x] Archive the change: move `openspec/changes/wire-roll-validator-client-712/` to `openspec/changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/` and stage both the new location and the deletion of the old location in a single commit
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-wire-roll-validator-client-712/` exists and `openspec/changes/wire-roll-validator-client-712/` is gone
+- [x] **Create a doc branch** for the archive and spec updates: `git checkout -b doc/archive-YYYY-MM-DD-wire-roll-validator-client-712` then `git push -u origin doc/archive-YYYY-MM-DD-wire-roll-validator-client-712`
 - [ ] Open a PR from `doc/archive-YYYY-MM-DD-wire-roll-validator-client-712` to `main` with title `docs: archive wire-roll-validator-client-712 (YYYY-MM-DD)` — do NOT push directly to `main`
 - [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin`)
 - [ ] Monitor the doc PR until it merges (same loop as the implementation PR — address comments and CI failures, push to the same doc branch, repeat)

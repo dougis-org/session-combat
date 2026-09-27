@@ -148,6 +148,46 @@ The system SHALL preserve the pre-existing error behavior of `POST /api/campaign
 - **When** they `POST` an in-bounds well-formed roll
 - **Then** the response status is `409` and no persistence or broadcast occurs
 
+### Requirement: Client hook mirrors server-side roll-submission validation
+
+The system SHALL validate the outgoing roll payload in `useRollSubmission`'s `submitRoll` against the shared `rollSubmissionSchema` (from `lib/validation/rollSubmission.ts`) before issuing any network request, and SHALL return `'error'` with no `fetch` call when the payload fails that validation.
+
+#### Scenario: Oversized formula is rejected locally
+
+- **Given** a caller of `submitRoll` with a `formula` string longer than `MAX_FORMULA_LENGTH`
+- **When** `submitRoll` is invoked
+- **Then** it resolves to `'error'` and `fetch` is not called
+
+#### Scenario: Oversized rolls array is rejected locally
+
+- **Given** a caller of `submitRoll` with a `rolls` array longer than `MAX_DICE_IN_ROLL`
+- **When** `submitRoll` is invoked
+- **Then** it resolves to `'error'` and `fetch` is not called
+
+#### Scenario: Out-of-range die value is rejected locally
+
+- **Given** a caller of `submitRoll` whose `rolls` array contains a value below `1` or above `MAX_DIE_VALUE`
+- **When** `submitRoll` is invoked
+- **Then** it resolves to `'error'` and `fetch` is not called
+
+#### Scenario: Out-of-range total is rejected locally
+
+- **Given** a caller of `submitRoll` whose `total` has an absolute value greater than `MAX_TOTAL_MAGNITUDE`
+- **When** `submitRoll` is invoked
+- **Then** it resolves to `'error'` and `fetch` is not called
+
+#### Scenario: A well-formed pool roll is still submitted
+
+- **Given** a caller of `submitRoll` with a payload shaped like `useDicePoolState.buildRoll()`'s output, including the maximum legitimate pool (`MAX_PER_DIE * DIE_SIDES.length` dice plus `MAX_MODIFIER`)
+- **When** `submitRoll` is invoked
+- **Then** local validation passes and `fetch` is called with the unmodified payload, preserving the existing `'success' | 'conflict' | 'error'` status mapping
+
+#### Scenario: A well-formed percentile (d%) roll is still submitted
+
+- **Given** a caller of `submitRoll` with a payload shaped like `useDicePoolState.buildPercentileRoll()`'s output (`formula` `"d%"`, a single `rolls` entry between 1 and 100)
+- **When** `submitRoll` is invoked
+- **Then** local validation passes and `fetch` is called with the unmodified payload
+
 ## MODIFIED Requirements
 
 _None. This change adds a new capability and does not modify a previously-recorded requirement._
@@ -173,6 +213,10 @@ _None._
 - Requirement: Rolls API caps the request body size -> Tasks: "Add lib/server/readBoundedJson.ts", "Wire bounded read into the route", "Body-size tests"
 - Requirement: Rolls API accepts well-formed rolls unchanged -> Tasks: "Route happy-path tests"
 - Requirement: Rolls API preserves existing auth and session errors -> Tasks: "Retain/adjust existing route tests"
+- Proposal element "`submitRoll` runs the shared schema's `safeParse` ... before `fetch`" (change: wire-roll-validator-client-712) -> Requirement: Client hook mirrors server-side roll-submission validation
+- Proposal element "On parse failure: return `'error'`, do not call `fetch`" (change: wire-roll-validator-client-712) -> Requirement: Client hook mirrors server-side roll-submission validation (all rejection scenarios)
+- Proposal element "valid pool roll and `d%` percentile roll → still submitted" (change: wire-roll-validator-client-712) -> Requirement: Client hook mirrors server-side roll-submission validation (both happy-path scenarios)
+- Requirement: Client hook mirrors server-side roll-submission validation -> Tasks: "Wire safeParse into submitRoll", "Client rejection unit tests", "Client boundary happy-path unit tests" (see [design.md](../../changes/archive/2026-09-27-wire-roll-validator-client-712/design.md) Decisions 1-3)
 
 ## Non-Functional Acceptance Criteria
 
@@ -195,3 +239,17 @@ See functional scenarios: "Oversized formula is rejected", "Oversized rolls arra
 - **Given** any payload that fails the body-size cap or schema validation
 - **When** the request is rejected
 - **Then** no `CampaignRoll` is written to storage and no `roll` event is emitted, so a retried valid submission behaves identically to a first-attempt valid submission
+
+#### Scenario: Client-side `safeParse` never throws
+
+- **Given** any input to `submitRoll`, valid or invalid
+- **When** the local validation gate runs
+- **Then** it never throws synchronously (using `safeParse`, not `parse`), so `submitRoll`'s returned promise always resolves to one of `'success' | 'conflict' | 'error'` and never rejects due to validation
+
+### Requirement: Client-side defense-in-depth performance
+
+#### Scenario: Local rejection avoids a network round trip
+
+- **Given** a payload that fails `rollSubmissionSchema.safeParse` in `submitRoll`
+- **When** `submitRoll` is invoked
+- **Then** no `fetch` call is made, so no network latency or server processing is incurred for that submission attempt
