@@ -12,9 +12,9 @@ export interface ValidationResult {
 export function validateString(
   value: unknown,
   fieldName: string,
-  options: { required?: boolean; minLength?: number } = {}
+  options: { required?: boolean; minLength?: number; maxLength?: number } = {}
 ): { valid: true; value: string } | { valid: false; error: ValidationError } {
-  const { required = false, minLength = 0 } = options;
+  const { required = false, minLength = 0, maxLength } = options;
 
   if (value === undefined || value === null) {
     if (required) {
@@ -44,6 +44,16 @@ export function validateString(
       error: {
         field: fieldName,
         message: `${fieldName} must be at least ${minLength} character${minLength === 1 ? '' : 's'}`,
+      },
+    };
+  }
+
+  if (maxLength !== undefined && trimmed.length > maxLength) {
+    return {
+      valid: false,
+      error: {
+        field: fieldName,
+        message: `${fieldName} must be at most ${maxLength} characters`,
       },
     };
   }

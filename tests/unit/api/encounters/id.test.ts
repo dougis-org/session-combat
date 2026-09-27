@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { GET, PUT, DELETE } from "@/app/api/encounters/[id]/route";
-import { storage } from "@/lib/storage";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -13,15 +12,15 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadEncounters: jest.fn(),
-    saveEncounter: jest.fn(),
-    deleteEncounter: jest.fn(),
-  },
+jest.mock("@/lib/storage/encounterRepo", () => ({
+  loadEncounters: jest.fn(),
+  saveEncounter: jest.fn(),
+  deleteEncounter: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+import * as encounterRepo from "@/lib/storage/encounterRepo";
+
+const mockedEncounterRepo = jest.mocked(encounterRepo);
 
 const ENC_ID = "enc-abc";
 const MOCK_ENCOUNTER = {
@@ -45,12 +44,12 @@ describe("GET /api/encounters/[id]", () => {
     GET,
     () => makeRequest("GET"),
     params,
-    () => mockedStorage.loadEncounters.mockResolvedValue([])
+    () => mockedEncounterRepo.loadEncounters.mockResolvedValue([])
   );
 
   it("returns encounter when found", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
+    mockedEncounterRepo.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
 
     const response = await GET(makeRequest("GET"), { params });
     expect(response.status).toBe(200);
@@ -62,8 +61,15 @@ describe("GET /api/encounters/[id]", () => {
     GET,
     () => makeRequest("GET"),
     params,
-    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"))
+    () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await GET(makeRequest("GET"), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
 });
 
 describe("PUT /api/encounters/[id]", () => {
@@ -75,12 +81,12 @@ describe("PUT /api/encounters/[id]", () => {
     PUT,
     () => makeRequest("PUT", { name: "New Name" }),
     params,
-    () => mockedStorage.loadEncounters.mockResolvedValue([])
+    () => mockedEncounterRepo.loadEncounters.mockResolvedValue([])
   );
 
   it("returns 400 when name is empty after update", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
+    mockedEncounterRepo.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
 
     const response = await PUT(makeRequest("PUT", { name: "  " }), { params });
     expect(response.status).toBe(400);
@@ -88,8 +94,8 @@ describe("PUT /api/encounters/[id]", () => {
 
   it("updates encounter and returns 200", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
-    mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
 
     const response = await PUT(
       makeRequest("PUT", { name: "Updated Name", description: "New desc" }),
@@ -100,15 +106,44 @@ describe("PUT /api/encounters/[id]", () => {
     const body = await response.json();
     expect(body.name).toBe("Updated Name");
     expect(body.description).toBe("New desc");
-    expect(mockedStorage.saveEncounter).toHaveBeenCalledTimes(1);
+    expect(mockedEncounterRepo.saveEncounter).toHaveBeenCalledTimes(1);
   });
 
   itReturns500WithParams(
     PUT,
     () => makeRequest("PUT", { name: "Valid" }),
     params,
-    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"))
+    () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await PUT(makeRequest("PUT", { name: "Valid" }), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for malformed JSON body", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const request = new (require("next/server").NextRequest)(
+      `http://localhost/api/encounters/${ENC_ID}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+        body: "{not valid json",
+      }
+    );
+    const response = await PUT(request, { params });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is not an object", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await PUT(makeRequest("PUT", ["not", "an", "object"]), { params });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /api/encounters/[id]", () => {
@@ -120,18 +155,18 @@ describe("DELETE /api/encounters/[id]", () => {
     DELETE,
     () => makeRequest("DELETE"),
     params,
-    () => mockedStorage.loadEncounters.mockResolvedValue([])
+    () => mockedEncounterRepo.loadEncounters.mockResolvedValue([])
   );
 
   it("deletes encounter and returns 200", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
-    mockedStorage.deleteEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.loadEncounters.mockResolvedValue([MOCK_ENCOUNTER] as any);
+    mockedEncounterRepo.deleteEncounter.mockResolvedValue(undefined as any);
 
     const response = await DELETE(makeRequest("DELETE"), { params });
 
     expect(response.status).toBe(200);
-    expect(mockedStorage.deleteEncounter).toHaveBeenCalledWith(
+    expect(mockedEncounterRepo.deleteEncounter).toHaveBeenCalledWith(
       ENC_ID,
       "user-123"
     );
@@ -141,6 +176,13 @@ describe("DELETE /api/encounters/[id]", () => {
     DELETE,
     () => makeRequest("DELETE"),
     params,
-    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"))
+    () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await DELETE(makeRequest("DELETE"), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
 });

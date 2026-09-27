@@ -2,13 +2,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { storage } from '@/lib/storage';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
+import { saveEncounter } from '@/lib/storage/encounterRepo';
 import { withAuthAndParams } from '@/lib/middleware';
 import { Campaign, CampaignChapter } from '@/lib/types';
 import { randomUUID } from 'crypto';
+import { validateString } from '@/lib/validation/core';
 
 export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const template = await storage.loadGlobalCampaignTemplateById(id);
+    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
+    if (!idResult.valid) {
+      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+    }
+
+    const template = await storage.loadGlobalCampaignTemplateById(idResult.value);
 
     if (!template) {
       return NextResponse.json({ error: 'Campaign template not found' }, { status: 404 });
@@ -58,7 +65,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
               createdAt: new Date(),
               updatedAt: new Date(),
             };
-            await storage.saveEncounter(encounter);
+            await saveEncounter(encounter);
             return encounter.id;
           })
         );

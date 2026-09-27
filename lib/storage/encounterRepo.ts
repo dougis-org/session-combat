@@ -1,4 +1,3 @@
-import { storage } from "@/lib/storage";
 import { getDatabase } from "@/lib/db";
 import { runStorageOp } from "@/lib/storage/runOp";
 import { Campaign, Encounter } from "@/lib/types";
@@ -37,7 +36,7 @@ export async function saveEncounters(encounters: Encounter[]): Promise<void> {
     { name: "saveEncounters", collection: "encounters" },
     async () => {
       for (const encounter of encounters) {
-        await storage.saveEncounter(encounter);
+        await saveEncounter(encounter);
       }
     }
   );

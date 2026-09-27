@@ -1,5 +1,5 @@
 import { getDatabase } from "../db";
-import { storage } from "../storage";
+import { loadEncountersByIds, saveEncounter } from "../storage/encounterRepo";
 import * as campaignRepo from "../storage/campaignRepo";
 import { Campaign, CampaignTemplate, Encounter } from "../types";
 import { randomUUID } from "node:crypto";
@@ -46,7 +46,7 @@ export async function backfillCampaignEncounters(): Promise<{
       }
 
       // 1.4 Fetch existing Encounter records for the campaign
-      const existingEncounters = await storage.loadEncountersByIds(
+      const existingEncounters = await loadEncountersByIds(
         campaign.encounterIds || [],
         campaign.userId
       );
@@ -77,7 +77,7 @@ export async function backfillCampaignEncounters(): Promise<{
           updatedAt: now,
         };
         
-        await storage.saveEncounter(newEncounter);
+        await saveEncounter(newEncounter);
         newEncounterIds.push(newEncounter.id);
         encountersAdded++;
       }
