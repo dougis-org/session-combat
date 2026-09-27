@@ -7,7 +7,12 @@ export type RollSubmitResult = 'success' | 'conflict' | 'error'
 
 export function useRollSubmission(campaignId: string) {
   async function submitRoll(formula: string, rolls: number[], total: number, visibility: RollVisibility): Promise<RollSubmitResult> {
-    if (!rollSubmissionSchema.safeParse({ formula, rolls, total, visibility }).success) {
+    const parsed = rollSubmissionSchema.safeParse({ formula, rolls, total, visibility })
+    if (!parsed.success) {
+      // Existing client logging convention: plain console.* (see useDiceAnimation.ts).
+      // Return contract is unchanged (still collapses to 'error') — this is a
+      // debuggability-only side channel, not a new error type.
+      console.warn('[roll-submission] rejected locally by rollSubmissionSchema', parsed.error.issues)
       return 'error'
     }
     try {

@@ -74,14 +74,44 @@ describe('useRollSubmission', () => {
     ['an oversized rolls array', '1d20', new Array(MAX_DICE_IN_ROLL + 1).fill(1), 10],
     ['a die value above the maximum', 'd%', [MAX_DIE_VALUE + 1], MAX_DIE_VALUE + 1],
     ['a die value below the minimum', '1d20', [0], 0],
+    ['a non-integer die value', '1d20', [10.5], 10],
     ['a total above the positive magnitude bound', '1d20', [10], MAX_TOTAL_MAGNITUDE + 1],
     ['a total beyond the negative magnitude bound', '1d20', [10], -(MAX_TOTAL_MAGNITUDE + 1)],
+    ['a NaN total', '1d20', [10], NaN],
+    ['an infinite total', '1d20', [10], Infinity],
+    ['an empty formula', '', [10], 10],
+    ['a whitespace-only formula', '   ', [10], 10],
   ])('rejects %s locally without calling fetch', async (_description, formula, rolls, total) => {
     global.fetch = jest.fn() as unknown as typeof fetch
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
     const result = setup()
     const outcome = await result.current.submitRoll(formula, rolls, total, { scope: 'group' })
     expect(outcome).toBe('error')
     expect(global.fetch).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+
+  it('rejects an invalid visibility.scope locally without calling fetch', async () => {
+    global.fetch = jest.fn() as unknown as typeof fetch
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const result = setup()
+    const outcome = await result.current.submitRoll('1d20', [10], 10, { scope: 'not-a-real-scope' } as unknown as Parameters<typeof result.current.submitRoll>[3])
+    expect(outcome).toBe('error')
+    expect(global.fetch).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+
+  it('still submits a legitimate negative total (penalty roll) at the negative magnitude boundary', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ status: 201 }) as unknown as typeof fetch
+    const result = setup()
+    const outcome = await result.current.submitRoll('1d20', [10], -MAX_TOTAL_MAGNITUDE, { scope: 'group' })
+    expect(outcome).toBe('success')
+    expect(global.fetch).toHaveBeenCalledWith(
+      `/api/campaigns/${CAMPAIGN_ID}/rolls`,
+      expect.objectContaining({
+        body: JSON.stringify({ formula: '1d20', rolls: [10], total: -MAX_TOTAL_MAGNITUDE, visibility: { scope: 'group' } }),
+      })
+    )
   })
 
   it('still submits a maximum-size pool roll payload', async () => {
