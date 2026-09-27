@@ -84,21 +84,35 @@ describe('useRollSubmission', () => {
   ])('rejects %s locally without calling fetch', async (_description, formula, rolls, total) => {
     global.fetch = jest.fn() as unknown as typeof fetch
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const result = setup()
-    const outcome = await result.current.submitRoll(formula, rolls, total, { scope: 'group' })
-    expect(outcome).toBe('error')
-    expect(global.fetch).not.toHaveBeenCalled()
-    warnSpy.mockRestore()
+    try {
+      const result = setup()
+      const outcome = await result.current.submitRoll(formula, rolls, total, { scope: 'group' })
+      expect(outcome).toBe('error')
+      expect(global.fetch).not.toHaveBeenCalled()
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[roll-submission] rejected locally by rollSubmissionSchema',
+        expect.any(Array)
+      )
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 
   it('rejects an invalid visibility.scope locally without calling fetch', async () => {
     global.fetch = jest.fn() as unknown as typeof fetch
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const result = setup()
-    const outcome = await result.current.submitRoll('1d20', [10], 10, { scope: 'not-a-real-scope' } as unknown as Parameters<typeof result.current.submitRoll>[3])
-    expect(outcome).toBe('error')
-    expect(global.fetch).not.toHaveBeenCalled()
-    warnSpy.mockRestore()
+    try {
+      const result = setup()
+      const outcome = await result.current.submitRoll('1d20', [10], 10, { scope: 'not-a-real-scope' } as unknown as Parameters<typeof result.current.submitRoll>[3])
+      expect(outcome).toBe('error')
+      expect(global.fetch).not.toHaveBeenCalled()
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[roll-submission] rejected locally by rollSubmissionSchema',
+        expect.any(Array)
+      )
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 
   it('still submits a legitimate negative total (penalty roll) at the negative magnitude boundary', async () => {
