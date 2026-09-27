@@ -125,6 +125,42 @@ describe("POST /api/encounters", () => {
     expect(mockedEncounterRepo.saveEncounter).toHaveBeenCalledTimes(1);
   });
 
+  it("persists the parsed monster array, not the raw request payload", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
+
+    const rawMonster = {
+      id: "mon-1",
+      name: "Goblin",
+      size: "small",
+      type: "humanoid",
+      ac: 15,
+      hp: 7,
+      maxHp: 7,
+      speed: "30 ft.",
+      abilityScores: {
+        strength: 8,
+        dexterity: 14,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 8,
+        charisma: 8,
+      },
+      challengeRating: 0.25,
+      unexpectedField: "should be stripped by validation",
+    };
+
+    const response = await POST(
+      makeRequest({ name: "Goblin Camp", monsters: [rawMonster] })
+    );
+
+    expect(response.status).toBe(201);
+    const [savedEncounter] = mockedEncounterRepo.saveEncounter.mock.calls[0];
+    expect(savedEncounter.monsters).toHaveLength(1);
+    expect(savedEncounter.monsters[0]).not.toHaveProperty("unexpectedField");
+    expect(savedEncounter.monsters[0].name).toBe("Goblin");
+  });
+
   itReturns500(
     POST,
     () => makeRequest({ name: "Valid Name" }),

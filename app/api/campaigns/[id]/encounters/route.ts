@@ -11,7 +11,7 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
     const idResult = validateString(id, 'id', { required: true, minLength: 1 });
     if (!idResult.valid) return NextResponse.json({ error: idResult.error.message }, { status: 400 });
 
-    const result = await assertCampaignAccess(id, auth.userId);
+    const result = await assertCampaignAccess(idResult.value, auth.userId);
     if (result instanceof NextResponse) return result;
     const { campaign } = result;
 
@@ -44,7 +44,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id }) => {
     }
     const encounterId = encounterIdResult.value;
 
-    const result = await assertCampaignAccess(id, auth.userId);
+    const result = await assertCampaignAccess(idResult.value, auth.userId);
     if (result instanceof NextResponse) return result;
     const { role } = result;
 
@@ -55,7 +55,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id }) => {
       return NextResponse.json({ error: 'Encounter not found' }, { status: 404 });
     }
 
-    await addEncounterToCampaign(id, encounterId, auth.userId);
+    await addEncounterToCampaign(idResult.value, encounterId, auth.userId);
 
     return NextResponse.json({ message: 'Encounter linked successfully' }, { status: 201 });
   } catch (error) {
