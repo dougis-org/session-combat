@@ -56,16 +56,20 @@ describe("validateEncounterMonsters", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("rejects an invalid alignment value", () => {
-    const result = validateEncounterMonsters([{ ...VALID_MONSTER, alignment: "Definitely Evil" }]);
-    expect(result.valid).toBe(false);
+  it("accepts a free-form alignment string (matches upload validation's leniency)", () => {
+    // Real imported/library data isn't reliably title-cased (e.g. "lawful evil"),
+    // so this is intentionally not a strict enum — see monsterUploadSchema.ts.
+    const result = validateEncounterMonsters([{ ...VALID_MONSTER, alignment: "lawful evil" }]);
+    expect(result.valid).toBe(true);
   });
 
-  it("rejects an invalid damage-resistance value", () => {
-    const result = validateEncounterMonsters([
-      { ...VALID_MONSTER, damageResistances: ["not-a-damage-type"] },
-    ]);
-    expect(result.valid).toBe(false);
+  it("accepts a monster with no explicit hp, defaulting it to maxHp", () => {
+    const { hp, ...withoutHp } = VALID_MONSTER;
+    const result = validateEncounterMonsters([withoutHp]);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.value[0].hp).toBe(VALID_MONSTER.maxHp);
+    }
   });
 
   it("rejects hp greater than maxHp", () => {

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { VALID_SIZES, UPLOAD_LIMITS } from './monsterUploadSchema';
-import { VALID_ALIGNMENTS } from '@/lib/types';
-import { DAMAGE_TYPES } from '@/lib/constants';
+import type { Monster } from '@/lib/types';
 import type { ValidationResult } from './core';
 
 /**
@@ -25,7 +24,6 @@ const abilityScoresSchema = z.object({
 const shortString = () => z.string().trim().max(UPLOAD_LIMITS.shortText);
 const stringList = () =>
   z.array(z.string().max(UPLOAD_LIMITS.listItem)).max(UPLOAD_LIMITS.listLength);
-const damageTypeList = () => z.array(z.enum(DAMAGE_TYPES)).max(UPLOAD_LIMITS.listLength);
 
 const boundedRecord = <V extends z.ZodTypeAny>(value: V) =>
   z
@@ -59,18 +57,24 @@ export const encounterMonsterSchema = z
       error: () => `size must be one of: ${VALID_SIZES.join(', ')}`,
     }),
     type: z.string().trim().min(1).max(UPLOAD_LIMITS.shortText),
-    alignment: z.enum(VALID_ALIGNMENTS).optional(),
+    // Matches upload validation's leniency (monsterUploadSchema's rawMonsterSchema):
+    // free-form string, not a strict enum — real library/import data isn't reliably
+    // title-cased ("lawful evil" vs "Lawful Evil") even though the Monster type
+    // declares a literal union.
+    alignment: shortString().optional(),
     ac: z.number().int().min(0).max(30),
     acNote: shortString().optional(),
-    hp: z.number().int().min(0),
+    // Optional: a freshly added monster instance (copied from a MonsterTemplate)
+    // may not carry an explicit hp yet — defaults to maxHp below.
+    hp: z.number().int().min(0).optional(),
     maxHp: z.number().int().min(1),
     speed: z.string().trim().min(1).max(UPLOAD_LIMITS.shortText),
     abilityScores: abilityScoresSchema,
     savingThrows: boundedRecord(z.number()).optional(),
     skills: boundedRecord(z.number()).optional(),
-    damageResistances: damageTypeList().optional(),
-    damageImmunities: damageTypeList().optional(),
-    damageVulnerabilities: damageTypeList().optional(),
+    damageResistances: stringList().optional(),
+    damageImmunities: stringList().optional(),
+    damageVulnerabilities: stringList().optional(),
     conditionImmunities: stringList().optional(),
     senses: boundedRecord(z.string().max(UPLOAD_LIMITS.recordValue)).optional(),
     languages: stringList().optional(),
@@ -89,14 +93,15 @@ export const encounterMonsterSchema = z
     initiative: z.number().optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.hp > value.maxHp) {
+    if (value.hp !== undefined && value.hp > value.maxHp) {
       ctx.addIssue({
         code: 'custom',
         path: ['hp'],
         message: 'hp must be less than or equal to maxHp',
       });
     }
-  });
+  })
+  .transform((value) => ({ ...value, hp: value.hp ?? value.maxHp }));
 
 export const encounterMonstersArraySchema = z
   .array(encounterMonsterSchema)
@@ -107,10 +112,10 @@ export type EncounterMonster = z.infer<typeof encounterMonsterSchema>;
 /** Validates an Encounter's full `monsters` array (may be empty). */
 export function validateEncounterMonsters(
   data: unknown
-): ({ valid: true; value: EncounterMonster[] } & ValidationResult) | ({ valid: false } & ValidationResult) {
+): ({ valid: true; value: Monster[] } & ValidationResult) | ({ valid: false } & ValidationResult) {
   const parsed = encounterMonstersArraySchema.safeParse(data);
   if (parsed.success) {
-    return { valid: true, value: parsed.data, errors: [] };
+    return { valid: true, value: parsed.data as unknown as Monster[], errors: [] };
   }
   return {
     valid: false,
