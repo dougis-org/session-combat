@@ -147,6 +147,28 @@ describe("POST /api/parties", () => {
     expect(response.status).toBe(201);
     expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
   });
+
+  it("returns 400 when characterIds is not an array", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: "not-an-array" }));
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toContain("characterIds");
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when characterIds contains a non-string element", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: ["char-1", 42] }));
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toContain("characterIds");
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
 });
 
 describe("PUT /api/parties/[id]", () => {
@@ -310,6 +332,21 @@ describe("PUT /api/parties/[id]", () => {
 
     expect(response.status).toBe(200);
     expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when characterIds contains a non-string element", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-1", 42],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error).toContain("characterIds");
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 });
 

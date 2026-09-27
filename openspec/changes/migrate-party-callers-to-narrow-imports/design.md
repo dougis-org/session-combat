@@ -10,7 +10,7 @@
 
 - Every party-domain call site in the 8 identified route files calls `partyRepo.*` directly instead of `storage.*`.
 - `addPartyToCampaign`, `removePartyFromCampaign`, `removePartyFromAllCampaigns` live in `lib/storage/partyRepo.ts`, with `lib/storage.ts` reduced to thin delegating wrappers for these three (mirroring the existing `saveParty`/`deleteParty` delegation pattern).
-- Zero behavior change: identical inputs produce identical outputs, identical database operations, identical error handling.
+- Zero behavior change for the import-migration itself: identical inputs produce identical outputs, identical database operations, identical error handling. (Exception, added post-review: `POST /api/parties` and `PUT /api/parties/[id]` now validate `characterIds` via `validateStringArray` and return 400 for a non-array or non-string-containing array, where the prior code silently coerced/accepted such input. This is a deliberate, tested hardening accepted during PR review, not a regression of the migration.)
 - All existing tests pass; tests that mock `storage.<party-method>` are updated to mock `partyRepo.<party-method>` where production code now calls the latter.
 
 ### Non-Goals

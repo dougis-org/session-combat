@@ -78,3 +78,4 @@ See functional scenario: "storage.ts continues to expose the same public methods
 - **Given** the full existing party and campaign-party-linking test suites (unit + integration) pass against the pre-change code
 - **When** the same test suites run against the post-change code, with only mock targets updated from `storage.<method>` to `partyRepo.<method>` where production code now calls `partyRepo`
 - **Then** every test's expected values, call counts, and error conditions remain identical — no test's assertions about behavior (as opposed to which object was called) need to change
+- **Exception**: `POST /api/parties` and `PUT /api/parties/[id]` gained `validateStringArray` validation on `characterIds` during PR review (returning 400 for a non-array or an array with a non-string element, where this input was previously silently coerced/accepted). New tests cover this 400 path in `tests/unit/api/parties/route.test.ts`; all other scenarios remain behavior-identical.
