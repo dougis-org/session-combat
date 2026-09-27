@@ -14,10 +14,7 @@ import {
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 jest.mock("@/lib/storage", () => ({
   storage: {
-    loadEncounters: jest.fn(),
-    saveEncounter: jest.fn(),
     getMember: jest.fn(),
-    addEncounterToCampaign: jest.fn(),
   },
 }));
 
@@ -25,10 +22,18 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
   loadCampaignByIdAny: jest.fn(),
 }));
 
+jest.mock("@/lib/storage/encounterRepo", () => ({
+  loadEncounters: jest.fn(),
+  saveEncounter: jest.fn(),
+  addEncounterToCampaign: jest.fn(),
+}));
+
 import * as campaignRepo from "@/lib/storage/campaignRepo";
+import * as encounterRepo from "@/lib/storage/encounterRepo";
 
 const mockedStorage = jest.mocked(storage);
 const mockedCampaignRepo = jest.mocked(campaignRepo);
+const mockedEncounterRepo = jest.mocked(encounterRepo);
 
 const MOCK_ENCOUNTERS = [
   { id: "enc-1", userId: "user-123", name: "Goblin Ambush", monsters: [] },
@@ -45,7 +50,7 @@ describe("GET /api/encounters", () => {
 
   it("returns list of encounters", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadEncounters.mockResolvedValue(MOCK_ENCOUNTERS as any);
+    mockedEncounterRepo.loadEncounters.mockResolvedValue(MOCK_ENCOUNTERS as any);
 
     const response = await GET(makeRequest());
     expect(response.status).toBe(200);
@@ -57,7 +62,7 @@ describe("GET /api/encounters", () => {
   itReturns500(
     GET,
     () => makeRequest(),
-    () => mockedStorage.loadEncounters.mockRejectedValue(new Error("Storage error"))
+    () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
 });
 
@@ -87,26 +92,26 @@ describe("POST /api/encounters", () => {
     });
     const response = await POST(request);
     expect(response.status).toBe(400);
-    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
   });
 
   it("returns 400 when body is not an object", async () => {
     mockAuthState.payload = MOCK_AUTH;
     const response = await POST(makeRequest(["not", "an", "object"]));
     expect(response.status).toBe(400);
-    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
   });
 
   it("returns 400 when monsters is not an array", async () => {
     mockAuthState.payload = MOCK_AUTH;
     const response = await POST(makeRequest({ name: "Test", monsters: "not-an-array" }));
     expect(response.status).toBe(400);
-    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
   });
 
   it("creates encounter and returns 201", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
 
     const response = await POST(
       makeRequest({ name: "Dragon Lair", description: "Scary", monsters: [] })
@@ -117,13 +122,13 @@ describe("POST /api/encounters", () => {
     expect(body.name).toBe("Dragon Lair");
     expect(body.userId).toBe("user-123");
     expect(body.description).toBe("Scary");
-    expect(mockedStorage.saveEncounter).toHaveBeenCalledTimes(1);
+    expect(mockedEncounterRepo.saveEncounter).toHaveBeenCalledTimes(1);
   });
 
   itReturns500(
     POST,
     () => makeRequest({ name: "Valid Name" }),
-    () => mockedStorage.saveEncounter.mockRejectedValue(new Error("Storage error"))
+    () => mockedEncounterRepo.saveEncounter.mockRejectedValue(new Error("Storage error"))
   );
 });
 
@@ -160,15 +165,15 @@ describe("POST /api/encounters with campaignId", () => {
   it("Create and link succeeds", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
-    mockedStorage.addEncounterToCampaign.mockResolvedValue(undefined);
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.addEncounterToCampaign.mockResolvedValue(undefined);
 
     const response = await POST(makeRequest({ name: "Goblin Ambush", campaignId: CAMPAIGN_ID }));
 
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.name).toBe("Goblin Ambush");
-    expect(mockedStorage.addEncounterToCampaign).toHaveBeenCalledWith(
+    expect(mockedEncounterRepo.addEncounterToCampaign).toHaveBeenCalledWith(
       CAMPAIGN_ID,
       body.id,
       "user-123"
@@ -176,13 +181,13 @@ describe("POST /api/encounters with campaignId", () => {
   });
 
   it("campaignId omitted behaves exactly as before", async () => {
-    mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
 
     const response = await POST(makeRequest({ name: "No Campaign" }));
 
     expect(response.status).toBe(201);
     expect(mockedStorage.getMember).not.toHaveBeenCalled();
-    expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
   it("returns 400 when campaignId is an empty string", async () => {
@@ -190,7 +195,7 @@ describe("POST /api/encounters with campaignId", () => {
 
     expect(response.status).toBe(400);
     expect(mockedStorage.getMember).not.toHaveBeenCalled();
-    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
   });
 
   it("Requester is not the campaign's DM", async () => {
@@ -200,14 +205,14 @@ describe("POST /api/encounters with campaignId", () => {
     const response = await POST(makeRequest({ name: "Trap Room", campaignId: CAMPAIGN_ID }));
 
     expect(response.status).toBe(404);
-    expect(mockedStorage.saveEncounter).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
   });
 
   it("Encounter creation succeeds but linking fails", async () => {
     mockedStorage.getMember.mockResolvedValue(DM_MEMBER);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.saveEncounter.mockResolvedValue(undefined as any);
-    mockedStorage.addEncounterToCampaign.mockRejectedValue(new Error("link failed"));
+    mockedEncounterRepo.saveEncounter.mockResolvedValue(undefined as any);
+    mockedEncounterRepo.addEncounterToCampaign.mockRejectedValue(new Error("link failed"));
 
     const response = await POST(makeRequest({ name: "Owlbear Den", campaignId: CAMPAIGN_ID }));
 

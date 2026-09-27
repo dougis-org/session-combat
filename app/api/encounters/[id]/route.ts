@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { loadEncounters, saveEncounter, deleteEncounter } from '@/lib/storage/encounterRepo';
 import { Encounter } from '@/lib/types';
+import { validateString } from '@/lib/validation/core';
 
 export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const encounters = await storage.loadEncounters(auth.userId);
+    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
+    if (!idResult.valid) {
+      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+    }
+
+    const encounters = await loadEncounters(auth.userId);
     const encounter = encounters.find((e) => e.id === id);
 
     if (!encounter) {
@@ -27,16 +33,26 @@ export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 
 export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const body = await request.json();
-    const { name, description, monsters } = body;
+    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
+    if (!idResult.valid) {
+      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+    }
 
-    console.log('PUT /api/encounters/[id] received:', { pathId: id, bodyId: body.id, userId: auth.userId });
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+    }
+
+    const { name, description, monsters } = body as Record<string, unknown>;
 
     // Get the existing encounter to verify ownership
-    const encounters = await storage.loadEncounters(auth.userId);
-    console.log('Loaded encounters:', encounters.map(e => ({ id: e.id, name: e.name })));
+    const encounters = await loadEncounters(auth.userId);
     const existingEncounter = encounters.find((e) => e.id === id);
-    console.log('Found existing encounter:', existingEncounter ? { id: existingEncounter.id, name: existingEncounter.name } : 'NOT FOUND');
 
     if (!existingEncounter) {
       return NextResponse.json(
@@ -45,22 +61,29 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       );
     }
 
-    if (!name || name.trim() === '') {
-      return NextResponse.json(
-        { error: 'Encounter name is required' },
-        { status: 400 }
-      );
+    const nameResult = validateString(name, 'name', { required: true, minLength: 1 });
+    if (!nameResult.valid) {
+      return NextResponse.json({ error: 'Encounter name is required' }, { status: 400 });
+    }
+
+    const descriptionResult = validateString(description, 'description');
+    if (!descriptionResult.valid) {
+      return NextResponse.json({ error: descriptionResult.error.message }, { status: 400 });
+    }
+
+    if (monsters !== undefined && !Array.isArray(monsters)) {
+      return NextResponse.json({ error: 'monsters must be an array' }, { status: 400 });
     }
 
     const updatedEncounter: Encounter = {
       ...existingEncounter,
-      name: name.trim(),
-      description: description !== undefined ? description : existingEncounter.description,
-      monsters: monsters !== undefined ? monsters : existingEncounter.monsters,
+      name: nameResult.value,
+      description: description !== undefined ? descriptionResult.value : existingEncounter.description,
+      monsters: (monsters as Encounter['monsters']) ?? existingEncounter.monsters,
       updatedAt: new Date(),
     };
 
-    await storage.saveEncounter(updatedEncounter);
+    await saveEncounter(updatedEncounter);
 
     return NextResponse.json(updatedEncounter);
   } catch (error) {
@@ -74,8 +97,13 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 
 export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
+    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
+    if (!idResult.valid) {
+      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+    }
+
     // Verify ownership before deleting
-    const encounters = await storage.loadEncounters(auth.userId);
+    const encounters = await loadEncounters(auth.userId);
     const encounter = encounters.find((e) => e.id === id);
 
     if (!encounter) {
@@ -85,7 +113,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
       );
     }
 
-    await storage.deleteEncounter(id, auth.userId);
+    await deleteEncounter(id, auth.userId);
 
     return NextResponse.json({ message: 'Encounter deleted successfully' });
   } catch (error) {

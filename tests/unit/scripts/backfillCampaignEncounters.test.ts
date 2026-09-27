@@ -2,12 +2,12 @@
  * @jest-environment node
  */
 import { getDatabase } from "@/lib/db";
-import { storage } from "@/lib/storage";
 
 jest.mock("@/lib/db");
-jest.mock("@/lib/storage");
 jest.mock("@/lib/storage/campaignRepo");
+jest.mock("@/lib/storage/encounterRepo");
 import * as campaignRepo from "@/lib/storage/campaignRepo";
+import * as encounterRepo from "@/lib/storage/encounterRepo";
 
 describe("backfillCampaignEncounters", () => {
   let mockDb: any;
@@ -73,7 +73,7 @@ describe("backfillCampaignEncounters", () => {
   test("skips if all encounters already exist", async () => {
     mockCampaignsCol.toArray.mockResolvedValue([{ id: "c1", name: "C1", templateId: "t1", userId: "u1" }]);
     mockTemplatesCol.findOne.mockResolvedValue({ id: "t1", encounters: [{ name: "Goblin Ambush" }] });
-    (storage.loadEncountersByIds as jest.Mock).mockResolvedValue([{ name: "Goblin Ambush" }]);
+    (encounterRepo.loadEncountersByIds as jest.Mock).mockResolvedValue([{ name: "Goblin Ambush" }]);
     
     const result = await backfillCampaignEncounters();
     
@@ -83,13 +83,13 @@ describe("backfillCampaignEncounters", () => {
   test("migrates and adds new encounters", async () => {
     mockCampaignsCol.toArray.mockResolvedValue([{ id: "c1", name: "C1", templateId: "t1", userId: "u1", encounterIds: [] }]);
     mockTemplatesCol.findOne.mockResolvedValue({ id: "t1", encounters: [{ name: "Goblin Ambush" }] });
-    (storage.loadEncountersByIds as jest.Mock).mockResolvedValue([]);
-    
+    (encounterRepo.loadEncountersByIds as jest.Mock).mockResolvedValue([]);
+
     const result = await backfillCampaignEncounters();
-    
+
     expect(result.migrated).toBe(1);
     expect(result.encountersAdded).toBe(1);
-    expect(storage.saveEncounter).toHaveBeenCalledTimes(1);
+    expect(encounterRepo.saveEncounter).toHaveBeenCalledTimes(1);
     expect(campaignRepo.saveCampaign).toHaveBeenCalledTimes(1);
   });
 

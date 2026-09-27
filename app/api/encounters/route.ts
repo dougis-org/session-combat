@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { loadEncounters, saveEncounter, addEncounterToCampaign } from '@/lib/storage/encounterRepo';
 import { Encounter } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { validateString } from '@/lib/validation/core';
 
 export const GET = withAuth(async (request, auth) => {
   try {
-    const encounters = await storage.loadEncounters(auth.userId);
+    const encounters = await loadEncounters(auth.userId);
     return NextResponse.json(encounters);
   } catch (error) {
     console.error('Error fetching encounters:', error);
@@ -73,11 +73,11 @@ export const POST = withAuth(async (request, auth) => {
       updatedAt: new Date(),
     };
 
-    await storage.saveEncounter(encounter);
+    await saveEncounter(encounter);
 
     if (linkedCampaignId !== undefined) {
       try {
-        await storage.addEncounterToCampaign(linkedCampaignId, encounter.id, auth.userId);
+        await addEncounterToCampaign(linkedCampaignId, encounter.id, auth.userId);
       } catch (linkError) {
         console.error('Error linking encounter to campaign:', linkError);
         return NextResponse.json(

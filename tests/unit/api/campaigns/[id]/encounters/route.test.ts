@@ -18,8 +18,6 @@ jest.mock("@/lib/middleware", () =>
 jest.mock("@/lib/storage", () => ({
   storage: {
     getMember: jest.fn(),
-    loadEncountersByIds: jest.fn(),
-    addEncounterToCampaign: jest.fn(),
   },
 }));
 
@@ -27,15 +25,20 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
   loadCampaignByIdAny: jest.fn(),
 }));
 
+jest.mock("@/lib/storage/encounterRepo", () => ({
+  loadEncountersByIds: jest.fn(),
+  addEncounterToCampaign: jest.fn(),
+}));
+
 import * as campaignRepo from "@/lib/storage/campaignRepo";
+import * as encounterRepo from "@/lib/storage/encounterRepo";
 
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
-  loadEncountersByIds: jest.MockedFunction<typeof storage.loadEncountersByIds>;
-  addEncounterToCampaign: jest.MockedFunction<typeof storage.addEncounterToCampaign>;
 };
 
 const mockedCampaignRepo = jest.mocked(campaignRepo);
+const mockedEncounterRepo = jest.mocked(encounterRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const DM_ID = "dm-user";
@@ -97,27 +100,27 @@ describe("GET /api/campaigns/[id]/encounters", () => {
   it("DM fetches linked encounters", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
 
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(2);
-    expect(mockedStorage.loadEncountersByIds).toHaveBeenCalledWith(["e1", "e2"], DM_ID);
+    expect(mockedEncounterRepo.loadEncountersByIds).toHaveBeenCalledWith(["e1", "e2"], DM_ID);
   });
 
   it("Player member fetches the same linked encounters, not filtered by their own userId", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_PLAYER);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue(ENCOUNTERS);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
 
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(2);
-    expect(mockedStorage.loadEncountersByIds).toHaveBeenCalledWith(["e1", "e2"], DM_ID);
+    expect(mockedEncounterRepo.loadEncountersByIds).toHaveBeenCalledWith(["e1", "e2"], DM_ID);
   });
 
   it("Non-member is rejected", async () => {
@@ -131,7 +134,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
   it("Empty encounterIds returns empty list", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue({ ...CAMPAIGN, encounterIds: [] });
-    mockedStorage.loadEncountersByIds.mockResolvedValue([]);
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue([]);
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
 
@@ -143,7 +146,7 @@ describe("GET /api/campaigns/[id]/encounters", () => {
   it("returns 500 when loadEncountersByIds throws", async () => {
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockRejectedValue(new Error("Storage error"));
+    mockedEncounterRepo.loadEncountersByIds.mockRejectedValue(new Error("Storage error"));
 
     const response = await GET(makeGetRequest(), { params: PARAMS });
 
@@ -167,23 +170,23 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue([
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue([
       { id: "e3", userId: DM_ID, name: "Owlbear", description: "", monsters: [], createdAt: new Date(), updatedAt: new Date() },
     ]);
-    mockedStorage.addEncounterToCampaign.mockResolvedValue(undefined);
+    mockedEncounterRepo.addEncounterToCampaign.mockResolvedValue(undefined);
 
     const response = await POST(makePostRequest({ encounterId: "e3" }), { params: PARAMS });
 
     expect([200, 201]).toContain(response.status);
-    expect(mockedStorage.addEncounterToCampaign).toHaveBeenCalledWith(CAMPAIGN_ID, "e3", DM_ID);
+    expect(mockedEncounterRepo.addEncounterToCampaign).toHaveBeenCalledWith(CAMPAIGN_ID, "e3", DM_ID);
   });
 
   it("Linking the same encounter twice is idempotent", async () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue([ENCOUNTERS[0]]);
-    mockedStorage.addEncounterToCampaign.mockResolvedValue(undefined);
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue([ENCOUNTERS[0]]);
+    mockedEncounterRepo.addEncounterToCampaign.mockResolvedValue(undefined);
 
     const response = await POST(makePostRequest({ encounterId: "e1" }), { params: PARAMS });
 
@@ -194,12 +197,12 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue([]);
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue([]);
 
     const response = await POST(makePostRequest({ encounterId: "e9" }), { params: PARAMS });
 
     expect(response.status).toBe(404);
-    expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
   it("Player member cannot link", async () => {
@@ -209,7 +212,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     const response = await POST(makePostRequest({ encounterId: "e3" }), { params: PARAMS });
 
     expect(response.status).toBe(404);
-    expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
   it("returns 400 for malformed JSON body", async () => {
@@ -229,7 +232,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     const response = await POST(request, { params: PARAMS });
 
     expect(response.status).toBe(400);
-    expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
   it("returns 400 when body is not an object", async () => {
@@ -240,7 +243,7 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     const response = await POST(makePostRequest(["not", "an", "object"]), { params: PARAMS });
 
     expect(response.status).toBe(400);
-    expect(mockedStorage.addEncounterToCampaign).not.toHaveBeenCalled();
+    expect(mockedEncounterRepo.addEncounterToCampaign).not.toHaveBeenCalled();
   });
 
   it("returns 400 when encounterId is omitted", async () => {
@@ -265,10 +268,10 @@ describe("POST /api/campaigns/[id]/encounters", () => {
     mockAuthState.payload = { ...MOCK_AUTH, userId: DM_ID };
     mockedStorage.getMember.mockResolvedValue(ACTIVE_DM);
     mockedCampaignRepo.loadCampaignByIdAny.mockResolvedValue(CAMPAIGN);
-    mockedStorage.loadEncountersByIds.mockResolvedValue([
+    mockedEncounterRepo.loadEncountersByIds.mockResolvedValue([
       { id: "e3", userId: DM_ID, name: "Owlbear", description: "", monsters: [], createdAt: new Date(), updatedAt: new Date() },
     ]);
-    mockedStorage.addEncounterToCampaign.mockRejectedValue(new Error("Storage error"));
+    mockedEncounterRepo.addEncounterToCampaign.mockRejectedValue(new Error("Storage error"));
 
     const response = await POST(makePostRequest({ encounterId: "e3" }), { params: PARAMS });
 

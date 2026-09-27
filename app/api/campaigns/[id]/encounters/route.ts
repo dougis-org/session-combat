@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { loadEncountersByIds, addEncounterToCampaign } from '@/lib/storage/encounterRepo';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { validateString } from '@/lib/validation/core';
 
@@ -15,7 +15,7 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
     if (result instanceof NextResponse) return result;
     const { campaign } = result;
 
-    const encounters = await storage.loadEncountersByIds(campaign.encounterIds ?? [], campaign.userId);
+    const encounters = await loadEncountersByIds(campaign.encounterIds ?? [], campaign.userId);
     return NextResponse.json(encounters);
   } catch (error) {
     console.error('Error fetching campaign encounters:', error);
@@ -50,12 +50,12 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id }) => {
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    const owned = await storage.loadEncountersByIds([encounterId], auth.userId);
+    const owned = await loadEncountersByIds([encounterId], auth.userId);
     if (owned.length === 0) {
       return NextResponse.json({ error: 'Encounter not found' }, { status: 404 });
     }
 
-    await storage.addEncounterToCampaign(id, encounterId, auth.userId);
+    await addEncounterToCampaign(id, encounterId, auth.userId);
 
     return NextResponse.json({ message: 'Encounter linked successfully' }, { status: 201 });
   } catch (error) {

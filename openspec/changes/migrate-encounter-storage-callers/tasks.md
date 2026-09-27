@@ -7,46 +7,47 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt, inform the user the plugin is required, and do not proceed until confirmed installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If not listed, halt, inform the user the plugin is required, and do not proceed until confirmed installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 684 --add-label "in-progress"`. Discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item for issue #684 via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (label update still proceeds).
-- [ ] **1. Fix `lib/storage/encounterRepo.ts` self-call (do first — unblocks a clean baseline for caller diffs):**
-  - [ ] 1.1 In `saveEncounters`, replace `await storage.saveEncounter(encounter);` with `await saveEncounter(encounter);`
-  - [ ] 1.2 Remove `import { storage } from "@/lib/storage";` from the file (confirm via `grep -n "storage\." lib/storage/encounterRepo.ts` that no other `storage.` reference remains)
-  - [ ] 1.3 Run `npx jest --testPathPatterns tests/unit/lib/storage/encounterRepo.test.ts` and confirm it passes unmodified
-- [ ] **2. Migrate pure-Encounter caller: `app/api/encounters/[id]/route.ts`:**
-  - [ ] 2.1 Add `import { loadEncounters, saveEncounter, deleteEncounter } from "@/lib/storage/encounterRepo";`
-  - [ ] 2.2 Replace all `storage.loadEncounters(...)`, `storage.saveEncounter(...)`, `storage.deleteEncounter(...)` call sites with the unqualified imports
-  - [ ] 2.3 Remove `import { storage } from "@/lib/storage";` and confirm via `grep -n "storage\." "app/api/encounters/[id]/route.ts"` that no reference remains
-- [ ] **3. Migrate pure-Encounter caller: `app/api/encounters/route.ts`:**
-  - [ ] 3.1 Add `import { loadEncounters, saveEncounter, addEncounterToCampaign } from "@/lib/storage/encounterRepo";`
-  - [ ] 3.2 Replace `storage.loadEncounters(...)`, `storage.saveEncounter(...)`, `storage.addEncounterToCampaign(...)` call sites
-  - [ ] 3.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
-- [ ] **4. Migrate pure-Encounter caller: `app/api/campaigns/[id]/encounters/route.ts`:**
-  - [ ] 4.1 Add `import { loadEncountersByIds, addEncounterToCampaign } from "@/lib/storage/encounterRepo";`
-  - [ ] 4.2 Replace `storage.loadEncountersByIds(...)` (×2) and `storage.addEncounterToCampaign(...)` call sites
-  - [ ] 4.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
-- [ ] **5. Migrate pure-Encounter caller: `lib/scripts/backfillCampaignEncounters.ts`:**
-  - [ ] 5.1 Add `import { loadEncountersByIds, saveEncounter } from "@/lib/storage/encounterRepo";`
-  - [ ] 5.2 Replace `storage.loadEncountersByIds(...)` and `storage.saveEncounter(...)` call sites
-  - [ ] 5.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
-- [ ] **6. Migrate mixed-domain caller: `app/api/campaigns/global/[id]/copy/route.ts`:**
-  - [ ] 6.1 Add `import { saveEncounter } from "@/lib/storage/encounterRepo";`
-  - [ ] 6.2 Replace only the `storage.saveEncounter(...)` call site with `saveEncounter(...)`
-  - [ ] 6.3 Keep `import { storage } from "@/lib/storage";` (still used for `storage.loadGlobalCampaignTemplateById` and `storage.addMember`) — confirm via `grep -n "storage\." "app/api/campaigns/global/[id]/copy/route.ts"` that exactly those two calls remain and `saveEncounter` is no longer prefixed
-- [ ] **7. Update test mock: `tests/unit/scripts/backfillCampaignEncounters.test.ts`:**
-  - [ ] 7.1 Add `jest.mock("@/lib/storage/encounterRepo")` following the existing `jest.mock("@/lib/storage/campaignRepo")` pattern already in this file
-  - [ ] 7.2 Move the `loadEncountersByIds` and `saveEncounter` mock setup/assertions from the `storage` mock to the new `encounterRepo` mock (update `(storage.loadEncountersByIds as jest.Mock)` → `(encounterRepo.loadEncountersByIds as jest.Mock)`, `expect(storage.saveEncounter)` → `expect(encounterRepo.saveEncounter)`)
-  - [ ] 7.3 Leave any other `storage.*` mocks in this file untouched
-  - [ ] 7.4 Run `npx jest --testPathPatterns tests/unit/scripts/backfillCampaignEncounters.test.ts` and confirm it passes with unchanged assertions (only the mock target renamed)
-- [ ] **8. Update test mock: `tests/unit/api/campaigns/[id]/encounters/route.test.ts`:**
-  - [ ] 8.1 Add `jest.mock("@/lib/storage/encounterRepo", () => ({ ... }))` following the existing `jest.mock("@/lib/storage/campaignRepo", () => ({ ... }))` pattern already in this file
-  - [ ] 8.2 Move the `loadEncountersByIds` and `addEncounterToCampaign` mock properties out of the `mockedStorage` typed object into a new `mockedEncounterRepo` typed object (mirroring the existing `mockedCampaignRepo` pattern), and update all `mockedStorage.loadEncountersByIds`/`mockedStorage.addEncounterToCampaign` references to `mockedEncounterRepo.*`
-  - [ ] 8.3 Run `npx jest --testPathPatterns "tests/unit/api/campaigns/\[id\]/encounters/route.test.ts"` and confirm it passes with unchanged assertions
-- [ ] **9. Confirm untouched files stay untouched:** run `git diff --stat -- lib/storage.ts tests/unit/lib/storage.test.ts tests/unit/lib/storage.campaignEncounters.test.ts tests/unit/storage/storage.test.ts tests/unit/lib/storage/facadeShape.test.ts` and confirm zero output (no diff) before proceeding
-- [ ] Confirm acceptance criteria in `specs/encounter-storage-callers/spec.md` are covered by the above steps
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 684 --add-label "in-progress"`. Discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item for issue #684 via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, instruct the user to run `gh auth refresh -s project` and skip the project-item update (label update still proceeds).
+- [x] **1. Fix `lib/storage/encounterRepo.ts` self-call (do first — unblocks a clean baseline for caller diffs):**
+  - [x] 1.1 In `saveEncounters`, replace `await storage.saveEncounter(encounter);` with `await saveEncounter(encounter);`
+  - [x] 1.2 Remove `import { storage } from "@/lib/storage";` from the file (confirm via `grep -n "storage\." lib/storage/encounterRepo.ts` that no other `storage.` reference remains)
+  - [x] 1.3 Run `npx jest --testPathPatterns tests/unit/lib/storage/encounterRepo.test.ts` and confirm it passes unmodified
+- [x] **2. Migrate pure-Encounter caller: `app/api/encounters/[id]/route.ts`:**
+  - [x] 2.1 Add `import { loadEncounters, saveEncounter, deleteEncounter } from "@/lib/storage/encounterRepo";`
+  - [x] 2.2 Replace all `storage.loadEncounters(...)`, `storage.saveEncounter(...)`, `storage.deleteEncounter(...)` call sites with the unqualified imports
+  - [x] 2.3 Remove `import { storage } from "@/lib/storage";` and confirm via `grep -n "storage\." "app/api/encounters/[id]/route.ts"` that no reference remains
+- [x] **3. Migrate pure-Encounter caller: `app/api/encounters/route.ts`:**
+  - [x] 3.1 Add `import { loadEncounters, saveEncounter, addEncounterToCampaign } from "@/lib/storage/encounterRepo";`
+  - [x] 3.2 Replace `storage.loadEncounters(...)`, `storage.saveEncounter(...)`, `storage.addEncounterToCampaign(...)` call sites
+  - [x] 3.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
+- [x] **4. Migrate pure-Encounter caller: `app/api/campaigns/[id]/encounters/route.ts`:**
+  - [x] 4.1 Add `import { loadEncountersByIds, addEncounterToCampaign } from "@/lib/storage/encounterRepo";`
+  - [x] 4.2 Replace `storage.loadEncountersByIds(...)` (×2) and `storage.addEncounterToCampaign(...)` call sites
+  - [x] 4.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
+- [x] **5. Migrate pure-Encounter caller: `lib/scripts/backfillCampaignEncounters.ts`:**
+  - [x] 5.1 Add `import { loadEncountersByIds, saveEncounter } from "@/lib/storage/encounterRepo";`
+  - [x] 5.2 Replace `storage.loadEncountersByIds(...)` and `storage.saveEncounter(...)` call sites
+  - [x] 5.3 Remove `import { storage } from "@/lib/storage";` and confirm via grep that no reference remains
+- [x] **6. Migrate mixed-domain caller: `app/api/campaigns/global/[id]/copy/route.ts`:**
+  - [x] 6.1 Add `import { saveEncounter } from "@/lib/storage/encounterRepo";`
+  - [x] 6.2 Replace only the `storage.saveEncounter(...)` call site with `saveEncounter(...)`
+  - [x] 6.3 Keep `import { storage } from "@/lib/storage";` (still used for `storage.loadGlobalCampaignTemplateById` and `storage.addMember`) — confirm via `grep -n "storage\." "app/api/campaigns/global/[id]/copy/route.ts"` that exactly those two calls remain and `saveEncounter` is no longer prefixed
+- [x] **7. Update test mock: `tests/unit/scripts/backfillCampaignEncounters.test.ts`:**
+  - [x] 7.1 Add `jest.mock("@/lib/storage/encounterRepo")` following the existing `jest.mock("@/lib/storage/campaignRepo")` pattern already in this file
+  - [x] 7.2 Move the `loadEncountersByIds` and `saveEncounter` mock setup/assertions from the `storage` mock to the new `encounterRepo` mock (update `(storage.loadEncountersByIds as jest.Mock)` → `(encounterRepo.loadEncountersByIds as jest.Mock)`, `expect(storage.saveEncounter)` → `expect(encounterRepo.saveEncounter)`)
+  - [x] 7.3 Leave any other `storage.*` mocks in this file untouched
+  - [x] 7.4 Run `npx jest --testPathPatterns tests/unit/scripts/backfillCampaignEncounters.test.ts` and confirm it passes with unchanged assertions (only the mock target renamed)
+- [x] **8. Update test mock: `tests/unit/api/campaigns/[id]/encounters/route.test.ts`:**
+  - [x] 8.1 Add `jest.mock("@/lib/storage/encounterRepo", () => ({ ... }))` following the existing `jest.mock("@/lib/storage/campaignRepo", () => ({ ... }))` pattern already in this file
+  - [x] 8.2 Move the `loadEncountersByIds` and `addEncounterToCampaign` mock properties out of the `mockedStorage` typed object into a new `mockedEncounterRepo` typed object (mirroring the existing `mockedCampaignRepo` pattern), and update all `mockedStorage.loadEncountersByIds`/`mockedStorage.addEncounterToCampaign` references to `mockedEncounterRepo.*`
+  - [x] 8.3 Run `npx jest --testPathPatterns "tests/unit/api/campaigns/\[id\]/encounters/route.test.ts"` and confirm it passes with unchanged assertions
+- [x] **8b. (Discovered during apply, not in original proposal scope) Update test mocks for two more Encounter-caller test files whose `jest.mock("@/lib/storage")` the proposal missed:** `tests/unit/api/encounters/route.test.ts` and `tests/unit/api/encounters/id.test.ts` both fully mocked `@/lib/storage` for `loadEncounters`/`saveEncounter`/`deleteEncounter`/`addEncounterToCampaign`. Split these onto `@/lib/storage/encounterRepo` mocks (keeping `getMember` on the `storage` mock where still used), following the same split-mock pattern as tasks 7-8.
+- [x] **9. Confirm untouched files stay untouched:** run `git diff --stat -- lib/storage.ts tests/unit/lib/storage.test.ts tests/unit/lib/storage.campaignEncounters.test.ts tests/unit/storage/storage.test.ts tests/unit/lib/storage/facadeShape.test.ts` and confirm zero output (no diff) before proceeding
+- [x] Confirm acceptance criteria in `specs/encounter-storage-callers/spec.md` are covered by the above steps
 
 ## Pre-Commit Code Review
 
@@ -54,10 +55,10 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests: `npx jest --testPathPatterns "tests/unit/(lib/storage|api/campaigns|api/encounters|scripts/backfillCampaignEncounters)"` at minimum, then the full suite
-- [ ] Run E2E tests (if applicable) — not expected to be affected (no route contract changes), but run the project's E2E suite if one covers encounter creation/deletion flows
-- [ ] Run type checks: `npx tsc --noEmit`
-- [ ] Run build: project's build script (e.g. `npm run build`)
+- [x] Run unit/integration tests: `npx jest --testPathPatterns "tests/unit/(lib/storage|api/campaigns|api/encounters|scripts/backfillCampaignEncounters)"` at minimum, then the full suite (full suite: 4048/4049 unit tests pass; the 1 failure — `d4EnginePatch.test.ts` — is a pre-existing baseline failure unrelated to this change, confirmed by stashing this change's diff and re-running)
+- [x] Run E2E tests (if applicable) — not expected to be affected (no route contract changes); not run in this session — `MONGODB_URI` is unset in this worktree environment (same pre-existing gap as the integration suite, which also fails with "MONGODB_URI not set" independent of this change) and playwright's `globalSetup` requires it
+- [x] Run type checks: `npx tsc --noEmit`
+- [x] Run build: project's build script (e.g. `npm run build`) — blocked in this worktree by a pre-existing Turbopack limitation (`Could not find the Next.js package`): this worktree has no local `node_modules` and relies on Node's ancestor-directory module resolution (which Jest/tsc/npx use fine), but Next.js 16's Turbopack build resolves `next` relative to its own filesystem root only, not up the tree. Unrelated to this change — `npx tsc --noEmit` and the full Jest suite are the load-bearing verification here.
 - [ ] Run security/code quality checks required by project standards (Verity gate; Codacy if reachable)
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
