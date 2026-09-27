@@ -7,37 +7,37 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — run `gh issue edit 712 --add-label "in-progress"` (repo `dougis-org/session-combat`). Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **Write failing unit tests first (TDD)** in `tests/unit/lib/dice/useRollSubmission.test.ts`, one per rejection scenario in `specs/roll-submission-validation/spec.md`:
+- [x] **Issue lifecycle: mark in-progress** — run `gh issue edit 712 --add-label "in-progress"` (repo `dougis-org/session-combat`). Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Write failing unit tests first (TDD)** in `tests/unit/lib/dice/useRollSubmission.test.ts`, one per rejection scenario in `specs/roll-submission-validation/spec.md`:
   - oversized `formula` (`MAX_FORMULA_LENGTH + 1` chars) → `'error'`, `fetch` not called
   - oversized `rolls` array (`MAX_DICE_IN_ROLL + 1` entries) → `'error'`, `fetch` not called
   - out-of-range die value (e.g. `101`, and separately `0`) → `'error'`, `fetch` not called
   - out-of-range `total` (`MAX_TOTAL_MAGNITUDE + 1` and `-(MAX_TOTAL_MAGNITUDE + 1)`) → `'error'`, `fetch` not called
   - Confirm each new test fails against current `lib/dice/useRollSubmission.ts` (red) before implementing
-- [ ] **Add boundary happy-path unit tests** in the same file:
+- [x] **Add boundary happy-path unit tests** in the same file:
   - max-pool-shaped payload (`MAX_DICE_IN_ROLL` dice at `MAX_DIE_VALUE`, `total` within `MAX_TOTAL_MAGNITUDE`) → still resolves per existing status mapping, `fetch` is called
   - `d%`-shaped payload (`formula: 'd%'`, single `rolls` entry in `1..100`) → still resolves per existing status mapping, `fetch` is called
-- [ ] **Implement the validation gate** in `lib/dice/useRollSubmission.ts`: import `rollSubmissionSchema` from `@/lib/validation/rollSubmission` (reuse — no new constants); at the top of `submitRoll`, `safeParse({ formula, rolls, total, visibility })` and `return 'error'` immediately on failure, before the existing `try`/`fetch` block (design Decision 1 & 3). Do not add a `label` parameter (design Decision 2).
-- [ ] Run the new and existing tests; confirm all pass (green) and no existing test in `tests/unit/lib/dice/useRollSubmission.test.ts` needed a behavior change
-- [ ] Confirm acceptance criteria in `specs/roll-submission-validation/spec.md` are covered by the tests above
+- [x] **Implement the validation gate** in `lib/dice/useRollSubmission.ts`: import `rollSubmissionSchema` from `@/lib/validation/rollSubmission` (reuse — no new constants); at the top of `submitRoll`, `safeParse({ formula, rolls, total, visibility })` and `return 'error'` immediately on failure, before the existing `try`/`fetch` block (design Decision 1 & 3). Do not add a `label` parameter (design Decision 2).
+- [x] Run the new and existing tests; confirm all pass (green) and no existing test in `tests/unit/lib/dice/useRollSubmission.test.ts` needed a behavior change
+- [x] Confirm acceptance criteria in `specs/roll-submission-validation/spec.md` are covered by the tests above
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill against `lib/dice/useRollSubmission.ts` and its test file. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill against `lib/dice/useRollSubmission.ts` and its test file. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests: `node node_modules/.bin/jest tests/unit/lib/dice/useRollSubmission.test.ts`
-- [ ] Run E2E tests (if applicable) — not applicable; no E2E coverage touches this hook
-- [ ] Run type checks: `npm run type-check` (or project's documented type-check script)
-- [ ] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards (Verity gate / Codacy, per repo config)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests: `node node_modules/.bin/jest tests/unit/lib/dice/useRollSubmission.test.ts`
+- [x] Run E2E tests (if applicable) — not applicable; no E2E coverage touches this hook
+- [x] Run type checks: `npm run type-check` (or project's documented type-check script)
+- [x] Run build: `npm run build`
+- [x] Run security/code quality checks required by project standards (Verity gate / Codacy, per repo config)
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -54,7 +54,7 @@ If **ANY** required step fails, iterate and fix before pushing.
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `wire-roll-validator-client-712` to `main`. PR body **must** include `Closes #712`.
 - [ ] **Issue lifecycle: mark in-review** — run `gh issue edit 712 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the status column semantically matching "In Review" via `gh project item-edit` (same project/field/option discovery as the in-progress lifecycle step above; warn and skip if not found).

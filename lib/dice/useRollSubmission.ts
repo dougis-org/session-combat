@@ -1,11 +1,15 @@
 'use client'
 
 import type { RollVisibility } from '@/lib/types'
+import { rollSubmissionSchema } from '@/lib/validation/rollSubmission'
 
 export type RollSubmitResult = 'success' | 'conflict' | 'error'
 
 export function useRollSubmission(campaignId: string) {
   async function submitRoll(formula: string, rolls: number[], total: number, visibility: RollVisibility): Promise<RollSubmitResult> {
+    if (!rollSubmissionSchema.safeParse({ formula, rolls, total, visibility }).success) {
+      return 'error'
+    }
     try {
       const res = await fetch(`/api/campaigns/${encodeURIComponent(campaignId)}/rolls`, {
         method: 'POST',
