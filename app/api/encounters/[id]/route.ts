@@ -1,18 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { loadEncounters, saveEncounter, deleteEncounter } from '@/lib/storage/encounterRepo';
 import { Encounter } from '@/lib/types';
 import { validateString } from '@/lib/validation/core';
+import { validateEncounterFields } from '@/lib/validation/encounterFields';
 
-export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
+async function parseEncounterBody(request: Request): Promise<Record<string, unknown> | NextResponse> {
+  let body: unknown;
   try {
-    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
-    if (!idResult.valid) {
-      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
-    }
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+  }
+  return body as Record<string, unknown>;
+}
+
+function validateEncounterId(id: unknown): { valid: true; value: string } | NextResponse {
+  const idResult = validateString(id, 'id', { required: true, minLength: 1 });
+  if (!idResult.valid) {
+    return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+  }
+  return idResult;
+}
+
+export const GET = withAuthAndParams<{ id: string }>(async (_request, auth, { id }) => {
+  try {
+    const idResult = validateEncounterId(id);
+    if (idResult instanceof NextResponse) return idResult;
 
     const encounters = await loadEncounters(auth.userId);
-    const encounter = encounters.find((e) => e.id === id);
+    const encounter = encounters.find((e) => e.id === idResult.value);
 
     if (!encounter) {
       return NextResponse.json(
@@ -32,27 +52,21 @@ export const GET = withAuthAndParams<{ id: string }>(async (request, auth, { id 
 });
 
 export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
+  const idResult = validateEncounterId(id);
+  if (idResult instanceof NextResponse) return idResult;
+
+  const body = await parseEncounterBody(request);
+  if (body instanceof NextResponse) return body;
+
   try {
-    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
-    if (!idResult.valid) {
-      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
+    const fieldsResult = validateEncounterFields(body);
+    if (!fieldsResult.valid) {
+      return NextResponse.json({ error: fieldsResult.error }, { status: 400 });
     }
-
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
-    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
-      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
-    }
-
-    const { name, description, monsters } = body as Record<string, unknown>;
 
     // Get the existing encounter to verify ownership
     const encounters = await loadEncounters(auth.userId);
-    const existingEncounter = encounters.find((e) => e.id === id);
+    const existingEncounter = encounters.find((e) => e.id === idResult.value);
 
     if (!existingEncounter) {
       return NextResponse.json(
@@ -61,25 +75,11 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       );
     }
 
-    const nameResult = validateString(name, 'name', { required: true, minLength: 1 });
-    if (!nameResult.valid) {
-      return NextResponse.json({ error: 'Encounter name is required' }, { status: 400 });
-    }
-
-    const descriptionResult = validateString(description, 'description');
-    if (!descriptionResult.valid) {
-      return NextResponse.json({ error: descriptionResult.error.message }, { status: 400 });
-    }
-
-    if (monsters !== undefined && !Array.isArray(monsters)) {
-      return NextResponse.json({ error: 'monsters must be an array' }, { status: 400 });
-    }
-
     const updatedEncounter: Encounter = {
       ...existingEncounter,
-      name: nameResult.value,
-      description: description !== undefined ? descriptionResult.value : existingEncounter.description,
-      monsters: (monsters as Encounter['monsters']) ?? existingEncounter.monsters,
+      name: fieldsResult.value.name,
+      description: fieldsResult.value.description ?? existingEncounter.description,
+      monsters: fieldsResult.value.monsters ?? existingEncounter.monsters,
       updatedAt: new Date(),
     };
 
@@ -95,16 +95,14 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
   }
 });
 
-export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
+export const DELETE = withAuthAndParams<{ id: string }>(async (_request, auth, { id }) => {
   try {
-    const idResult = validateString(id, 'id', { required: true, minLength: 1 });
-    if (!idResult.valid) {
-      return NextResponse.json({ error: idResult.error.message }, { status: 400 });
-    }
+    const idResult = validateEncounterId(id);
+    if (idResult instanceof NextResponse) return idResult;
 
     // Verify ownership before deleting
     const encounters = await loadEncounters(auth.userId);
-    const encounter = encounters.find((e) => e.id === id);
+    const encounter = encounters.find((e) => e.id === idResult.value);
 
     if (!encounter) {
       return NextResponse.json(
@@ -113,7 +111,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
       );
     }
 
-    await deleteEncounter(id, auth.userId);
+    await deleteEncounter(idResult.value, auth.userId);
 
     return NextResponse.json({ message: 'Encounter deleted successfully' });
   } catch (error) {

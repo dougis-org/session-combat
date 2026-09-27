@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { loadEncounters, saveEncounter, addEncounterToCampaign } from '@/lib/storage/encounterRepo';
 import { Encounter } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { validateString } from '@/lib/validation/core';
+import { validateEncounterFields } from '@/lib/validation/encounterFields';
 
-export const GET = withAuth(async (request, auth) => {
+export const GET = withAuth(async (_request, auth) => {
   try {
     const encounters = await loadEncounters(auth.userId);
     return NextResponse.json(encounters);
@@ -18,7 +19,7 @@ export const GET = withAuth(async (request, auth) => {
   }
 });
 
-export const POST = withAuth(async (request, auth) => {
+async function parseEncounterBody(request: Request): Promise<Record<string, unknown> | NextResponse> {
   let body: unknown;
   try {
     body = await request.json();
@@ -28,56 +29,58 @@ export const POST = withAuth(async (request, auth) => {
   if (typeof body !== 'object' || body === null || Array.isArray(body)) {
     return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
   }
+  return body as Record<string, unknown>;
+}
+
+async function resolveLinkedCampaign(
+  campaignId: unknown,
+  userId: string
+): Promise<{ campaignId: string } | NextResponse | undefined> {
+  if (campaignId === undefined) return undefined;
+
+  const campaignIdResult = validateString(campaignId, 'campaignId', { required: true, minLength: 1 });
+  if (!campaignIdResult.valid) {
+    return NextResponse.json({ error: campaignIdResult.error.message }, { status: 400 });
+  }
+
+  const result = await assertCampaignAccess(campaignIdResult.value, userId);
+  if (result instanceof NextResponse) return result;
+  if (result.role !== 'dm') {
+    return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+  }
+
+  return { campaignId: campaignIdResult.value };
+}
+
+export const POST = withAuth(async (request, auth) => {
+  const body = await parseEncounterBody(request);
+  if (body instanceof NextResponse) return body;
 
   try {
-    const { name, description, monsters, campaignId } = body as Record<string, unknown>;
-
-    const nameResult = validateString(name, 'name', { required: true, minLength: 1 });
-    if (!nameResult.valid) {
-      return NextResponse.json({ error: 'Encounter name is required' }, { status: 400 });
+    const fieldsResult = validateEncounterFields(body);
+    if (!fieldsResult.valid) {
+      return NextResponse.json({ error: fieldsResult.error }, { status: 400 });
     }
 
-    const descriptionResult = validateString(description, 'description');
-    if (!descriptionResult.valid) {
-      return NextResponse.json({ error: descriptionResult.error.message }, { status: 400 });
-    }
-
-    if (monsters !== undefined && !Array.isArray(monsters)) {
-      return NextResponse.json({ error: 'monsters must be an array' }, { status: 400 });
-    }
-
-    let linkedCampaignId: string | undefined;
-    if (campaignId !== undefined) {
-      const campaignIdResult = validateString(campaignId, 'campaignId', { required: true, minLength: 1 });
-      if (!campaignIdResult.valid) {
-        return NextResponse.json({ error: campaignIdResult.error.message }, { status: 400 });
-      }
-      linkedCampaignId = campaignIdResult.value;
-
-      const result = await assertCampaignAccess(linkedCampaignId, auth.userId);
-      if (result instanceof NextResponse) return result;
-      const { role } = result;
-      if (role !== 'dm') {
-        return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-      }
-    }
+    const linked = await resolveLinkedCampaign(body.campaignId, auth.userId);
+    if (linked instanceof NextResponse) return linked;
 
     const encounter: Encounter = {
       _id: undefined,
       id: crypto.randomUUID(),
       userId: auth.userId,
-      name: nameResult.value,
-      description: descriptionResult.value,
-      monsters: (monsters as Encounter['monsters']) || [],
+      name: fieldsResult.value.name,
+      description: fieldsResult.value.description ?? '',
+      monsters: fieldsResult.value.monsters ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     await saveEncounter(encounter);
 
-    if (linkedCampaignId !== undefined) {
+    if (linked !== undefined) {
       try {
-        await addEncounterToCampaign(linkedCampaignId, encounter.id, auth.userId);
+        await addEncounterToCampaign(linked.campaignId, encounter.id, auth.userId);
       } catch (linkError) {
         console.error('Error linking encounter to campaign:', linkError);
         return NextResponse.json(
