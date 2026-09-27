@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
+import { validateStringArray } from '@/lib/validation/core';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
-    const parties = await storage.loadParties(auth.userId);
+    const parties = await partyRepo.loadParties(auth.userId);
     return NextResponse.json(parties);
   } catch (error) {
     console.error('Error fetching parties:', error);
@@ -22,12 +23,17 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
     }
 
+    const idsResult = validateStringArray(characterIds, 'characterIds');
+    if (!idsResult.valid) {
+      return NextResponse.json({ error: idsResult.error.message }, { status: 400 });
+    }
+
     const now = new Date();
-    const ids: string[] = Array.isArray(characterIds) ? characterIds : [];
+    const ids = idsResult.value;
 
     if (typeof campaignId === 'string' && campaignId.trim()) {
       const cid = campaignId.trim();
-      const checks = await Promise.all(ids.map(charId => storage.canAddToCampaignParty(cid, charId, auth.userId)));
+      const checks = await Promise.all(ids.map(charId => partyRepo.canAddToCampaignParty(cid, charId, auth.userId)));
       if (checks.some(allowed => !allowed)) {
         return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
       }
@@ -47,13 +53,13 @@ export const POST = withAuth(async (request, auth) => {
       updatedAt: now,
     };
 
-    await storage.saveParty(party);
+    await partyRepo.saveParty(party);
 
     if (typeof campaignId === 'string' && campaignId.trim()) {
       try {
-        await storage.addPartyToCampaign(campaignId.trim(), partyId);
+        await partyRepo.addPartyToCampaign(campaignId.trim(), partyId);
       } catch (err) {
-        await storage.deleteParty(partyId, auth.userId);
+        await partyRepo.deleteParty(partyId, auth.userId);
         throw err;
       }
     }

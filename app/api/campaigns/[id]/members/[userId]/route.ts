@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 
 type Params = { id: string; userId: string };
 
@@ -28,7 +29,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
         const targetShares = shares.filter(s => s.userId === targetUserId);
         const now = new Date();
         await Promise.all(
-          targetShares.map(share => storage.setPartyMemberLeftAt(campaignId, share.characterId, now))
+          targetShares.map(share => partyRepo.setPartyMemberLeftAt(campaignId, share.characterId, now))
         );
       } catch (cleanupError) {
         console.error('Error during party cleanup after member removal:', cleanupError);

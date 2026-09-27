@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
 
 type Params = { id: string; cid: string };
@@ -26,7 +27,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
       return NextResponse.json({ error: 'Share not found' }, { status: 404 });
     }
 
-    void storage.setPartyMemberLeftAt(campaignId, characterId, new Date()).catch(
+    void partyRepo.setPartyMemberLeftAt(campaignId, characterId, new Date()).catch(
       (e: unknown) => console.error('Error during party cleanup after unshare:', e)
     );
 

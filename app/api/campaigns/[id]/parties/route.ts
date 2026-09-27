@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import * as partyRepo from '@/lib/storage/partyRepo';
 
 type Params = { id: string };
 
@@ -11,7 +12,7 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campai
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const parties = await storage.loadPartiesByCampaign(campaignId);
+    const parties = await partyRepo.loadPartiesByCampaign(campaignId);
     return NextResponse.json(parties);
   } catch (error) {
     console.error('Error loading campaign parties:', error);

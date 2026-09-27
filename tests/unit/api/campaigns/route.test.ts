@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
   MOCK_AUTH,
@@ -21,9 +22,12 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage", () => ({
   storage: {
     addMember: jest.fn().mockResolvedValue(undefined),
-    saveParty: jest.fn().mockResolvedValue(undefined),
-    deleteParty: jest.fn().mockResolvedValue(undefined),
   },
+}));
+
+jest.mock("@/lib/storage/partyRepo", () => ({
+  saveParty: jest.fn().mockResolvedValue(undefined),
+  deleteParty: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -41,6 +45,7 @@ jest.mock("@/lib/utils/campaign", () => ({
 
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 const mockedStorage = jest.mocked(storage);
+const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const MOCK_CAMPAIGN = {
@@ -114,8 +119,8 @@ describe("POST /api/campaigns", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedCampaignRepo.saveCampaign.mockResolvedValue(undefined as any);
-    mockedStorage.saveParty.mockResolvedValue(undefined as any);
-    mockedStorage.deleteParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
     mockedStorage.addMember.mockResolvedValue(undefined as any);
   });
 
@@ -258,7 +263,7 @@ describe("POST /api/campaigns", () => {
     const response = await POST(makePostRequest({ name: "Dragon Heist" }));
     expect(response.status).toBe(201);
     const body = await response.json();
-    expect(mockedStorage.saveParty).toHaveBeenCalledWith(
+    expect(mockedPartyRepo.saveParty).toHaveBeenCalledWith(
       expect.objectContaining({
         name: "Main Party",
         userId: "user-123",
@@ -272,7 +277,7 @@ describe("POST /api/campaigns", () => {
     mockedCampaignRepo.saveCampaign.mockImplementation(async () => {
       calls.push("saveCampaign");
     });
-    mockedStorage.saveParty.mockImplementation(async () => {
+    mockedPartyRepo.saveParty.mockImplementation(async () => {
       calls.push("saveParty");
     });
     mockedStorage.addMember.mockImplementation(async () => {
@@ -291,7 +296,7 @@ describe("POST /api/campaigns", () => {
   });
 
   it("rolls back the campaign when saveParty fails", async () => {
-    mockedStorage.saveParty.mockRejectedValue(new Error("party save failed"));
+    mockedPartyRepo.saveParty.mockRejectedValue(new Error("party save failed"));
 
     const response = await POST(makePostRequest({ name: "Doomed" }));
 
@@ -304,7 +309,7 @@ describe("POST /api/campaigns", () => {
   });
 
   it("still returns 500 for the original error when deleteCampaign rollback itself fails after saveParty fails", async () => {
-    mockedStorage.saveParty.mockRejectedValue(new Error("party save failed"));
+    mockedPartyRepo.saveParty.mockRejectedValue(new Error("party save failed"));
     mockedCampaignRepo.deleteCampaign.mockRejectedValue(new Error("delete campaign failed"));
 
     const response = await POST(makePostRequest({ name: "Doomed" }));
@@ -320,7 +325,7 @@ describe("POST /api/campaigns", () => {
     const response = await POST(makePostRequest({ name: "Doomed" }));
 
     expect(response.status).toBe(500);
-    expect(mockedStorage.deleteParty).toHaveBeenCalledWith(
+    expect(mockedPartyRepo.deleteParty).toHaveBeenCalledWith(
       expect.any(String),
       "user-123"
     );
@@ -332,12 +337,12 @@ describe("POST /api/campaigns", () => {
 
   it("still rolls back the campaign and rethrows when deleteParty itself fails during member-failure rollback", async () => {
     mockedStorage.addMember.mockRejectedValue(new Error("member save failed"));
-    mockedStorage.deleteParty.mockRejectedValue(new Error("delete party failed"));
+    mockedPartyRepo.deleteParty.mockRejectedValue(new Error("delete party failed"));
 
     const response = await POST(makePostRequest({ name: "Doomed" }));
 
     expect(response.status).toBe(500);
-    expect(mockedStorage.deleteParty).toHaveBeenCalled();
+    expect(mockedPartyRepo.deleteParty).toHaveBeenCalled();
     expect(mockedCampaignRepo.deleteCampaign).toHaveBeenCalledWith(
       expect.any(String),
       "user-123"

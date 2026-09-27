@@ -3,6 +3,7 @@
  */
 import { DELETE } from "@/app/api/campaigns/[id]/members/[userId]/route";
 import { storage } from "@/lib/storage";
+import * as partyRepo from "@/lib/storage/partyRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -20,16 +21,19 @@ jest.mock("@/lib/storage", () => ({
     getMember: jest.fn(),
     updateMemberStatus: jest.fn(),
     listAllSharesForCampaign: jest.fn(),
-    setPartyMemberLeftAt: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/partyRepo", () => ({
+  setPartyMemberLeftAt: jest.fn(),
 }));
 
 const mockedStorage = jest.mocked(storage) as {
   getMember: jest.MockedFunction<typeof storage.getMember>;
   updateMemberStatus: jest.MockedFunction<typeof storage.updateMemberStatus>;
   listAllSharesForCampaign: jest.MockedFunction<typeof storage.listAllSharesForCampaign>;
-  setPartyMemberLeftAt: jest.MockedFunction<typeof storage.setPartyMemberLeftAt>;
 };
+const mockedPartyRepo = jest.mocked(partyRepo);
 
 const CAMPAIGN_ID = "camp-1";
 const TARGET_USER_ID = "target-user-456";
@@ -55,7 +59,7 @@ beforeEach(() => {
   mockAuthState.payload = MOCK_AUTH;
   mockedStorage.updateMemberStatus.mockResolvedValue(undefined);
   mockedStorage.listAllSharesForCampaign.mockResolvedValue([]);
-  mockedStorage.setPartyMemberLeftAt.mockResolvedValue();
+  mockedPartyRepo.setPartyMemberLeftAt.mockResolvedValue();
 });
 
 describe("DELETE /api/campaigns/[id]/members/[userId]", () => {
@@ -241,9 +245,9 @@ describe("DELETE /api/campaigns/[id]/members/[userId]", () => {
 
       await DELETE(makeDeleteRequest(), { params: PARAMS });
 
-      expect(mockedStorage.setPartyMemberLeftAt).toHaveBeenCalledTimes(2);
-      expect(mockedStorage.setPartyMemberLeftAt).toHaveBeenCalledWith(CAMPAIGN_ID, "char-X", expect.any(Date));
-      expect(mockedStorage.setPartyMemberLeftAt).toHaveBeenCalledWith(CAMPAIGN_ID, "char-Y", expect.any(Date));
+      expect(mockedPartyRepo.setPartyMemberLeftAt).toHaveBeenCalledTimes(2);
+      expect(mockedPartyRepo.setPartyMemberLeftAt).toHaveBeenCalledWith(CAMPAIGN_ID, "char-X", expect.any(Date));
+      expect(mockedPartyRepo.setPartyMemberLeftAt).toHaveBeenCalledWith(CAMPAIGN_ID, "char-Y", expect.any(Date));
     });
 
     it("B5-2: member with no shares — removal still returns 200", async () => {
@@ -252,7 +256,7 @@ describe("DELETE /api/campaigns/[id]/members/[userId]", () => {
       const response = await DELETE(makeDeleteRequest(), { params: PARAMS });
 
       expect(response.status).toBe(200);
-      expect(mockedStorage.setPartyMemberLeftAt).not.toHaveBeenCalled();
+      expect(mockedPartyRepo.setPartyMemberLeftAt).not.toHaveBeenCalled();
     });
 
     it("B5-3: cleanup error does not fail removal response", async () => {
