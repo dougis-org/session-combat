@@ -1,4 +1,5 @@
 import { validateEncounterMonsters } from "@/lib/validation/encounterMonster";
+import { UPLOAD_LIMITS } from "@/lib/validation/monsterUploadSchema";
 
 const VALID_MONSTER = {
   id: "mon-1",
@@ -83,6 +84,24 @@ describe("validateEncounterMonsters", () => {
     if (result.valid) {
       expect(result.value[0]).not.toHaveProperty("unexpectedField");
     }
+  });
+
+  it("accepts an array at exactly the maxMonsters limit", () => {
+    const monsters = Array.from({ length: UPLOAD_LIMITS.maxMonsters }, (_, i) => ({
+      ...VALID_MONSTER,
+      id: `mon-${i}`,
+    }));
+    const result = validateEncounterMonsters(monsters);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects an array exceeding the maxMonsters limit", () => {
+    const monsters = Array.from({ length: UPLOAD_LIMITS.maxMonsters + 1 }, (_, i) => ({
+      ...VALID_MONSTER,
+      id: `mon-${i}`,
+    }));
+    const result = validateEncounterMonsters(monsters);
+    expect(result.valid).toBe(false);
   });
 
   it("accepts explicit null for optional fields, normalizing them to undefined (regression: PR #786 CI)", () => {

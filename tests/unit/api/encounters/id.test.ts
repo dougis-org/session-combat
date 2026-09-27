@@ -63,6 +63,13 @@ describe("GET /api/encounters/[id]", () => {
     params,
     () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await GET(makeRequest("GET"), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
 });
 
 describe("PUT /api/encounters/[id]", () => {
@@ -108,6 +115,35 @@ describe("PUT /api/encounters/[id]", () => {
     params,
     () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await PUT(makeRequest("PUT", { name: "Valid" }), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for malformed JSON body", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const request = new (require("next/server").NextRequest)(
+      `http://localhost/api/encounters/${ENC_ID}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", cookie: "auth-token=t" },
+        body: "{not valid json",
+      }
+    );
+    const response = await PUT(request, { params });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is not an object", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await PUT(makeRequest("PUT", ["not", "an", "object"]), { params });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.saveEncounter).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /api/encounters/[id]", () => {
@@ -142,4 +178,11 @@ describe("DELETE /api/encounters/[id]", () => {
     params,
     () => mockedEncounterRepo.loadEncounters.mockRejectedValue(new Error("Storage error"))
   );
+
+  it("returns 400 when id param is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await DELETE(makeRequest("DELETE"), { params: Promise.resolve({ id: "" }) });
+    expect(response.status).toBe(400);
+    expect(mockedEncounterRepo.loadEncounters).not.toHaveBeenCalled();
+  });
 });

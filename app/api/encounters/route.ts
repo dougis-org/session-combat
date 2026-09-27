@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { withAuth } from '@/lib/middleware';
 import { loadEncounters, saveEncounter, addEncounterToCampaign } from '@/lib/storage/encounterRepo';
 import { Encounter } from '@/lib/types';
@@ -67,7 +68,7 @@ export const POST = withAuth(async (request, auth) => {
 
     const encounter: Encounter = {
       _id: undefined,
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       userId: auth.userId,
       name: fieldsResult.value.name,
       description: fieldsResult.value.description ?? '',
