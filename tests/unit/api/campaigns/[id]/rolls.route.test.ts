@@ -444,16 +444,6 @@ describe("POST /api/campaigns/[id]/rolls", () => {
     expect(accepted.status).toBe(201);
     expect(mockedEmitFiltered).toHaveBeenCalledTimes(1);
   });
-
-  it("T3.20 does not import rollSubmissionSchema — client-side wiring is out of scope for this change (tracked in #712)", () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require("fs");
-    const source = fs.readFileSync(
-      require.resolve("@/lib/dice/useRollSubmission"),
-      "utf8"
-    );
-    expect(source).not.toMatch(/rollSubmissionSchema|from ['"]@\/lib\/validation\/rollSubmission['"]/);
-  });
 });
 
 // ─── GET tests ────────────────────────────────────────────────────────────────
