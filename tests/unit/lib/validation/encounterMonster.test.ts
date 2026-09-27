@@ -84,4 +84,31 @@ describe("validateEncounterMonsters", () => {
       expect(result.value[0]).not.toHaveProperty("unexpectedField");
     }
   });
+
+  it("accepts explicit null for optional fields, normalizing them to undefined (regression: PR #786 CI)", () => {
+    // Persisted Monster/MonsterTemplate documents serialize unset optional fields
+    // as explicit `null`, not an absent key. A monster added from the library in
+    // tests/e2e/encounters.spec.ts's "Encounter creation — with imported monster"
+    // suite has this exact shape and was rejected by an earlier version of this
+    // schema (400 "expected string, received null") before this fix.
+    const monsterWithNulls = {
+      ...VALID_MONSTER,
+      acNote: null,
+      description: null,
+      source: null,
+      legendaryActionCount: null,
+      userId: null,
+      templateId: null,
+    };
+    const result = validateEncounterMonsters([monsterWithNulls]);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.value[0].acNote).toBeUndefined();
+      expect(result.value[0].description).toBeUndefined();
+      expect(result.value[0].source).toBeUndefined();
+      expect(result.value[0].legendaryActionCount).toBeUndefined();
+      expect(result.value[0].userId).toBeUndefined();
+      expect(result.value[0].templateId).toBeUndefined();
+    }
+  });
 });

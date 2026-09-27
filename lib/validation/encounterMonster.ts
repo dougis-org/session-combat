@@ -50,8 +50,8 @@ const abilityArray = () =>
 export const encounterMonsterSchema = z
   .object({
     id: z.string().trim().min(1).max(UPLOAD_LIMITS.name),
-    userId: z.string().trim().min(1).max(UPLOAD_LIMITS.name).optional(),
-    templateId: z.string().trim().min(1).max(UPLOAD_LIMITS.name).optional(),
+    userId: z.string().trim().min(1).max(UPLOAD_LIMITS.name).nullish(),
+    templateId: z.string().trim().min(1).max(UPLOAD_LIMITS.name).nullish(),
     name: z.string().trim().min(1).max(UPLOAD_LIMITS.name),
     size: z.enum(VALID_SIZES, {
       error: () => `size must be one of: ${VALID_SIZES.join(', ')}`,
@@ -61,39 +61,42 @@ export const encounterMonsterSchema = z
     // free-form string, not a strict enum — real library/import data isn't reliably
     // title-cased ("lawful evil" vs "Lawful Evil") even though the Monster type
     // declares a literal union.
-    alignment: shortString().optional(),
+    alignment: shortString().nullish(),
     ac: z.number().int().min(0).max(30),
-    acNote: shortString().optional(),
+    // Persisted Monster/MonsterTemplate documents store unset optional fields as
+    // explicit `null`, not an absent key — every optional field here must accept
+    // both (`.nullish()`), not just `.optional()`.
+    acNote: shortString().nullish(),
     // Optional: a freshly added monster instance (copied from a MonsterTemplate)
     // may not carry an explicit hp yet — defaults to maxHp below.
-    hp: z.number().int().min(0).optional(),
+    hp: z.number().int().min(0).nullish(),
     maxHp: z.number().int().min(1),
     speed: z.string().trim().min(1).max(UPLOAD_LIMITS.shortText),
     abilityScores: abilityScoresSchema,
-    savingThrows: boundedRecord(z.number()).optional(),
-    skills: boundedRecord(z.number()).optional(),
-    damageResistances: stringList().optional(),
-    damageImmunities: stringList().optional(),
-    damageVulnerabilities: stringList().optional(),
-    conditionImmunities: stringList().optional(),
-    senses: boundedRecord(z.string().max(UPLOAD_LIMITS.recordValue)).optional(),
-    languages: stringList().optional(),
-    communication: shortString().optional(),
+    savingThrows: boundedRecord(z.number()).nullish(),
+    skills: boundedRecord(z.number()).nullish(),
+    damageResistances: stringList().nullish(),
+    damageImmunities: stringList().nullish(),
+    damageVulnerabilities: stringList().nullish(),
+    conditionImmunities: stringList().nullish(),
+    senses: boundedRecord(z.string().max(UPLOAD_LIMITS.recordValue)).nullish(),
+    languages: stringList().nullish(),
+    communication: shortString().nullish(),
     challengeRating: z.number().min(0),
-    experiencePoints: z.number().min(0).optional(),
-    description: z.string().max(UPLOAD_LIMITS.description).optional(),
-    source: shortString().optional(),
-    traits: abilityArray().optional(),
-    actions: abilityArray().optional(),
-    bonusActions: abilityArray().optional(),
-    reactions: abilityArray().optional(),
-    lairActions: abilityArray().optional(),
-    legendaryActions: abilityArray().optional(),
-    legendaryActionCount: z.number().int().min(0).optional(),
-    initiative: z.number().optional(),
+    experiencePoints: z.number().min(0).nullish(),
+    description: z.string().max(UPLOAD_LIMITS.description).nullish(),
+    source: shortString().nullish(),
+    traits: abilityArray().nullish(),
+    actions: abilityArray().nullish(),
+    bonusActions: abilityArray().nullish(),
+    reactions: abilityArray().nullish(),
+    lairActions: abilityArray().nullish(),
+    legendaryActions: abilityArray().nullish(),
+    legendaryActionCount: z.number().int().min(0).nullish(),
+    initiative: z.number().nullish(),
   })
   .superRefine((value, ctx) => {
-    if (value.hp !== undefined && value.hp > value.maxHp) {
+    if (value.hp !== undefined && value.hp !== null && value.hp > value.maxHp) {
       ctx.addIssue({
         code: 'custom',
         path: ['hp'],
@@ -101,7 +104,14 @@ export const encounterMonsterSchema = z
       });
     }
   })
-  .transform((value) => ({ ...value, hp: value.hp ?? value.maxHp }));
+  .transform((value) => {
+    // Normalize every `null` to `undefined` so the output matches Monster's
+    // `field?: T` shape (never `field: T | null`), and default hp to maxHp.
+    const normalized = Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, v === null ? undefined : v])
+    ) as typeof value;
+    return { ...normalized, hp: normalized.hp ?? normalized.maxHp };
+  });
 
 export const encounterMonstersArraySchema = z
   .array(encounterMonsterSchema)
