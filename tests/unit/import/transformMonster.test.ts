@@ -55,6 +55,8 @@ describe("transformMonster", () => {
       { input: "1/4", expected: 0.25 },
       { input: "1/8", expected: 0.125 },
       { input: "1/0", expected: 0 },
+      { input: "x/2", expected: 0 },
+      { input: "2/x", expected: 0 },
       { input: "CR5", expected: 0 },
       { input: "", expected: 0 },
       { input: "5", expected: 5 },
