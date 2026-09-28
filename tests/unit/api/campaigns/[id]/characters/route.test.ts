@@ -3,6 +3,7 @@
  */
 import { POST, GET } from "@/app/api/campaigns/[id]/characters/route";
 import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import * as characterRepo from "@/lib/storage/characterRepo";
 import { DuplicateShareError } from "@/lib/errors";
@@ -20,10 +21,13 @@ jest.mock("@/lib/middleware", () =>
 
 jest.mock("@/lib/storage", () => ({
   storage: {
-    getMember: jest.fn(),
     addShare: jest.fn(),
     listSharesForCampaign: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/partyRepo", () => ({
@@ -34,10 +38,10 @@ jest.mock("@/lib/storage/characterRepo", () => ({
   loadCharacterById: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-  addShare: jest.MockedFunction<typeof storage.addShare>;
-  listSharesForCampaign: jest.MockedFunction<typeof storage.listSharesForCampaign>;
+const mockedStorage = {
+  addShare: jest.mocked(storage).addShare,
+  listSharesForCampaign: jest.mocked(storage).listSharesForCampaign,
+  getMember: jest.mocked(getMember),
 };
 const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCharacterRepo = jest.mocked(characterRepo);

@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET } from "@/app/api/campaigns/[id]/parties/route";
-import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import {
   makeRouteRequest,
@@ -12,17 +12,15 @@ import {
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/partyRepo", () => ({
   loadPartiesByCampaign: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = { getMember: jest.mocked(getMember) };
 const mockedPartyRepo = jest.mocked(partyRepo);
 
 const BASE_URL = "http://localhost/api/campaigns/camp-1/parties";

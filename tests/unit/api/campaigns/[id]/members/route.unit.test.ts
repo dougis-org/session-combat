@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/campaigns/[id]/members/route";
-import { storage } from "@/lib/storage";
+import { addMember, getMember, listMembersForCampaign, updateMemberStatus } from "@/lib/storage/membershipRepo";
 import { DuplicateMemberError } from "@/lib/errors";
 import {
   MOCK_AUTH,
@@ -19,20 +19,18 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-    addMember: jest.fn(),
-    updateMemberStatus: jest.fn(),
-    listMembersForCampaign: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
+  addMember: jest.fn(),
+  updateMemberStatus: jest.fn(),
+  listMembersForCampaign: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-  addMember: jest.MockedFunction<typeof storage.addMember>;
-  updateMemberStatus: jest.MockedFunction<typeof storage.updateMemberStatus>;
-  listMembersForCampaign: jest.MockedFunction<typeof storage.listMembersForCampaign>;
+const mockedStorage = {
+  getMember: jest.mocked(getMember),
+  addMember: jest.mocked(addMember),
+  updateMemberStatus: jest.mocked(updateMemberStatus),
+  listMembersForCampaign: jest.mocked(listMembersForCampaign),
 };
 
 const mockedGetDatabase = jest.mocked(getDatabase);

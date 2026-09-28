@@ -1,6 +1,6 @@
 import type { ChangeStream } from 'mongodb';
 import { connectToDatabase, getDatabase } from '@/lib/db';
-import { storage } from '@/lib/storage';
+import { listMembersForCampaign } from '@/lib/storage/membershipRepo';
 import { canSeeMessage } from '@/lib/utils/campaignMessages';
 import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import type { CampaignMember, CampaignMessage, CampaignRoll, CampaignStreamEvent } from '@/lib/types';
@@ -77,7 +77,7 @@ async function detectReplicaSet(): Promise<boolean> {
 }
 
 async function activeMembers(campaignId: string): Promise<CampaignMember[]> {
-  const members = await storage.listMembersForCampaign(campaignId);
+  const members = await listMembersForCampaign(campaignId);
   return members.filter(m => m.status === 'active');
 }
 

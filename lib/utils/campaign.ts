@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { Campaign, CampaignChapter, MemberRole } from '@/lib/types';
-import { storage } from '@/lib/storage';
+import { getMember } from '@/lib/storage/membershipRepo';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 
 const notFound = () => NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
@@ -9,7 +9,7 @@ export async function assertCampaignAccess(
   campaignId: string,
   userId: string,
 ): Promise<{ campaign: Campaign; role: MemberRole } | NextResponse> {
-  const member = await storage.getMember(campaignId, userId);
+  const member = await getMember(campaignId, userId);
   if (!member || member.status !== 'active') return notFound();
   const campaign = await campaignRepo.loadCampaignByIdAny(campaignId);
   if (!campaign) return notFound();

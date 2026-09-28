@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { addMember, getMember, listMembersForCampaign, updateMemberStatus } from '@/lib/storage/membershipRepo';
 import { getDatabase } from '@/lib/db';
 import { DuplicateMemberError } from '@/lib/errors';
 
@@ -9,12 +9,12 @@ type Params = { id: string };
 
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campaignId }) => {
   try {
-    const caller = await storage.getMember(campaignId, auth.userId);
+    const caller = await getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const members = await storage.listMembersForCampaign(campaignId);
+    const members = await listMembersForCampaign(campaignId);
 
     const validObjectIds = members
       .map(m => m.userId)
@@ -69,16 +69,16 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'Cannot invite yourself' }, { status: 400 });
     }
 
-    const caller = await storage.getMember(campaignId, auth.userId);
+    const caller = await getMember(campaignId, auth.userId);
     if (!caller || caller.role !== 'dm' || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const target = await storage.getMember(campaignId, userId);
+    const target = await getMember(campaignId, userId);
 
     if (!target) {
       const newId = crypto.randomUUID();
-      await storage.addMember({
+      await addMember({
         id: newId,
         campaignId,
         userId,
@@ -93,7 +93,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'Member already exists' }, { status: 409 });
     }
 
-    await storage.updateMemberStatus(campaignId, userId, 'invited', auth.userId, 'player');
+    await updateMemberStatus(campaignId, userId, 'invited', auth.userId, 'player');
     return NextResponse.json({ id: target.id, status: 'invited' }, { status: 201 });
   } catch (error) {
     if (error instanceof DuplicateMemberError) {

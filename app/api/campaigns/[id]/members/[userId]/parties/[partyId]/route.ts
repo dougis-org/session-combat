@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { getMember } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacters } from '@/lib/storage/characterRepo';
 import type { PartyMember } from '@/lib/types';
@@ -10,7 +10,7 @@ type Params = { id: string; userId: string; partyId: string };
 
 async function isAuthorized(campaignId: string, callerId: string, memberId: string): Promise<boolean> {
   if (callerId === memberId) return true;
-  const caller = await storage.getMember(campaignId, callerId);
+  const caller = await getMember(campaignId, callerId);
   return !!caller && caller.role === 'dm' && caller.status === 'active';
 }
 
@@ -80,7 +80,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id: campaig
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const member = await storage.getMember(campaignId, memberId);
+    const member = await getMember(campaignId, memberId);
     if (!member || member.status !== 'active') {
       return NextResponse.json({ error: 'Member not found or not active' }, { status: 404 });
     }

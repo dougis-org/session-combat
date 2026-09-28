@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { addMember } from '@/lib/storage/membershipRepo';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { CAMPAIGN_STATUSES } from '@/lib/types';
@@ -88,7 +88,7 @@ export const POST = withAuth(async (request, auth) => {
     }
 
     try {
-      await storage.addMember({
+      await addMember({
         id: crypto.randomUUID(),
         campaignId: campaign.id,
         userId: auth.userId,

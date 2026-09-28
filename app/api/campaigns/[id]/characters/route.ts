@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { getMember } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
 import { DuplicateShareError } from '@/lib/errors';
@@ -25,7 +26,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   const characterId = characterIdResult.value;
 
   try {
-    const member = await storage.getMember(campaignId, auth.userId);
+    const member = await getMember(campaignId, auth.userId);
     if (!member || member.status !== 'active' || member.role !== 'player') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -60,7 +61,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campaignId }) => {
   try {
-    const member = await storage.getMember(campaignId, auth.userId);
+    const member = await getMember(campaignId, auth.userId);
     if (!member || member.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

@@ -11,32 +11,34 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** — this change is issue-driven (#685). Run `gh issue edit 685 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item for issue #685 via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] **Confirm inventory is still accurate before editing.** Re-run the discovery greps from the proposal against the current `main`/worktree HEAD (methods may have gained/lost callers since exploration):
+- [x] **Issue lifecycle: mark in-progress** — this change is issue-driven (#685). Run `gh issue edit 685 --add-label "in-progress"`. Then discover the GitHub Project linked to `dougis-org/session-combat` (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item for issue #685 via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] **Confirm inventory is still accurate before editing.** Re-run the discovery greps from the proposal against the current `main`/worktree HEAD (methods may have gained/lost callers since exploration):
   - `grep -rn "storage\.\(addMember\|updateMemberStatus\|listMembersForCampaign\|getMember\|listInvitationsForUser\|getUserById\|getUsersByIds\)(" --include='*.ts' --include='*.tsx'` across the repo, filtering out `.verity/.snapshot/`.
   - If the file list differs from the 15 files below, update `proposal.md`, `design.md`, and `specs/membership-storage-callers/spec.md` accordingly before proceeding (per Change Control in proposal.md).
-- [ ] **Full-swap files (8) — remove `storage` import, add `membershipRepo` import, rewrite call sites:**
-  - [ ] `lib/utils/campaign.ts` — `getMember`
-  - [ ] `lib/server/transport.ts` — `listMembersForCampaign`
-  - [ ] `app/api/campaigns/[id]/parties/route.ts` — `getMember`
-  - [ ] `app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts` — `getMember`
-  - [ ] `app/api/campaigns/route.ts` — `addMember`
-  - [ ] `app/api/me/invitations/route.ts` — `getUsersByIds`, `listInvitationsForUser`
-  - [ ] `app/api/campaigns/[id]/members/route.ts` — `addMember`, `getMember`, `listMembersForCampaign`, `updateMemberStatus` (preserve the existing `instanceof DuplicateMemberError` catch around `addMember` unchanged)
-  - [ ] `app/api/campaigns/[id]/members/me/route.ts` — `getMember`, `updateMemberStatus`
-- [ ] **Partial-swap files (7) — add `membershipRepo` import alongside the retained `storage` import, rewrite only the membership call sites:**
-  - [ ] `lib/storage/partyRepo.ts` — `getMember` via relative `./membershipRepo` import (sibling module); leave `storage.listAllSharesForCampaign`, `storage.loadCharacterById`, `storage.loadPartiesByCampaign`, `storage.saveParty` untouched
-  - [ ] `app/api/campaigns/[id]/characters/[cid]/route.ts` — `getMember`; leave `storage.removeShare` untouched
-  - [ ] `app/api/campaigns/[id]/characters/route.ts` — `getMember`; leave `storage.addShare`, `storage.listSharesForCampaign` untouched
-  - [ ] `app/api/campaigns/[id]/members/[userId]/route.ts` — `getMember`, `updateMemberStatus`; leave `storage.listAllSharesForCampaign` untouched
-  - [ ] `app/api/campaigns/[id]/rolls/route.ts` — `getMember`, `getUserById`, `listMembersForCampaign`; leave `storage.listCampaignRolls`, `storage.saveCampaignRoll` untouched
-  - [ ] `app/api/campaigns/[id]/messages/route.ts` — `getMember`, `getUserById`, `listMembersForCampaign`; no other storage calls to preserve, but keep this file's other imports intact
-  - [ ] `app/api/campaigns/global/[id]/copy/route.ts` — `addMember`; leave `storage.loadGlobalCampaignTemplateById` untouched
-- [ ] **After each file edit**, check for import-name collisions (e.g. a local symbol already named `getMember`) before finalizing the named import; rename via `import { getMember as membershipGetMember }` only if a collision exists (none expected per current inventory).
-- [ ] **Update test mocks for all 15 production files** — for each file's corresponding test file(s), change any mock of `@/lib/storage`'s migrated methods to mock `@/lib/storage/membershipRepo` instead (or add a second mock target for partial-swap files that still mock `storage` for the retained calls).
-- [ ] **Repo-wide test-file discovery sweep** — run `grep -rn "storage\.\(addMember\|updateMemberStatus\|listMembersForCampaign\|getMember\|listInvitationsForUser\|getUserById\|getUsersByIds\)(" tests/` (or equivalent test root) to find any test mock/assertion referencing these methods on `storage` beyond the 15 production files' own tests, and update each to target `membershipRepo` where the corresponding production code has migrated.
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — not applicable here beyond reusing `membershipRepo`'s existing exports (no new logic is written).
-- [ ] Confirm acceptance criteria are covered: all 15 files migrated, mixed-domain files retain non-membership `storage` calls, zero remaining non-test `storage.<membershipMethod>(` matches, all existing tests pass unmodified in assertions.
+  - Confirmed: inventory matches exactly the 15 files listed below.
+- [x] **Full-swap files (8) — remove `storage` import, add `membershipRepo` import, rewrite call sites:**
+  - [x] `lib/utils/campaign.ts` — `getMember`
+  - [x] `lib/server/transport.ts` — `listMembersForCampaign`
+  - [x] `app/api/campaigns/[id]/parties/route.ts` — `getMember`
+  - [x] `app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route.ts` — `getMember`
+  - [x] `app/api/campaigns/route.ts` — `addMember`
+  - [x] `app/api/me/invitations/route.ts` — `getUsersByIds`, `listInvitationsForUser`
+  - [x] `app/api/campaigns/[id]/members/route.ts` — `addMember`, `getMember`, `listMembersForCampaign`, `updateMemberStatus` (preserve the existing `instanceof DuplicateMemberError` catch around `addMember` unchanged)
+  - [x] `app/api/campaigns/[id]/members/me/route.ts` — `getMember`, `updateMemberStatus`
+  - Note: `app/api/campaigns/[id]/messages/route.ts` (originally listed below as a partial-swap file) turned out to have zero non-membership `storage` calls, so per Decision 1 it also got a full import removal rather than a partial swap.
+- [x] **Partial-swap files (7) — add `membershipRepo` import alongside the retained `storage` import, rewrite only the membership call sites:**
+  - [x] `lib/storage/partyRepo.ts` — `getMember` via relative `./membershipRepo` import (sibling module); leave `storage.listAllSharesForCampaign`, `storage.loadCharacterById`, `storage.loadPartiesByCampaign`, `storage.saveParty` untouched
+  - [x] `app/api/campaigns/[id]/characters/[cid]/route.ts` — `getMember`; leave `storage.removeShare` untouched
+  - [x] `app/api/campaigns/[id]/characters/route.ts` — `getMember`; leave `storage.addShare`, `storage.listSharesForCampaign` untouched
+  - [x] `app/api/campaigns/[id]/members/[userId]/route.ts` — `getMember`, `updateMemberStatus`; leave `storage.listAllSharesForCampaign` untouched
+  - [x] `app/api/campaigns/[id]/rolls/route.ts` — `getMember`, `getUserById`, `listMembersForCampaign`; leave `storage.listCampaignRolls`, `storage.saveCampaignRoll` untouched
+  - [x] `app/api/campaigns/[id]/messages/route.ts` — `getMember`, `getUserById`, `listMembersForCampaign`; full swap applied (see note above — no non-membership calls existed to preserve)
+  - [x] `app/api/campaigns/global/[id]/copy/route.ts` — `addMember`; leave `storage.loadGlobalCampaignTemplateById` untouched
+- [x] **After each file edit**, check for import-name collisions (e.g. a local symbol already named `getMember`) before finalizing the named import; rename via `import { getMember as membershipGetMember }` only if a collision exists (none expected per current inventory). Confirmed: no collisions found.
+- [x] **Update test mocks for all 15 production files** — for each file's corresponding test file(s), change any mock of `@/lib/storage`'s migrated methods to mock `@/lib/storage/membershipRepo` instead (or add a second mock target for partial-swap files that still mock `storage` for the retained calls). Also fixed 3 downstream test files not among the 15 (encounters routes) whose mocks targeted `storage.getMember` but exercise `assertCampaignAccess`, which is one of the 15 migrated files — running the suite surfaced these as real failures, not just a static grep gap.
+- [x] **Repo-wide test-file discovery sweep** — run `grep -rn "storage\.\(addMember\|updateMemberStatus\|listMembersForCampaign\|getMember\|listInvitationsForUser\|getUserById\|getUsersByIds\)(" tests/` (or equivalent test root) to find any test mock/assertion referencing these methods on `storage` beyond the 15 production files' own tests, and update each to target `membershipRepo` where the corresponding production code has migrated. Remaining matches are legitimate direct tests of the `storage`/`membershipRepo` facade itself (unit + integration), not stale mocks of migrated callers.
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch — not applicable here beyond reusing `membershipRepo`'s existing exports (no new logic is written).
+- [x] Confirm acceptance criteria are covered: all 15 files migrated, mixed-domain files retain non-membership `storage` calls, zero remaining non-test `storage.<membershipMethod>(` matches, all existing tests pass unmodified in assertions (4088/4089 unit tests pass; the 1 failure is a pre-existing, unrelated node_modules patch-marker check).
 
 ## Pre-Commit Code Review
 
@@ -44,12 +46,12 @@
 
 ## Validation
 
-- [ ] Run unit/integration tests
+- [x] Run unit/integration tests — 4092/4092 unit tests pass; membership integration suite (12/12) passes
 - [ ] Run E2E tests (if applicable)
-- [ ] Run type checks
-- [ ] Run build
-- [ ] Run security/code quality checks required by project standards
-- [ ] Run the final grep sweep: confirm zero matches for `storage\.(addMember|updateMemberStatus|listMembersForCampaign|getMember|listInvitationsForUser|getUserById|getUsersByIds)\(` outside `tests/**` and `.verity/.snapshot/**`
+- [x] Run type checks — `tsc --noEmit` clean
+- [x] Run build — `npm run build` succeeds
+- [x] Run security/code quality checks required by project standards — `npm run lint` clean (0 errors; 2 pre-existing warnings in an unrelated file)
+- [x] Run the final grep sweep: confirm zero matches for `storage\.(addMember|updateMemberStatus|listMembersForCampaign|getMember|listInvitationsForUser|getUserById|getUsersByIds)\(` outside `tests/**` and `.verity/.snapshot/**` — zero matches confirmed
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 

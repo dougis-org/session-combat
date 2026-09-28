@@ -3,6 +3,7 @@
  */
 import { POST } from "@/app/api/campaigns/global/[id]/copy/route";
 import { storage } from "@/lib/storage";
+import { addMember } from "@/lib/storage/membershipRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -13,8 +14,11 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage", () => ({
   storage: {
     loadGlobalCampaignTemplateById: jest.fn(),
-    addMember: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  addMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -29,7 +33,10 @@ jest.mock("crypto", () => ({
   randomUUID: jest.fn(() => `uuid-${++uuidCounter}`),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = {
+  loadGlobalCampaignTemplateById: jest.mocked(storage).loadGlobalCampaignTemplateById,
+  addMember: jest.mocked(addMember),
+};
 const mockedCampaignRepo = jest.mocked(campaignRepo);
 
 const TEMPLATE_ID = "tpl-1";

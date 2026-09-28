@@ -3,13 +3,11 @@
  */
 import { NextResponse } from "next/server";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
-import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import { StorageError } from "@/lib/storage/errors";
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -18,8 +16,8 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
 
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
+const mockedStorage = {
+  getMember: jest.mocked(getMember),
 };
 
 const mockedCampaignRepo = jest.mocked(campaignRepo);

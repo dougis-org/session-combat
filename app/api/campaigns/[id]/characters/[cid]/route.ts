@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { getMember } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
 
@@ -8,7 +9,7 @@ type Params = { id: string; cid: string };
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: campaignId, cid: characterId }) => {
   try {
-    const member = await storage.getMember(campaignId, auth.userId);
+    const member = await getMember(campaignId, auth.userId);
     if (!member || member.status !== 'active' || member.role !== 'player') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
