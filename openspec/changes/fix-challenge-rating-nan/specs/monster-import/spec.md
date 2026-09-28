@@ -35,10 +35,12 @@ The system SHALL parse a monster's challenge rating from an Open5E import payloa
 
 ### Requirement: Reliability
 
-#### Scenario: No NaN propagation from import pipeline
+#### Scenario: No NaN propagation from fraction-form challenge ratings
 
-- **Given** any string value for `challenge_rating` in an Open5E import payload, including malformed fraction strings
+- **Given** a fraction-form string value for `challenge_rating` in an Open5E import payload (e.g. `"x/2"`, `"2/x"`, `"1/2"`, `"1/0"`), including malformed fraction strings
 - **When** `transformMonster` computes `MonsterTemplate.challengeRating`
 - **Then** the result is always a finite number (`Number.isFinite(monster.challengeRating)` is `true`), never `NaN`
+
+This scenario covers the `"/"` branch of `parseChallengeRating` only. The non-fraction fallback (`parseFloat(String(rating)) || 0`) is unchanged by this fix and is out of scope; it is not guaranteed finite for all inputs (e.g. `"Infinity"` or `"1e999"` pass through as non-finite values), matching pre-existing behavior.
 
 No distinct Performance, Security, or Access-control criteria apply to this change; see functional scenarios above for the complete behavioral contract.
