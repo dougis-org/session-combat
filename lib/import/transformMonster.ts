@@ -42,7 +42,7 @@ function parseChallengeRating(rating: unknown): number {
   if (typeof rating === "number") return rating;
   if (typeof rating === "string" && rating.includes("/")) {
     const [num, den] = rating.split("/").map(Number);
-    return den > 0 ? num / den : 0;
+    return den > 0 && Number.isFinite(num) ? num / den : 0;
   }
   return parseFloat(String(rating)) || 0;
 }
