@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-09-28-fix-challenge-rating-nan/design.md) document, not a replacement.
 
 ### Requirement: MODIFIED Challenge rating parsing never produces NaN
 
