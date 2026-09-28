@@ -3,6 +3,7 @@
  */
 import { NextRequest } from "next/server";
 import { storage } from "@/lib/storage";
+import * as membershipRepo from "@/lib/storage/membershipRepo";
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 import { StorageError } from "@/lib/storage/errors";
 import { getDatabase } from "@/lib/db";
@@ -215,7 +216,7 @@ describe("Route POST seeding (mocked storage)", () => {
   test("POST campaign — 201 returned and addMember called with correct DM payload", async () => {
     mockAuthState.payload = { userId: "user-123", email: "user@test.com", tokenVersion: 1 };
     const saveCampaignSpy = jest.spyOn(campaignRepo, "saveCampaign").mockResolvedValue(undefined as any);
-    const addMemberSpy = jest.spyOn(storage, "addMember").mockResolvedValue(undefined as any);
+    const addMemberSpy = jest.spyOn(membershipRepo, "addMember").mockResolvedValue(undefined as any);
     const req = makeRouteRequest("http://localhost/api/campaigns", "POST", { name: "New Epic Campaign" });
     const response = await POST(req);
 
@@ -243,7 +244,7 @@ describe("Route POST seeding (mocked storage)", () => {
   test("POST campaign — deleteCampaign called and 500 returned when addMember throws", async () => {
     mockAuthState.payload = { userId: "user-123", email: "user@test.com", tokenVersion: 1 };
     const saveCampaignSpy = jest.spyOn(campaignRepo, "saveCampaign").mockResolvedValue(undefined as any);
-    const addMemberSpy = jest.spyOn(storage, "addMember").mockRejectedValue(new Error("DB failure") as never);
+    const addMemberSpy = jest.spyOn(membershipRepo, "addMember").mockRejectedValue(new Error("DB failure") as never);
     const deleteCampaignSpy = jest.spyOn(campaignRepo, "deleteCampaign").mockResolvedValue(undefined as any);
 
     const req = makeRouteRequest("http://localhost/api/campaigns", "POST", { name: "Failed Seeding Campaign" });

@@ -73,10 +73,8 @@ jest.mock('@/lib/db', () => ({
   getDatabase: jest.fn((...args: unknown[]) => mockGetDatabase(...args)),
 }));
 
-jest.mock('@/lib/storage', () => ({
-  storage: {
-    listMembersForCampaign: (...args: unknown[]) => mockListMembers(...args),
-  },
+jest.mock('@/lib/storage/membershipRepo', () => ({
+  listMembersForCampaign: (...args: unknown[]) => mockListMembers(...args),
 }));
 
 function resetMocks() {

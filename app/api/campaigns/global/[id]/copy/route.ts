@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 import { NextRequest, NextResponse } from 'next/server';
 import { storage } from '@/lib/storage';
+import { addMember } from '@/lib/storage/membershipRepo';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { saveEncounter } from '@/lib/storage/encounterRepo';
 import { withAuthAndParams } from '@/lib/middleware';
@@ -44,7 +45,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
     await campaignRepo.saveCampaign(campaign);
 
     try {
-      await storage.addMember({
+      await addMember({
         id: randomUUID(),
         campaignId: campaign.id,
         userId: auth.userId,

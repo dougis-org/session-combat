@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { POST } from "@/app/api/campaigns/[id]/messages/route";
-import { storage } from "@/lib/storage";
+import { getMember, getUserById, listMembersForCampaign } from "@/lib/storage/membershipRepo";
 import { emitFiltered } from "@/lib/server/transport";
 import {
   MOCK_AUTH,
@@ -15,12 +15,10 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-    getUserById: jest.fn(),
-    listMembersForCampaign: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
+  getUserById: jest.fn(),
+  listMembersForCampaign: jest.fn(),
 }));
 
 let mockedGetDatabase: jest.Mock;
@@ -38,7 +36,11 @@ jest.mock("@/lib/gridfs", () => ({
 
 import { verifyAttachmentCampaign } from "@/lib/gridfs";
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = {
+  getMember: jest.mocked(getMember),
+  getUserById: jest.mocked(getUserById),
+  listMembersForCampaign: jest.mocked(listMembersForCampaign),
+};
 const mockedEmitFiltered = jest.mocked(emitFiltered);
 const mockedVerifyAttachment = jest.mocked(verifyAttachmentCampaign);
 

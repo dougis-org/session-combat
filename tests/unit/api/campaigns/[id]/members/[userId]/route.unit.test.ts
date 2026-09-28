@@ -3,6 +3,7 @@
  */
 import { DELETE } from "@/app/api/campaigns/[id]/members/[userId]/route";
 import { storage } from "@/lib/storage";
+import { getMember, updateMemberStatus } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import {
   MOCK_AUTH,
@@ -18,20 +19,23 @@ jest.mock("@/lib/middleware", () =>
 
 jest.mock("@/lib/storage", () => ({
   storage: {
-    getMember: jest.fn(),
-    updateMemberStatus: jest.fn(),
     listAllSharesForCampaign: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
+  updateMemberStatus: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/partyRepo", () => ({
   setPartyMemberLeftAt: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-  updateMemberStatus: jest.MockedFunction<typeof storage.updateMemberStatus>;
-  listAllSharesForCampaign: jest.MockedFunction<typeof storage.listAllSharesForCampaign>;
+const mockedStorage = {
+  listAllSharesForCampaign: jest.mocked(storage).listAllSharesForCampaign,
+  getMember: jest.mocked(getMember),
+  updateMemberStatus: jest.mocked(updateMemberStatus),
 };
 const mockedPartyRepo = jest.mocked(partyRepo);
 

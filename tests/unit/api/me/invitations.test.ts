@@ -3,17 +3,15 @@
  */
 import { GET } from "@/app/api/me/invitations/route";
 import { requireAuth } from "@/lib/middleware";
-import { storage } from "@/lib/storage";
+import { listInvitationsForUser, getUsersByIds } from "@/lib/storage/membershipRepo";
 import { MOCK_AUTH, makeRouteRequest } from "@/tests/unit/helpers/route.test.helpers";
 import { CampaignMember } from "@/lib/types";
 
 jest.mock("@/lib/middleware");
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    listInvitationsForUser: jest.fn(),
-    getUsersByIds: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  listInvitationsForUser: jest.fn(),
+  getUsersByIds: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -23,9 +21,9 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 const mockedRequireAuth = jest.mocked(requireAuth);
-const mockedStorage = jest.mocked(storage) as {
-  listInvitationsForUser: jest.MockedFunction<typeof storage.listInvitationsForUser>;
-  getUsersByIds: jest.MockedFunction<typeof storage.getUsersByIds>;
+const mockedStorage = {
+  listInvitationsForUser: jest.mocked(listInvitationsForUser),
+  getUsersByIds: jest.mocked(getUsersByIds),
 };
 
 const mockedCampaignRepo = jest.mocked(campaignRepo);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { getMember, getUserById, listMembersForCampaign } from '@/lib/storage/membershipRepo';
 import { emitFiltered } from '@/lib/server/transport';
 import { canSeeRoll } from '@/lib/utils/campaignRolls';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
@@ -29,7 +30,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
     const { formula, rolls, total, label, visibility } = parsed.data;
 
-    const caller = await storage.getMember(campaignId, auth.userId);
+    const caller = await getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -42,7 +43,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       return NextResponse.json({ error: 'No active session' }, { status: 409 });
     }
 
-    const user = await storage.getUserById(auth.userId);
+    const user = await getUserById(auth.userId);
     const rollerName = user?.username ?? 'Unknown';
 
     const roll: CampaignRoll = {
@@ -61,7 +62,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 
     await storage.saveCampaignRoll(roll);
 
-    const activeMembers = await storage.listMembersForCampaign(campaignId);
+    const activeMembers = await listMembersForCampaign(campaignId);
     const activeMembersFiltered = activeMembers.filter((m) => m.status === 'active');
 
     emitFiltered(
@@ -95,7 +96,7 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
     }
     const { sessionId, limit, before } = parsedQuery.data;
 
-    const caller = await storage.getMember(campaignId, auth.userId);
+    const caller = await getMember(campaignId, auth.userId);
     if (!caller || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

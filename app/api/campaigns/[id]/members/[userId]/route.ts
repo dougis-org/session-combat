@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import { storage } from '@/lib/storage';
+import { getMember, updateMemberStatus } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 
 type Params = { id: string; userId: string };
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: campaignId, userId: targetUserId }) => {
   try {
-    const caller = await storage.getMember(campaignId, auth.userId);
+    const caller = await getMember(campaignId, auth.userId);
     if (!caller || caller.role !== 'dm' || caller.status !== 'active') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -16,12 +17,12 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
       return NextResponse.json({ error: 'Cannot remove yourself' }, { status: 400 });
     }
 
-    const target = await storage.getMember(campaignId, targetUserId);
+    const target = await getMember(campaignId, targetUserId);
     if (!target || (target.status !== 'active' && target.status !== 'invited')) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    await storage.updateMemberStatus(campaignId, targetUserId, 'removed', auth.userId);
+    await updateMemberStatus(campaignId, targetUserId, 'removed', auth.userId);
 
     void (async () => {
       try {

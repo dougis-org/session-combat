@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { storage } from "@/lib/storage";
+import * as membershipRepo from "@/lib/storage/membershipRepo";
 import { DuplicateShareError } from "@/lib/errors";
 import { CampaignCharacterShare } from "@/lib/types";
 
@@ -405,7 +406,7 @@ describe("storage.canAddToCampaignParty", () => {
       campaignId: "camp-1", characterId: "char-1", userId: "player-1"
     });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
-    jest.spyOn(storage, "getMember").mockResolvedValue({ status: "active" } as any);
+    jest.spyOn(membershipRepo, "getMember").mockResolvedValue({ status: "active" } as any);
 
     const result = await storage.canAddToCampaignParty("camp-1", "char-1", "dm-user");
 
@@ -420,7 +421,7 @@ describe("storage.canAddToCampaignParty", () => {
       campaignId: "camp-1", characterId: "char-1", userId: "player-1"
     });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
-    jest.spyOn(storage, "getMember").mockResolvedValue({ status: "invited" } as any);
+    jest.spyOn(membershipRepo, "getMember").mockResolvedValue({ status: "invited" } as any);
 
     const result = await storage.canAddToCampaignParty("camp-1", "char-1", "dm-user");
 
@@ -447,7 +448,7 @@ describe("storage.canAddToCampaignParty", () => {
       campaignId: "camp-1", characterId: "char-1", userId: "player-1"
     });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne });
-    jest.spyOn(storage, "getMember").mockResolvedValue({ status: "removed" } as any);
+    jest.spyOn(membershipRepo, "getMember").mockResolvedValue({ status: "removed" } as any);
 
     const result = await storage.canAddToCampaignParty("camp-1", "char-1", "dm-user");
 

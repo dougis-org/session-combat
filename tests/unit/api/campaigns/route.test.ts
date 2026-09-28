@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GET, POST } from "@/app/api/campaigns/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/campaigns/[id]/route";
-import { storage } from "@/lib/storage";
+import { addMember } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 import {
@@ -19,10 +19,8 @@ import {
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    addMember: jest.fn().mockResolvedValue(undefined),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  addMember: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("@/lib/storage/partyRepo", () => ({
@@ -44,7 +42,7 @@ jest.mock("@/lib/utils/campaign", () => ({
 }));
 
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = { addMember: jest.mocked(addMember) };
 const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCampaignRepo = jest.mocked(campaignRepo);
 

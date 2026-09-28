@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { getMember, updateMemberStatus } from '@/lib/storage/membershipRepo';
 
 export const GET = withAuthAndParams<{ id: string }>(async (_request, auth, { id: campaignId }) => {
   try {
-    const member = await storage.getMember(campaignId, auth.userId);
+    const member = await getMember(campaignId, auth.userId);
     if (!member) {
       return NextResponse.json({ error: 'Not a member' }, { status: 404 });
     }
@@ -31,7 +31,7 @@ export const PATCH = withAuthAndParams<Params>(async (request: NextRequest, auth
   }
 
   try {
-    const member = await storage.getMember(campaignId, auth.userId);
+    const member = await getMember(campaignId, auth.userId);
     if (!member || member.status === 'removed') {
       return NextResponse.json({ error: 'No invitation found' }, { status: 404 });
     }
@@ -41,14 +41,14 @@ export const PATCH = withAuthAndParams<Params>(async (request: NextRequest, auth
     if (action === 'accept') {
       if (status === 'active') return NextResponse.json({ status: 'active' }, { status: 200 });
       if (status === 'declined') return NextResponse.json({ error: 'You have already declined this invitation' }, { status: 409 });
-      await storage.updateMemberStatus(campaignId, auth.userId, 'active', auth.userId);
+      await updateMemberStatus(campaignId, auth.userId, 'active', auth.userId);
       return NextResponse.json({ status: 'active' }, { status: 200 });
     }
 
     // action === 'decline'
     if (status === 'declined') return NextResponse.json({ status: 'declined' }, { status: 200 });
     if (status === 'active') return NextResponse.json({ error: 'You have already accepted this invitation' }, { status: 409 });
-    await storage.updateMemberStatus(campaignId, auth.userId, 'declined', auth.userId);
+    await updateMemberStatus(campaignId, auth.userId, 'declined', auth.userId);
     return NextResponse.json({ status: 'declined' }, { status: 200 });
   } catch (error) {
     console.error('Error responding to invitation:', error);

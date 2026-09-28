@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET } from "@/app/api/campaigns/[id]/members/me/route";
-import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import { CampaignMember } from "@/lib/types";
 import {
   MOCK_AUTH,
@@ -15,15 +15,11 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-};
+const mockedStorage = { getMember: jest.mocked(getMember) };
 
 const CAMPAIGN_ID = "camp-1";
 const PARAMS = Promise.resolve({ id: CAMPAIGN_ID });

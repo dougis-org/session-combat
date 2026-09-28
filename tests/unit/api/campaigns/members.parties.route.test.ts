@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { PUT } from "@/app/api/campaigns/[id]/members/[userId]/parties/[partyId]/route";
-import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import * as characterRepo from "@/lib/storage/characterRepo";
 import {
@@ -13,10 +13,8 @@ import {
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/partyRepo", () => ({
@@ -28,7 +26,7 @@ jest.mock("@/lib/storage/characterRepo", () => ({
   loadCharacters: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = { getMember: jest.mocked(getMember) };
 const mockedPartyRepo = jest.mocked(partyRepo);
 const mockedCharacterRepo = jest.mocked(characterRepo);
 

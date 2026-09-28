@@ -3,6 +3,7 @@ import { runStorageOp } from "@/lib/storage/runOp";
 import { Party, PartyMember, SharedCharacterEntry, CampaignCharacterShare } from "@/lib/types";
 import { buildEntityQuery, normalizeStoredEntityId } from "@/lib/storage/helpers";
 import { loadCharacterById } from "./characterRepo";
+import { getMember } from "./membershipRepo";
 import { storage } from "@/lib/storage";
 import { Filter } from "mongodb";
 
@@ -158,7 +159,7 @@ export async function canAddToCampaignParty(campaignId: string, characterId: str
         .findOne({ campaignId, characterId });
       if (!share) return false;
 
-      const member = await storage.getMember(campaignId, share.userId);
+      const member = await getMember(campaignId, share.userId);
       return member?.status === 'active';
     }
   );
@@ -223,7 +224,7 @@ export async function buildSharedCharacterEntries(campaignId: string): Promise<S
       const results = await Promise.all(
         shares.map(async (share) => {
           const [member, character] = await Promise.all([
-            storage.getMember(campaignId, share.userId),
+            getMember(campaignId, share.userId),
             loadCharacterById(share.characterId),
           ]);
           if (!member || member.status !== 'active') return null;

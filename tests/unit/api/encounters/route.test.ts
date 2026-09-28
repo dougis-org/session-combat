@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/encounters/route";
-import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -12,10 +12,8 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -31,7 +29,7 @@ jest.mock("@/lib/storage/encounterRepo", () => ({
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 import * as encounterRepo from "@/lib/storage/encounterRepo";
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = { getMember: jest.mocked(getMember) };
 const mockedCampaignRepo = jest.mocked(campaignRepo);
 const mockedEncounterRepo = jest.mocked(encounterRepo);
 

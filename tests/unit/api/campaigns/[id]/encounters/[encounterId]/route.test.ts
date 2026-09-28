@@ -3,6 +3,7 @@
  */
 import { DELETE } from "@/app/api/campaigns/[id]/encounters/[encounterId]/route";
 import { storage } from "@/lib/storage";
+import { getMember } from "@/lib/storage/membershipRepo";
 import { Campaign, CampaignMember } from "@/lib/types";
 import {
   MOCK_AUTH,
@@ -17,9 +18,12 @@ jest.mock("@/lib/middleware", () =>
 
 jest.mock("@/lib/storage", () => ({
   storage: {
-    getMember: jest.fn(),
     removeEncounterFromCampaign: jest.fn(),
   },
+}));
+
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/campaignRepo", () => ({
@@ -28,9 +32,9 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
 
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-  removeEncounterFromCampaign: jest.MockedFunction<typeof storage.removeEncounterFromCampaign>;
+const mockedStorage = {
+  removeEncounterFromCampaign: jest.mocked(storage).removeEncounterFromCampaign,
+  getMember: jest.mocked(getMember),
 };
 
 const mockedCampaignRepo = jest.mocked(campaignRepo);

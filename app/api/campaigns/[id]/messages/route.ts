@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import { getMember, getUserById, listMembersForCampaign } from '@/lib/storage/membershipRepo';
 import { getDatabase } from '@/lib/db';
 import { verifyAttachmentCampaign } from '@/lib/gridfs';
 import { emitFiltered } from '@/lib/server/transport';
@@ -62,7 +62,7 @@ function parseVisibility(visibility: unknown): { error: NextResponse } | { msgVi
   return { msgVisibility };
 }
 
-type CallerRecord = Awaited<ReturnType<typeof storage.getMember>>;
+type CallerRecord = Awaited<ReturnType<typeof getMember>>;
 
 function checkCallerAccess(caller: CallerRecord, isScene: boolean): NextResponse | null {
   if (!caller || caller.status !== 'active') {
@@ -96,7 +96,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   const { text, visibility, kind, attachmentId } = body as Record<string, unknown>;
   const isScene = kind === 'scene';
 
-  const caller = await storage.getMember(campaignId, auth.userId);
+  const caller = await getMember(campaignId, auth.userId);
   const accessError = checkCallerAccess(caller, isScene);
   if (accessError) return accessError;
 
@@ -106,7 +106,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   const visResult = parseVisibility(visibility);
   if ('error' in visResult) return visResult.error;
 
-  const user = await storage.getUserById(auth.userId);
+  const user = await getUserById(auth.userId);
   const senderName = user?.username ?? 'Unknown';
 
   const message: CampaignMessage = {
@@ -134,7 +134,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
   void _ignored;
   await db.collection('campaignMessages').insertOne(messageDoc);
 
-  const activeMembers = await storage.listMembersForCampaign(campaignId);
+  const activeMembers = await listMembersForCampaign(campaignId);
   const activeMembersFiltered = activeMembers.filter(m => m.status === 'active');
 
   emitFiltered(
@@ -147,7 +147,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
 });
 
 export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaignId }) => {
-  const caller = await storage.getMember(campaignId, auth.userId);
+  const caller = await getMember(campaignId, auth.userId);
   if (!caller || caller.status !== 'active') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }

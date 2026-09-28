@@ -3,23 +3,21 @@
  */
 import { PATCH } from "@/app/api/campaigns/[id]/members/me/route";
 import { requireAuth } from "@/lib/middleware";
-import { storage } from "@/lib/storage";
+import { getMember, updateMemberStatus } from "@/lib/storage/membershipRepo";
 import { MOCK_AUTH, makeRouteRequest } from "@/tests/unit/helpers/route.test.helpers";
 import { CampaignMember } from "@/lib/types";
 
 jest.mock("@/lib/middleware");
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getMember: jest.fn(),
-    updateMemberStatus: jest.fn(),
-  },
+jest.mock("@/lib/storage/membershipRepo", () => ({
+  getMember: jest.fn(),
+  updateMemberStatus: jest.fn(),
 }));
 
 const mockedRequireAuth = jest.mocked(requireAuth);
-const mockedStorage = jest.mocked(storage) as {
-  getMember: jest.MockedFunction<typeof storage.getMember>;
-  updateMemberStatus: jest.MockedFunction<typeof storage.updateMemberStatus>;
+const mockedStorage = {
+  getMember: jest.mocked(getMember),
+  updateMemberStatus: jest.mocked(updateMemberStatus),
 };
 
 const CAMPAIGN_ID = "camp-1";
