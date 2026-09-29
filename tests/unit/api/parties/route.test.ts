@@ -7,6 +7,7 @@ import { PartyCampaignAuthorizationError } from "@/lib/storage/errors";
 import {
   MOCK_AUTH,
   makeRouteRequest,
+  makeMalformedJsonRequest,
   itReturns401,
   itReturns500,
   mockAuthState,
@@ -58,10 +59,19 @@ describe("GET /api/parties", () => {
 describe("POST /api/parties", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (mockedPartyRepo as any).isActiveDm.mockResolvedValue(true);
+    mockedPartyRepo.isActiveDm.mockResolvedValue(true);
   });
 
   itReturns401(POST, () => makeRequest({ name: "Crew" }));
+
+  it("returns 400 (not 500) when the request body is malformed JSON", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeMalformedJsonRequest("http://localhost/api/parties", "POST"));
+
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
 
   it("returns 400 when name is missing", async () => {
     mockAuthState.payload = MOCK_AUTH;
@@ -113,7 +123,7 @@ describe("POST /api/parties", () => {
 
   it("B2-1: returns 403 when campaignId set and character not shared", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(false);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(false);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -127,21 +137,21 @@ describe("POST /api/parties", () => {
 
   it("B2-1b: returns 403 before checking sharing when caller is not an active DM of the campaign", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).isActiveDm.mockResolvedValue(false);
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.isActiveDm.mockResolvedValue(false);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
 
     const response = await POST(
       makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-1"] })
     );
 
     expect(response.status).toBe(403);
-    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect(mockedPartyRepo.canAddToCampaignParty).not.toHaveBeenCalled();
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 
   it("B2-2: returns 201 when campaignId set and shared character allowed", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -158,7 +168,7 @@ describe("POST /api/parties", () => {
     const response = await POST(makeRequest({ name: "No Campaign", characterIds: ["char-1"] }));
 
     expect(response.status).toBe(201);
-    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect(mockedPartyRepo.canAddToCampaignParty).not.toHaveBeenCalled();
   });
 
   it("returns 400 when characterIds is not an array", async () => {
@@ -180,6 +190,24 @@ describe("POST /api/parties", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.error).toContain("characterIds");
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when a characterIds element is an empty string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: ["char-1", ""] }));
+
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when a characterIds element exceeds the entity-id length limit", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: ["x".repeat(201)] }));
+
+    expect(response.status).toBe(400);
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 
@@ -227,7 +255,7 @@ describe("POST /api/parties", () => {
 
   it("returns 403 and rolls back when addPartyToCampaign rejects with PartyCampaignAuthorizationError", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
     mockedPartyRepo.addPartyToCampaign.mockRejectedValueOnce(
       new PartyCampaignAuthorizationError("camp-1", "user-123")
@@ -244,7 +272,7 @@ describe("POST /api/parties", () => {
 
   it("still surfaces the original authorization error (not the cleanup failure) when the orphaned-party rollback delete fails", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
     mockedPartyRepo.addPartyToCampaign.mockRejectedValueOnce(
       new PartyCampaignAuthorizationError("camp-1", "user-123")

@@ -195,6 +195,44 @@ export function validateEntityId(
   return validateString(value, fieldName, { required: true, minLength: 1, maxLength: 200 });
 }
 
+/**
+ * Same bounds as validateEntityId, applied to every element of an array —
+ * for request fields like characterIds that are lists of foreign-entity ids
+ * flowing straight into repository lookups/filters.
+ */
+export function validateEntityIdArray(
+  value: unknown,
+  fieldName: string = 'array'
+): { valid: true; value: string[] } | { valid: false; error: ValidationError } {
+  if (value === undefined || value === null) {
+    return { valid: true, value: [] };
+  }
+
+  if (!Array.isArray(value)) {
+    return {
+      valid: false,
+      error: {
+        field: fieldName,
+        message: `${fieldName} must be an array of strings`,
+      },
+    };
+  }
+
+  const result: string[] = [];
+  for (let i = 0; i < value.length; i++) {
+    const idResult = validateEntityId(value[i], `${fieldName}[${i}]`);
+    if (!idResult.valid) {
+      return {
+        valid: false,
+        error: { field: fieldName, index: i, message: idResult.error.message },
+      };
+    }
+    result.push(idResult.value);
+  }
+
+  return { valid: true, value: result };
+}
+
 export type CampaignIdInput =
   | { kind: 'omit' }
   | { kind: 'invalid' }

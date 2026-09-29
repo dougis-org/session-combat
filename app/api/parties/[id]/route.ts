@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
-import { validateStringArray, validateEntityId, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
+import { validateEntityIdArray, validateEntityId, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
 import { PartyCampaignAuthorizationError } from '@/lib/storage/errors';
 
 type Params = { id: string };
@@ -15,57 +15,51 @@ function validatePartyIdParam(id: string): { ok: true; value: string } | { ok: f
   return { ok: true, value: result.value };
 }
 
-type MemberReconciliationResult =
-  | { ok: true; members: PartyMember[] }
-  | { ok: false; status: number; error: string };
+type CampaignAuthResult = { ok: true } | { ok: false; status: number; error: string };
 
-async function reconcileMembers(
-  existingParty: Party,
-  validatedIds: string[] | undefined,
-  campaignIdInput: CampaignIdInput,
-  userId: string,
-  now: Date,
-  currentCampaignId: string | undefined
-): Promise<MemberReconciliationResult> {
-  const existingActiveIds = new Set<string>(
-    existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
-  );
-  // When characterIds is omitted, membership itself is unchanged, but a
-  // campaign move still needs every currently-active character re-checked
-  // against the new campaign's sharing rules.
-  const newIdSet = validatedIds !== undefined ? new Set<string>(validatedIds) : existingActiveIds;
-
-  // currentCampaignId is resolved live (via campaigns.partyIds), never read
-  // off the deprecated party.campaignId field directly — that field is
-  // deleted on every successful reassignment, so trusting it here would
-  // silently skip the sharing re-check for any already-migrated party.
-  const effectiveCampaignId = campaignIdInput.kind === 'set'
-    ? campaignIdInput.value
-    : currentCampaignId;
-  const campaignChanged = effectiveCampaignId !== currentCampaignId;
-
-  if (effectiveCampaignId) {
-    // Authorize the campaign the sharing check is about to run against —
-    // whether it's a brand-new target or the party's currently-linked
-    // campaign — before running that check. Otherwise a caller with no
-    // authority over the campaign could learn whether a given character is
-    // shared into it purely from the sharing check's own 403.
-    const authorized = await partyRepo.isActiveDm(effectiveCampaignId, userId);
-    if (!authorized) {
-      return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
-    }
-
-    const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
-    const checks = await Promise.all(
-      charsToCheck.map(charId => partyRepo.canAddToCampaignParty(effectiveCampaignId, charId, userId))
-    );
-    if (checks.some(allowed => !allowed)) {
-      return { ok: false, status: 403, error: 'Character not shared into campaign' };
-    }
+/**
+ * Authorizes the campaign a PUT's character-sharing check is about to run
+ * against — whether it's a brand-new target or the party's currently-linked
+ * campaign — before running that check. Otherwise a caller with no
+ * authority over the campaign could learn whether a given character is
+ * shared into it purely from the sharing check's own 403.
+ */
+async function authorizeCampaignSharing(
+  effectiveCampaignId: string | undefined,
+  campaignChanged: boolean,
+  newIdSet: Set<string>,
+  existingActiveIds: Set<string>,
+  userId: string
+): Promise<CampaignAuthResult> {
+  if (!effectiveCampaignId) {
+    return { ok: true };
   }
 
+  const authorized = await partyRepo.isActiveDm(effectiveCampaignId, userId);
+  if (!authorized) {
+    return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
+  }
+
+  const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
+  const checks = await Promise.all(
+    charsToCheck.map(charId => partyRepo.canAddToCampaignParty(effectiveCampaignId, charId, userId))
+  );
+  if (checks.some(allowed => !allowed)) {
+    return { ok: false, status: 403, error: 'Character not shared into campaign' };
+  }
+  return { ok: true };
+}
+
+/** Pure add/remove reconciliation of party membership — no authorization. */
+function reconcileMembers(
+  existingParty: Party,
+  validatedIds: string[] | undefined,
+  newIdSet: Set<string>,
+  existingActiveIds: Set<string>,
+  now: Date
+): PartyMember[] {
   if (validatedIds === undefined) {
-    return { ok: true, members: existingParty.members };
+    return existingParty.members;
   }
 
   const updatedMembers = existingParty.members.map(m => {
@@ -79,8 +73,7 @@ async function reconcileMembers(
       updatedMembers.push({ characterId: charId, addedAt: now });
     }
   }
-
-  return { ok: true, members: updatedMembers };
+  return updatedMembers;
 }
 
 type PutBodyValidation =
@@ -114,7 +107,7 @@ function validatePutBody(body: Record<string, unknown>): PutBodyValidation {
     if (!Array.isArray(characterIds)) {
       return { ok: false, status: 400, error: 'characterIds must be an array of strings' };
     }
-    const idsResult = validateStringArray(characterIds, 'characterIds');
+    const idsResult = validateEntityIdArray(characterIds, 'characterIds');
     if (!idsResult.valid) {
       return { ok: false, status: 400, error: idsResult.error.message };
     }
@@ -199,7 +192,12 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       return NextResponse.json({ error: idValidation.error }, { status: idValidation.status });
     }
 
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Request body must be valid JSON' }, { status: 400 });
+    }
     if (typeof body !== 'object' || body === null || Array.isArray(body)) {
       return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
     }
@@ -220,16 +218,30 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
     const now = new Date();
     const currentCampaignId = await partyRepo.getCurrentCampaignId(existingParty.id, existingParty.campaignId);
 
-    const reconciliation = await reconcileMembers(existingParty, validatedIds, campaignIdInput, auth.userId, now, currentCampaignId);
-    if (!reconciliation.ok) {
-      return NextResponse.json({ error: reconciliation.error }, { status: reconciliation.status });
+    const existingActiveIds = new Set<string>(
+      existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
+    );
+    // When characterIds is omitted, membership itself is unchanged, but a
+    // campaign move still needs every currently-active character re-checked
+    // against the new campaign's sharing rules.
+    const newIdSet = validatedIds !== undefined ? new Set<string>(validatedIds) : existingActiveIds;
+    // currentCampaignId is resolved live (via campaigns.partyIds), never read
+    // off the deprecated party.campaignId field directly — that field is
+    // deleted on every successful reassignment, so trusting it here would
+    // silently skip the sharing re-check for any already-migrated party.
+    const effectiveCampaignId = campaignIdInput.kind === 'set' ? campaignIdInput.value : currentCampaignId;
+    const campaignChanged = effectiveCampaignId !== currentCampaignId;
+
+    const authResult = await authorizeCampaignSharing(effectiveCampaignId, campaignChanged, newIdSet, existingActiveIds, auth.userId);
+    if (!authResult.ok) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
     const updatedParty: Party = {
       ...existingParty,
       name: name !== undefined ? name.trim() : existingParty.name,
       description: description !== undefined ? description.trim() : (existingParty.description || ''),
-      members: reconciliation.members,
+      members: reconcileMembers(existingParty, validatedIds, newIdSet, existingActiveIds, now),
       updatedAt: now,
     };
 

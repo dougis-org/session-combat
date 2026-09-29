@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
-import { validateStringArray, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
+import { validateEntityIdArray, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
 import { PartyCampaignAuthorizationError } from '@/lib/storage/errors';
 
 type PostBodyValidation =
@@ -19,7 +19,7 @@ function validatePostBody(body: Record<string, unknown>): PostBodyValidation {
     return { ok: false, status: 400, error: 'description must be a string' };
   }
 
-  const idsResult = validateStringArray(characterIds, 'characterIds');
+  const idsResult = validateEntityIdArray(characterIds, 'characterIds');
   if (!idsResult.valid) {
     return { ok: false, status: 400, error: idsResult.error.message };
   }
@@ -94,7 +94,12 @@ export const GET = withAuth(async (_request, auth) => {
 
 export const POST = withAuth(async (request, auth) => {
   try {
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Request body must be valid JSON' }, { status: 400 });
+    }
     if (typeof body !== 'object' || body === null || Array.isArray(body)) {
       return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
     }

@@ -6,6 +6,7 @@ import {
   validateStringRecord,
   validateNumberRecord,
   validateEntityId,
+  validateEntityIdArray,
   parseCampaignIdInput,
 } from '@/lib/validation/core';
 
@@ -190,6 +191,46 @@ describe('validateEntityId', () => {
   it('returns invalid for a non-string value', () => {
     const result = validateEntityId(42);
     expect(result.valid).toBe(false);
+  });
+});
+
+describe('validateEntityIdArray', () => {
+  it('returns empty array for undefined', () => {
+    expect(validateEntityIdArray(undefined, 'characterIds')).toEqual({ valid: true, value: [] });
+  });
+
+  it('returns empty array for null', () => {
+    expect(validateEntityIdArray(null, 'characterIds')).toEqual({ valid: true, value: [] });
+  });
+
+  it('returns valid for an array of normal id strings', () => {
+    expect(validateEntityIdArray(['char-1', 'char-2'], 'characterIds')).toEqual({
+      valid: true,
+      value: ['char-1', 'char-2'],
+    });
+  });
+
+  it('returns invalid for a non-array', () => {
+    const result = validateEntityIdArray('char-1', 'characterIds');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid with index when an element is not a string', () => {
+    const result = validateEntityIdArray(['char-1', 42], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
+  });
+
+  it('returns invalid with index when an element is an empty string', () => {
+    const result = validateEntityIdArray(['char-1', ''], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
+  });
+
+  it('returns invalid when an element exceeds 200 characters', () => {
+    const result = validateEntityIdArray(['char-1', 'x'.repeat(201)], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
   });
 });
 

@@ -84,6 +84,22 @@ export function makeRouteRequest(
   });
 }
 
+/**
+ * Build a NextRequest carrying a body that is NOT valid JSON, for testing
+ * that a route's `request.json()` parse failure is handled as a 400 rather
+ * than propagating into the route's generic catch block as a 500.
+ */
+export function makeMalformedJsonRequest(url: string, method: string): NextRequest {
+  return new NextRequest(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      cookie: "auth-token=t",
+    },
+    body: "{not valid json",
+  });
+}
+
 // ─── Shared session log fixture ──────────────────────────────────────────────
 
 export const MOCK_SESSION_LOG = {
