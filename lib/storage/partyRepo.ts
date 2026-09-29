@@ -272,17 +272,21 @@ async function findLinkedCampaignIds(partyId: string, legacyCampaignId: string |
 }
 
 /**
- * Resolves the campaign a party is actually linked to right now, live —
+ * Resolves every campaign a party is actually linked to right now, live —
  * never trust the deprecated Party.campaignId field directly, since it is
  * deleted on every successful reassignment once a party has migrated to
- * campaign.partyIds. Callers that need "what campaign is this party in
+ * campaign.partyIds. Callers that need "what campaign(s) is this party in
  * today" (e.g. to decide whether a campaign move is happening, or which
  * campaign's sharing rules apply) must use this instead of reading
  * party.campaignId off a loaded Party.
+ *
+ * Returns an array, not a single id: although a party is normally linked to
+ * at most one campaign, nothing prevents more than one from referencing the
+ * same partyId (e.g. a not-yet-cleaned-up stray link), and callers must
+ * authorize/validate against every one of them, not just the first.
  */
-export async function getCurrentCampaignId(partyId: string, legacyCampaignId: string | undefined): Promise<string | undefined> {
-  const linked = await findLinkedCampaignIds(partyId, legacyCampaignId);
-  return linked[0];
+export async function getLinkedCampaignIds(partyId: string, legacyCampaignId: string | undefined): Promise<string[]> {
+  return findLinkedCampaignIds(partyId, legacyCampaignId);
 }
 
 export async function reassignPartyCampaign(

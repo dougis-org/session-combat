@@ -16,7 +16,7 @@ jest.mock("@/lib/storage/partyRepo", () => ({
   deleteParty: jest.fn(),
   canAddToCampaignParty: jest.fn(),
   reassignPartyCampaign: jest.fn(),
-  getCurrentCampaignId: jest.fn(),
+  getLinkedCampaignIds: jest.fn(),
   isActiveDm: jest.fn(),
 }));
 
@@ -42,8 +42,8 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
     // Default: the live-resolved current campaign matches whatever legacy
     // campaignId hint is on the loaded party, preserving pre-migration
     // semantics for tests that don't care about the live/legacy distinction.
-    mockedPartyRepo.getCurrentCampaignId.mockImplementation(
-      async (_partyId: string, legacyCampaignId?: string) => legacyCampaignId
+    mockedPartyRepo.getLinkedCampaignIds.mockImplementation(
+      async (_partyId: string, legacyCampaignId?: string) => (legacyCampaignId ? [legacyCampaignId] : [])
     );
     mockedPartyRepo.isActiveDm.mockResolvedValue(true);
   });
@@ -152,7 +152,7 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
     // the deprecated campaignId field on the party document is gone, but
     // the party is still live-linked to a campaign.
     mockedPartyRepo.loadParties.mockResolvedValue([{ ...EXISTING_PARTY, campaignId: undefined }] as any);
-    mockedPartyRepo.getCurrentCampaignId.mockResolvedValue("camp-1");
+    mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue(["camp-1"]);
     mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(false);
 
     const response = await PUT(
@@ -184,7 +184,7 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
   });
 
   it("B4-5: rolls back the campaign reassignment if saveParty fails afterward", async () => {
-    mockedPartyRepo.getCurrentCampaignId.mockResolvedValue(undefined);
+    mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue([]);
     mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.reassignPartyCampaign.mockResolvedValueOnce(undefined as any);
     mockedPartyRepo.saveParty.mockRejectedValueOnce(new Error("db write failed"));
@@ -206,5 +206,44 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
       "camp-2",
       "user-123"
     );
+  });
+
+  it("B5-1: when a party is stray-linked to more than one campaign, requires DM authorization for every linked campaign, not just the first", async () => {
+    mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue(["camp-1", "camp-2"]);
+    mockedPartyRepo.isActiveDm.mockImplementation(async (campaignId: string) => campaignId === "camp-1");
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-1", "char-new"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.isActiveDm).toHaveBeenCalledWith("camp-2", "user-123");
+    expect(mockedPartyRepo.reassignPartyCampaign).not.toHaveBeenCalled();
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("B5-2: when stray-linked to more than one campaign and authorized for both, requires the new character to be shared into every linked campaign", async () => {
+    mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue(["camp-1", "camp-2"]);
+    mockedPartyRepo.isActiveDm.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockImplementation(
+      async (campaignId: string, charId: string) => !(campaignId === "camp-2" && charId === "char-new")
+    );
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: ["char-1", "char-new"],
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.canAddToCampaignParty).toHaveBeenCalledWith("camp-1", "char-new", "user-123");
+    expect(mockedPartyRepo.canAddToCampaignParty).toHaveBeenCalledWith("camp-2", "char-new", "user-123");
   });
 });

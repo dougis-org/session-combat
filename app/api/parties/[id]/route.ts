@@ -18,36 +18,91 @@ function validatePartyIdParam(id: string): { ok: true; value: string } | { ok: f
 type CampaignAuthResult = { ok: true } | { ok: false; status: number; error: string };
 
 /**
- * Authorizes the campaign a PUT's character-sharing check is about to run
+ * Authorizes every campaign a PUT's character-sharing check is about to run
  * against — whether it's a brand-new target or the party's currently-linked
- * campaign — before running that check. Otherwise a caller with no
- * authority over the campaign could learn whether a given character is
- * shared into it purely from the sharing check's own 403.
+ * campaign(s) — before running that check. Otherwise a caller with no
+ * authority over a campaign could learn whether a given character is shared
+ * into it purely from the sharing check's own 403.
+ *
+ * Takes an array, not a single id: a party is normally linked to at most one
+ * campaign, but nothing at the data level guarantees that, so every campaign
+ * a party is actually linked to must be authorized and sharing-checked, not
+ * just the first one found.
  */
 async function authorizeCampaignSharing(
-  effectiveCampaignId: string | undefined,
+  effectiveCampaignIds: string[],
   campaignChanged: boolean,
   newIdSet: Set<string>,
   existingActiveIds: Set<string>,
   userId: string
 ): Promise<CampaignAuthResult> {
-  if (!effectiveCampaignId) {
+  if (effectiveCampaignIds.length === 0) {
     return { ok: true };
   }
 
-  const authorized = await partyRepo.isActiveDm(effectiveCampaignId, userId);
-  if (!authorized) {
-    return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
+  for (const campaignId of effectiveCampaignIds) {
+    const authorized = await partyRepo.isActiveDm(campaignId, userId);
+    if (!authorized) {
+      return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
+    }
   }
 
   const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
-  const checks = await Promise.all(
-    charsToCheck.map(charId => partyRepo.canAddToCampaignParty(effectiveCampaignId, charId, userId))
-  );
-  if (checks.some(allowed => !allowed)) {
-    return { ok: false, status: 403, error: 'Character not shared into campaign' };
+  for (const campaignId of effectiveCampaignIds) {
+    const checks = await Promise.all(
+      charsToCheck.map(charId => partyRepo.canAddToCampaignParty(campaignId, charId, userId))
+    );
+    if (checks.some(allowed => !allowed)) {
+      return { ok: false, status: 403, error: 'Character not shared into campaign' };
+    }
   }
   return { ok: true };
+}
+
+type CampaignAuthContext =
+  | { ok: true; newIdSet: Set<string>; existingActiveIds: Set<string>; linkedCampaignIds: string[] }
+  | { ok: false; status: number; error: string };
+
+/**
+ * Resolves the party's live campaign linkage, works out which campaign(s)
+ * this PUT's character set must be authorized/sharing-checked against, and
+ * runs that check. Kept out of the PUT handler so the handler itself is
+ * just request parsing and response mapping.
+ */
+async function authorizeCampaignTransition(
+  existingParty: Party,
+  validatedIds: string[] | undefined,
+  campaignIdInput: CampaignIdInput,
+  userId: string
+): Promise<CampaignAuthContext> {
+  const linkedCampaignIds = await partyRepo.getLinkedCampaignIds(existingParty.id, existingParty.campaignId);
+
+  const existingActiveIds = new Set<string>(
+    existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
+  );
+  // When characterIds is omitted, membership itself is unchanged, but a
+  // campaign move still needs every currently-active character re-checked
+  // against the new campaign's sharing rules.
+  const newIdSet = validatedIds !== undefined ? new Set<string>(validatedIds) : existingActiveIds;
+
+  let effectiveCampaignIds: string[];
+  let campaignChanged: boolean;
+  if (campaignIdInput.kind === 'set') {
+    effectiveCampaignIds = campaignIdInput.value ? [campaignIdInput.value] : [];
+    campaignChanged = linkedCampaignIds.length !== 1 || linkedCampaignIds[0] !== campaignIdInput.value;
+  } else {
+    // Unchanged — but re-validate against every campaign this party is
+    // actually (possibly more than one) linked to right now, not just the
+    // first, since campaign.campaignId is only ever a single-value hint.
+    effectiveCampaignIds = linkedCampaignIds;
+    campaignChanged = false;
+  }
+
+  const authResult = await authorizeCampaignSharing(effectiveCampaignIds, campaignChanged, newIdSet, existingActiveIds, userId);
+  if (!authResult.ok) {
+    return authResult;
+  }
+  return { ok: true, newIdSet, existingActiveIds, linkedCampaignIds };
 }
 
 /** Pure add/remove reconciliation of party membership — no authorization. */
@@ -216,26 +271,12 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
     }
 
     const now = new Date();
-    const currentCampaignId = await partyRepo.getCurrentCampaignId(existingParty.id, existingParty.campaignId);
 
-    const existingActiveIds = new Set<string>(
-      existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
-    );
-    // When characterIds is omitted, membership itself is unchanged, but a
-    // campaign move still needs every currently-active character re-checked
-    // against the new campaign's sharing rules.
-    const newIdSet = validatedIds !== undefined ? new Set<string>(validatedIds) : existingActiveIds;
-    // currentCampaignId is resolved live (via campaigns.partyIds), never read
-    // off the deprecated party.campaignId field directly — that field is
-    // deleted on every successful reassignment, so trusting it here would
-    // silently skip the sharing re-check for any already-migrated party.
-    const effectiveCampaignId = campaignIdInput.kind === 'set' ? campaignIdInput.value : currentCampaignId;
-    const campaignChanged = effectiveCampaignId !== currentCampaignId;
-
-    const authResult = await authorizeCampaignSharing(effectiveCampaignId, campaignChanged, newIdSet, existingActiveIds, auth.userId);
-    if (!authResult.ok) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    const authContext = await authorizeCampaignTransition(existingParty, validatedIds, campaignIdInput, auth.userId);
+    if (!authContext.ok) {
+      return NextResponse.json({ error: authContext.error }, { status: authContext.status });
     }
+    const { newIdSet, existingActiveIds, linkedCampaignIds } = authContext;
 
     const updatedParty: Party = {
       ...existingParty,
@@ -245,7 +286,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       updatedAt: now,
     };
 
-    const applied = await applyCampaignReassignment(updatedParty, campaignIdInput, existingParty.campaignId, currentCampaignId, auth.userId, id);
+    const applied = await applyCampaignReassignment(updatedParty, campaignIdInput, existingParty.campaignId, linkedCampaignIds[0], auth.userId, id);
     if (!applied.ok) {
       return NextResponse.json({ error: applied.error }, { status: applied.status });
     }

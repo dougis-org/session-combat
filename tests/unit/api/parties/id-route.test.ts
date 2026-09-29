@@ -18,7 +18,7 @@ jest.mock("@/lib/storage/partyRepo", () => ({
   deleteParty: jest.fn(),
   canAddToCampaignParty: jest.fn(),
   reassignPartyCampaign: jest.fn(),
-  getCurrentCampaignId: jest.fn(),
+  getLinkedCampaignIds: jest.fn(),
   isActiveDm: jest.fn(),
 }));
 
@@ -44,8 +44,8 @@ describe("PUT /api/parties/[id]", () => {
     // Default: the live-resolved current campaign matches whatever legacy
     // campaignId hint is on the loaded party, preserving pre-migration
     // semantics for tests that don't care about the live/legacy distinction.
-    mockedPartyRepo.getCurrentCampaignId.mockImplementation(
-      async (_partyId: string, legacyCampaignId?: string) => legacyCampaignId
+    mockedPartyRepo.getLinkedCampaignIds.mockImplementation(
+      async (_partyId: string, legacyCampaignId?: string) => (legacyCampaignId ? [legacyCampaignId] : [])
     );
     mockedPartyRepo.isActiveDm.mockResolvedValue(true);
   });
