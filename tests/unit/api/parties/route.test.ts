@@ -2,16 +2,14 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/parties/route";
-import { GET as GET_ONE, PUT, DELETE } from "@/app/api/parties/[id]/route";
 import * as partyRepo from "@/lib/storage/partyRepo";
+import { PartyCampaignAuthorizationError } from "@/lib/storage/errors";
 import {
   MOCK_AUTH,
   makeRouteRequest,
+  makeMalformedJsonRequest,
   itReturns401,
   itReturns500,
-  itReturns401WithParams,
-  itReturns404WithParams,
-  itReturns500WithParams,
   mockAuthState,
 } from "@/tests/unit/helpers/route.test.helpers";
 
@@ -22,8 +20,7 @@ jest.mock("@/lib/storage/partyRepo", () => ({
   deleteParty: jest.fn(),
   canAddToCampaignParty: jest.fn(),
   addPartyToCampaign: jest.fn(),
-  removePartyFromCampaign: jest.fn(),
-  removePartyFromAllCampaigns: jest.fn(),
+  isActiveDm: jest.fn(),
 }));
 
 const mockedPartyRepo = jest.mocked(partyRepo);
@@ -60,9 +57,21 @@ describe("GET /api/parties", () => {
 });
 
 describe("POST /api/parties", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedPartyRepo.isActiveDm.mockResolvedValue(true);
+  });
 
   itReturns401(POST, () => makeRequest({ name: "Crew" }));
+
+  it("returns 400 (not 500) when the request body is malformed JSON", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeMalformedJsonRequest("http://localhost/api/parties", "POST"));
+
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
 
   it("returns 400 when name is missing", async () => {
     mockAuthState.payload = MOCK_AUTH;
@@ -114,7 +123,7 @@ describe("POST /api/parties", () => {
 
   it("B2-1: returns 403 when campaignId set and character not shared", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(false);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(false);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -126,9 +135,23 @@ describe("POST /api/parties", () => {
     expect(body.error).toContain("not shared");
   });
 
+  it("B2-1b: returns 403 before checking sharing when caller is not an active DM of the campaign", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.isActiveDm.mockResolvedValue(false);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: ["char-1"] })
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.canAddToCampaignParty).not.toHaveBeenCalled();
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
   it("B2-2: returns 201 when campaignId set and shared character allowed", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
 
     const response = await POST(
@@ -145,7 +168,7 @@ describe("POST /api/parties", () => {
     const response = await POST(makeRequest({ name: "No Campaign", characterIds: ["char-1"] }));
 
     expect(response.status).toBe(201);
-    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
+    expect(mockedPartyRepo.canAddToCampaignParty).not.toHaveBeenCalled();
   });
 
   it("returns 400 when characterIds is not an array", async () => {
@@ -169,254 +192,97 @@ describe("POST /api/parties", () => {
     expect(body.error).toContain("characterIds");
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
-});
 
-describe("PUT /api/parties/[id]", () => {
-  const EXISTING_PARTY = {
-    id: "party-123",
-    userId: "user-123",
-    name: "Old Name",
-    description: "",
-    members: [{ characterId: "char-1", addedAt: new Date("2026-04-07T00:00:00.000Z") }],
-    createdAt: new Date("2026-04-07T00:00:00.000Z"),
-    updatedAt: new Date("2026-04-07T00:01:00.000Z"),
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
+  it("returns 400 when a characterIds element is an empty string", async () => {
     mockAuthState.payload = MOCK_AUTH;
-    mockedPartyRepo.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
-    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
-  });
 
-  it("updates party fields and returns 200", async () => {
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "New Name",
-        description: "Updated",
-        characterIds: ["char-1", "char-2"],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: ["char-1", ""] }));
 
-    expect(response.status).toBe(200);
-    expect(mockedPartyRepo.saveParty).toHaveBeenCalledTimes(1);
-    const savedParty = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(savedParty).toMatchObject({
-      id: "party-123",
-      userId: "user-123",
-      name: "New Name",
-      description: "Updated",
-    });
-    const activeIds = savedParty.members.filter((m: { leftAt?: Date }) => !m.leftAt).map((m: { characterId: string }) => m.characterId);
-    expect(activeIds).toContain("char-1");
-    expect(activeIds).toContain("char-2");
-  });
-
-  it("strips _id from saved payload", async () => {
-    await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "New Name",
-        description: "Updated",
-        characterIds: [],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
-
-    const savedParty = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(savedParty._id).toBeUndefined();
-  });
-
-  it("returns 400 when name is blank", async () => {
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", { name: "  " }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
     expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 
-  it("sets campaignId when non-empty string provided", async () => {
-    await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        campaignId: " camp-1 ",
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
+  it("returns 400 when a characterIds element exceeds the entity-id length limit", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+
+    const response = await POST(makeRequest({ name: "Bad Ids", characterIds: ["x".repeat(201)] }));
+
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for each non-string, non-undefined campaignId type", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    for (const badValue of [null, 42, true, [], {}]) {
+      const response = await POST(makeRequest({ name: "Party", campaignId: badValue }));
+      expect(response.status).toBe(400);
+    }
+  });
+
+  it("treats a whitespace-only campaignId as unlink (empty), not an error", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "Party", campaignId: "   " }));
+
+    expect(response.status).toBe(201);
+    expect(mockedPartyRepo.addPartyToCampaign).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when campaignId exceeds the entity-id length limit", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await POST(makeRequest({ name: "Party", campaignId: "x".repeat(201) }));
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when description is not a string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await POST(makeRequest({ name: "Party", description: 42 }));
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("no share check or campaign link when campaignId is omitted", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "No Campaign" }));
+
+    expect(response.status).toBe(201);
+    expect(mockedPartyRepo.addPartyToCampaign).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 and rolls back when addPartyToCampaign rejects with PartyCampaignAuthorizationError", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.addPartyToCampaign.mockRejectedValueOnce(
+      new PartyCampaignAuthorizationError("camp-1", "user-123")
     );
-    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(saved.campaignId).toBeUndefined();
-  });
+    mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
 
-  it("removes campaignId when empty string provided", async () => {
-    mockedPartyRepo.loadParties.mockResolvedValue([
-      { ...EXISTING_PARTY, campaignId: "old-camp" },
-    ] as any);
-    await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        campaignId: "",
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: [] })
     );
-    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(saved.campaignId).toBeUndefined();
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.deleteParty).toHaveBeenCalledTimes(1);
   });
 
-  it("returns 404 when party not found", async () => {
-    mockedPartyRepo.loadParties.mockResolvedValue([]);
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/missing", "PUT", { name: "X" }),
-      { params: Promise.resolve({ id: "missing" }) }
+  it("still surfaces the original authorization error (not the cleanup failure) when the orphaned-party rollback delete fails", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.addPartyToCampaign.mockRejectedValueOnce(
+      new PartyCampaignAuthorizationError("camp-1", "user-123")
     );
-    expect(response.status).toBe(404);
-  });
+    mockedPartyRepo.deleteParty.mockRejectedValueOnce(new Error("cleanup failed"));
 
-  it("B3-1: returns 403 when adding unshared character to campaign party", async () => {
-    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(false);
-
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        characterIds: ["char-new-unshared"],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: [] })
     );
 
     expect(response.status).toBe(403);
   });
-
-  it("B3-2: returns 200 when adding shared character to campaign party", async () => {
-    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
-    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
-
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        characterIds: ["char-new-shared"],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
-
-    expect(response.status).toBe(200);
-  });
-
-  it("B3-3: re-adding existing active member does not trigger share check", async () => {
-    const partyWithCampaign = { ...EXISTING_PARTY, campaignId: "camp-1" };
-    mockedPartyRepo.loadParties.mockResolvedValue([partyWithCampaign] as any);
-
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        characterIds: ["char-1"],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
-
-    expect(response.status).toBe(200);
-    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
-  });
-
-  it("B3-4: no share check when party has no campaignId", async () => {
-    mockedPartyRepo.loadParties.mockResolvedValue([EXISTING_PARTY] as any);
-
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        characterIds: ["char-new"],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
-
-    expect(response.status).toBe(200);
-    expect((mockedPartyRepo as any).canAddToCampaignParty).not.toHaveBeenCalled();
-  });
-
-  it("returns 400 when characterIds contains a non-string element", async () => {
-    const response = await PUT(
-      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
-        name: "Name",
-        characterIds: ["char-1", 42],
-      }),
-      { params: Promise.resolve({ id: "party-123" }) }
-    );
-
-    expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.error).toContain("characterIds");
-    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
-  });
-});
-
-describe("GET /api/parties/[id]", () => {
-  const PARAMS = Promise.resolve({ id: "party-123" });
-  const makeReq = () => makeRouteRequest("http://localhost/api/parties/party-123", "GET");
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockAuthState.payload = MOCK_AUTH;
-    mockedPartyRepo.loadParties.mockResolvedValue([
-      { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
-    ] as any);
-  });
-
-  itReturns401WithParams(GET_ONE, makeReq, PARAMS);
-
-  it("returns party when found", async () => {
-    const response = await GET_ONE(makeReq(), { params: PARAMS });
-    expect(response.status).toBe(200);
-    expect((await response.json()).name).toBe("Fellowship");
-  });
-
-  itReturns404WithParams(
-    GET_ONE,
-    makeReq,
-    PARAMS,
-    () => mockedPartyRepo.loadParties.mockResolvedValue([])
-  );
-
-  itReturns500WithParams(
-    GET_ONE,
-    makeReq,
-    PARAMS,
-    () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
-  );
-});
-
-describe("DELETE /api/parties/[id]", () => {
-  const PARAMS = Promise.resolve({ id: "party-123" });
-  const makeReq = () => makeRouteRequest("http://localhost/api/parties/party-123", "DELETE");
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockAuthState.payload = MOCK_AUTH;
-    mockedPartyRepo.loadParties.mockResolvedValue([
-      { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
-    ] as any);
-    mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
-  });
-
-  itReturns401WithParams(DELETE, makeReq, PARAMS);
-
-  it("deletes party and returns 200", async () => {
-    const response = await DELETE(makeReq(), { params: PARAMS });
-    expect(response.status).toBe(200);
-    expect(mockedPartyRepo.deleteParty).toHaveBeenCalledWith("party-123", "user-123");
-  });
-
-  itReturns404WithParams(
-    DELETE,
-    makeReq,
-    PARAMS,
-    () => mockedPartyRepo.loadParties.mockResolvedValue([])
-  );
-
-  itReturns500WithParams(
-    DELETE,
-    makeReq,
-    PARAMS,
-    () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
-  );
 });

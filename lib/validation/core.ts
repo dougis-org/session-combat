@@ -183,6 +183,82 @@ export function validateRecord<T extends string | number | (string | number)>(
   return { valid: true, value: result };
 }
 
+/**
+ * Reusable validator for path/body identifier params (e.g. the `id` segment
+ * of a parameterized route). Intended to be invoked as the first action in a
+ * parameterized handler, before any repository lookup.
+ */
+export function validateEntityId(
+  value: unknown,
+  fieldName: string = 'id'
+): { valid: true; value: string } | { valid: false; error: ValidationError } {
+  return validateString(value, fieldName, { required: true, minLength: 1, maxLength: 200 });
+}
+
+/**
+ * Same bounds as validateEntityId, applied to every element of an array —
+ * for request fields like characterIds that are lists of foreign-entity ids
+ * flowing straight into repository lookups/filters.
+ */
+export function validateEntityIdArray(
+  value: unknown,
+  fieldName: string = 'array'
+): { valid: true; value: string[] } | { valid: false; error: ValidationError } {
+  if (value === undefined || value === null) {
+    return { valid: true, value: [] };
+  }
+
+  if (!Array.isArray(value)) {
+    return {
+      valid: false,
+      error: {
+        field: fieldName,
+        message: `${fieldName} must be an array of strings`,
+      },
+    };
+  }
+
+  const result: string[] = [];
+  for (let i = 0; i < value.length; i++) {
+    const idResult = validateEntityId(value[i], `${fieldName}[${i}]`);
+    if (!idResult.valid) {
+      return {
+        valid: false,
+        error: { field: fieldName, index: i, message: idResult.error.message },
+      };
+    }
+    result.push(idResult.value);
+  }
+
+  return { valid: true, value: result };
+}
+
+export type CampaignIdInput =
+  | { kind: 'omit' }
+  | { kind: 'invalid' }
+  | { kind: 'set'; value: string };
+
+export function parseCampaignIdInput(value: unknown): CampaignIdInput {
+  if (value === undefined) {
+    return { kind: 'omit' };
+  }
+  if (typeof value !== 'string') {
+    return { kind: 'invalid' };
+  }
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    // '' is the documented "unlink from any campaign" value — it must stay
+    // representable even though it's shorter than validateEntityId's
+    // minLength.
+    return { kind: 'set', value: '' };
+  }
+  const result = validateEntityId(trimmed, 'campaignId');
+  if (!result.valid) {
+    return { kind: 'invalid' };
+  }
+  return { kind: 'set', value: result.value };
+}
+
 export function validateStringRecord(
   value: unknown,
   fieldName: string = 'record'

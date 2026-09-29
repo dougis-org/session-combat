@@ -5,6 +5,9 @@ import {
   validateRecord,
   validateStringRecord,
   validateNumberRecord,
+  validateEntityId,
+  validateEntityIdArray,
+  parseCampaignIdInput,
 } from '@/lib/validation/core';
 
 describe('validateString', () => {
@@ -162,5 +165,96 @@ describe('validateNumberRecord', () => {
   it('returns invalid for a record with string values', () => {
     const result = validateNumberRecord({ strength: 'high' }, 'savingThrows');
     expect(result.valid).toBe(false);
+  });
+});
+
+describe('validateEntityId', () => {
+  it('returns valid for a normal id string', () => {
+    expect(validateEntityId('party-123')).toEqual({ valid: true, value: 'party-123' });
+  });
+
+  it('returns invalid for an empty string', () => {
+    const result = validateEntityId('');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a whitespace-only string', () => {
+    const result = validateEntityId('   ');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a value over 200 characters', () => {
+    const result = validateEntityId('x'.repeat(201));
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a non-string value', () => {
+    const result = validateEntityId(42);
+    expect(result.valid).toBe(false);
+  });
+});
+
+describe('validateEntityIdArray', () => {
+  it('returns empty array for undefined', () => {
+    expect(validateEntityIdArray(undefined, 'characterIds')).toEqual({ valid: true, value: [] });
+  });
+
+  it('returns empty array for null', () => {
+    expect(validateEntityIdArray(null, 'characterIds')).toEqual({ valid: true, value: [] });
+  });
+
+  it('returns valid for an array of normal id strings', () => {
+    expect(validateEntityIdArray(['char-1', 'char-2'], 'characterIds')).toEqual({
+      valid: true,
+      value: ['char-1', 'char-2'],
+    });
+  });
+
+  it('returns invalid for a non-array', () => {
+    const result = validateEntityIdArray('char-1', 'characterIds');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid with index when an element is not a string', () => {
+    const result = validateEntityIdArray(['char-1', 42], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
+  });
+
+  it('returns invalid with index when an element is an empty string', () => {
+    const result = validateEntityIdArray(['char-1', ''], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
+  });
+
+  it('returns invalid when an element exceeds 200 characters', () => {
+    const result = validateEntityIdArray(['char-1', 'x'.repeat(201)], 'characterIds');
+    expect(result.valid).toBe(false);
+    if (!result.valid) expect(result.error.index).toBe(1);
+  });
+});
+
+describe('parseCampaignIdInput', () => {
+  it('returns omit when value is undefined', () => {
+    expect(parseCampaignIdInput(undefined)).toEqual({ kind: 'omit' });
+  });
+
+  it('returns invalid for a non-string value', () => {
+    for (const badValue of [null, 42, true, [], {}]) {
+      expect(parseCampaignIdInput(badValue)).toEqual({ kind: 'invalid' });
+    }
+  });
+
+  it('returns set with an empty value for an empty or whitespace-only string (the documented unlink value)', () => {
+    expect(parseCampaignIdInput('')).toEqual({ kind: 'set', value: '' });
+    expect(parseCampaignIdInput('   ')).toEqual({ kind: 'set', value: '' });
+  });
+
+  it('returns set with the trimmed value for a normal campaign id', () => {
+    expect(parseCampaignIdInput('  camp-1  ')).toEqual({ kind: 'set', value: 'camp-1' });
+  });
+
+  it('returns invalid for a campaign id over 200 characters', () => {
+    expect(parseCampaignIdInput('x'.repeat(201))).toEqual({ kind: 'invalid' });
   });
 });

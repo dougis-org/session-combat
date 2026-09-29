@@ -4,7 +4,6 @@ import {
   Character,
   CombatState,
   Party,
-  PartyMember,
   Campaign,
   CampaignTemplate,
   MonsterTemplate,
@@ -22,7 +21,6 @@ import {
   StatusConditionCatalogEntry,
 } from "./types";
 
-import { normalizeStoredEntityId } from "./storage/helpers";
 import {
   getUserPreferences as getUserPreferencesRepo,
   updateUserPreferences as updateUserPreferencesRepo,
@@ -110,9 +108,9 @@ export const storage = {
   // Save campaign (upsert)
   async saveCampaign(campaign: Campaign): Promise<void> { return campaignRepo.saveCampaign(campaign); },
 
-  async addPartyToCampaign(campaignId: string, partyId: string): Promise<void> { return partyRepo.addPartyToCampaign(campaignId, partyId); },
+  async addPartyToCampaign(campaignId: string, partyId: string, callerId: string): Promise<void> { return partyRepo.addPartyToCampaign(campaignId, partyId, callerId); },
 
-  async removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> { return partyRepo.removePartyFromCampaign(campaignId, partyId); },
+  async removePartyFromCampaign(campaignId: string, partyId: string, callerId: string): Promise<void> { return partyRepo.removePartyFromCampaign(campaignId, partyId, callerId); },
 
   async removePartyFromAllCampaigns(partyId: string): Promise<void> { return partyRepo.removePartyFromAllCampaigns(partyId); },
 

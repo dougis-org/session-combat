@@ -346,11 +346,19 @@ describe("Campaign API Integration Tests", () => {
     });
     expect(acceptRes.status).toBe(200);
 
-    // User2 creates a party in the campaign
-    const partyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
+    // User2 (a non-DM member) cannot link their own party to the campaign
+    const forbiddenPartyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
       method: "POST",
       headers: authed(authCookie2),
       body: JSON.stringify({ name: "User2 Party", campaignId: campaign.id }),
+    });
+    expect(forbiddenPartyRes.status).toBe(403);
+
+    // Only the DM (user1) can link a party to the campaign
+    const partyRes = await fetch(`${baseUrl}/api/parties`, { // nosemgrep
+      method: "POST",
+      headers: authed(),
+      body: JSON.stringify({ name: "DM Party", campaignId: campaign.id }),
     });
     expect(partyRes.status).toBe(201);
     const party = await partyRes.json() as { id: string; };
@@ -362,8 +370,8 @@ describe("Campaign API Integration Tests", () => {
     });
     expect([200, 204]).toContain(deleteRes.status);
 
-    // Verify user2's party is also 200 (survives)
-    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed(authCookie2) }); // nosemgrep
+    // Verify the party survives campaign deletion even with other active members present
+    const getPartyRes = await fetch(`${baseUrl}/api/parties/${party.id}`, { headers: authed() }); // nosemgrep
     expect(getPartyRes.status).toBe(200);
   });
 
