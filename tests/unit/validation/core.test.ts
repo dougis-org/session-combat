@@ -5,6 +5,8 @@ import {
   validateRecord,
   validateStringRecord,
   validateNumberRecord,
+  validateEntityId,
+  parseCampaignIdInput,
 } from '@/lib/validation/core';
 
 describe('validateString', () => {
@@ -162,5 +164,56 @@ describe('validateNumberRecord', () => {
   it('returns invalid for a record with string values', () => {
     const result = validateNumberRecord({ strength: 'high' }, 'savingThrows');
     expect(result.valid).toBe(false);
+  });
+});
+
+describe('validateEntityId', () => {
+  it('returns valid for a normal id string', () => {
+    expect(validateEntityId('party-123')).toEqual({ valid: true, value: 'party-123' });
+  });
+
+  it('returns invalid for an empty string', () => {
+    const result = validateEntityId('');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a whitespace-only string', () => {
+    const result = validateEntityId('   ');
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a value over 200 characters', () => {
+    const result = validateEntityId('x'.repeat(201));
+    expect(result.valid).toBe(false);
+  });
+
+  it('returns invalid for a non-string value', () => {
+    const result = validateEntityId(42);
+    expect(result.valid).toBe(false);
+  });
+});
+
+describe('parseCampaignIdInput', () => {
+  it('returns omit when value is undefined', () => {
+    expect(parseCampaignIdInput(undefined)).toEqual({ kind: 'omit' });
+  });
+
+  it('returns invalid for a non-string value', () => {
+    for (const badValue of [null, 42, true, [], {}]) {
+      expect(parseCampaignIdInput(badValue)).toEqual({ kind: 'invalid' });
+    }
+  });
+
+  it('returns set with an empty value for an empty or whitespace-only string (the documented unlink value)', () => {
+    expect(parseCampaignIdInput('')).toEqual({ kind: 'set', value: '' });
+    expect(parseCampaignIdInput('   ')).toEqual({ kind: 'set', value: '' });
+  });
+
+  it('returns set with the trimmed value for a normal campaign id', () => {
+    expect(parseCampaignIdInput('  camp-1  ')).toEqual({ kind: 'set', value: 'camp-1' });
+  });
+
+  it('returns invalid for a campaign id over 200 characters', () => {
+    expect(parseCampaignIdInput('x'.repeat(201))).toEqual({ kind: 'invalid' });
   });
 });

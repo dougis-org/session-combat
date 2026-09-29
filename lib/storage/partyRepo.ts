@@ -5,13 +5,17 @@ import { normalizeStoredEntityId } from "@/lib/storage/helpers";
 import { loadCharacterById } from "./characterRepo";
 import { getMember } from "./membershipRepo";
 import { PartyCampaignAuthorizationError } from "./errors";
-import { parseCampaignIdInput } from "@/lib/validation/core";
+import { CampaignIdInput } from "@/lib/validation/core";
 import { storage } from "@/lib/storage";
 import { Filter } from "mongodb";
 
-async function assertActiveDm(campaignId: string, callerId: string): Promise<void> {
+export async function isActiveDm(campaignId: string, callerId: string): Promise<boolean> {
   const member = await getMember(campaignId, callerId);
-  if (!member || member.role !== 'dm' || member.status !== 'active') {
+  return !!member && member.role === 'dm' && member.status === 'active';
+}
+
+async function assertActiveDm(campaignId: string, callerId: string): Promise<void> {
+  if (!(await isActiveDm(campaignId, callerId))) {
     throw new PartyCampaignAuthorizationError(campaignId, callerId);
   }
 }
@@ -204,8 +208,13 @@ export async function addPartyToCampaign(campaignId: string, partyId: string, ca
   });
 }
 
-export async function removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
-  return runStorageOp({ name: "removePartyFromCampaign", collection: "campaigns" }, async () => {
+export async function removePartyFromCampaign(campaignId: string, partyId: string, callerId: string): Promise<void> {
+  return runStorageOp({
+    name: "removePartyFromCampaign",
+    collection: "campaigns",
+    rethrowAsIs: (error) => error instanceof PartyCampaignAuthorizationError,
+  }, async () => {
+    await assertActiveDm(campaignId, callerId);
     const db = await getDatabase();
     const campaign = await db.collection<CampaignPartyDoc>("campaigns").findOne({ id: campaignId });
     if (campaign && campaign.partyIds === undefined) {
@@ -227,6 +236,24 @@ export async function removePartyFromCampaign(campaignId: string, partyId: strin
   });
 }
 
+async function legacyCampaignStillLinked(campaignId: string, partyId: string): Promise<boolean> {
+  const db = await getDatabase();
+  const campaign = await db.collection<CampaignPartyDoc>("campaigns").findOne({ id: campaignId });
+  if (!campaign) {
+    // The campaign no longer exists; the legacy pointer is stale and must
+    // not be treated as a real link (it would otherwise permanently 403
+    // every future reassignment for this party).
+    return false;
+  }
+  if (campaign.partyIds === undefined) {
+    // Not yet migrated to the live partyIds array — the legacy field is
+    // still the authoritative pointer.
+    return true;
+  }
+  // Already migrated: only count it if the party is actually still there.
+  return campaign.partyIds.includes(partyId);
+}
+
 async function findLinkedCampaignIds(partyId: string, legacyCampaignId: string | undefined): Promise<string[]> {
   const db = await getDatabase();
   const linked = await db
@@ -236,16 +263,31 @@ async function findLinkedCampaignIds(partyId: string, legacyCampaignId: string |
   const ids = new Set<string>(linked.map((c) => c.id));
   // The deprecated Party.campaignId field is the only pointer into
   // legacy campaigns whose partyIds array hasn't been migrated yet, so it
-  // must be included as a candidate alongside the live partyIds lookup.
-  if (legacyCampaignId) {
+  // must be included as a candidate alongside the live partyIds lookup —
+  // but only if it still points at a real, live link.
+  if (legacyCampaignId && !ids.has(legacyCampaignId) && (await legacyCampaignStillLinked(legacyCampaignId, partyId))) {
     ids.add(legacyCampaignId);
   }
   return Array.from(ids);
 }
 
+/**
+ * Resolves the campaign a party is actually linked to right now, live —
+ * never trust the deprecated Party.campaignId field directly, since it is
+ * deleted on every successful reassignment once a party has migrated to
+ * campaign.partyIds. Callers that need "what campaign is this party in
+ * today" (e.g. to decide whether a campaign move is happening, or which
+ * campaign's sharing rules apply) must use this instead of reading
+ * party.campaignId off a loaded Party.
+ */
+export async function getCurrentCampaignId(partyId: string, legacyCampaignId: string | undefined): Promise<string | undefined> {
+  const linked = await findLinkedCampaignIds(partyId, legacyCampaignId);
+  return linked[0];
+}
+
 export async function reassignPartyCampaign(
   updatedParty: Party,
-  campaignId: unknown,
+  campaignIdInput: CampaignIdInput,
   existingCampaignId: string | undefined,
   callerId: string
 ): Promise<void> {
@@ -254,9 +296,11 @@ export async function reassignPartyCampaign(
     collection: "campaigns",
     rethrowAsIs: (error) => error instanceof PartyCampaignAuthorizationError,
   }, async () => {
-    const parsed = parseCampaignIdInput(campaignId);
-    if (parsed.kind === 'omit') return;
-    if (parsed.kind === 'invalid') {
+    if (campaignIdInput.kind === 'omit') return;
+    if (campaignIdInput.kind === 'invalid') {
+      // Defensive only: every caller validates the raw request body with
+      // parseCampaignIdInput before this point, so 'invalid' should never
+      // actually reach here.
       throw new Error('Invalid campaignId: expected a string or undefined');
     }
 
@@ -272,22 +316,26 @@ export async function reassignPartyCampaign(
     const removedFrom: string[] = [];
     try {
       for (const linkedId of linkedCampaignIds) {
-        await removePartyFromCampaign(linkedId, updatedParty.id);
+        await removePartyFromCampaign(linkedId, updatedParty.id, callerId);
         removedFrom.push(linkedId);
       }
     } catch (err) {
       await Promise.all(
-        removedFrom.map(cid => addPartyToCampaign(cid, updatedParty.id, callerId).catch(() => {}))
+        removedFrom.map(cid => addPartyToCampaign(cid, updatedParty.id, callerId).catch((rollbackErr) => {
+          console.error(`[reassignPartyCampaign] rollback failed: could not restore party ${updatedParty.id} to campaign ${cid} after a removal error:`, rollbackErr);
+        }))
       );
       throw err;
     }
 
-    if (parsed.value) {
+    if (campaignIdInput.value) {
       try {
-        await addPartyToCampaign(parsed.value, updatedParty.id, callerId);
+        await addPartyToCampaign(campaignIdInput.value, updatedParty.id, callerId);
       } catch (err) {
         for (const linkedId of linkedCampaignIds) {
-          await addPartyToCampaign(linkedId, updatedParty.id, callerId).catch(() => {});
+          await addPartyToCampaign(linkedId, updatedParty.id, callerId).catch((rollbackErr) => {
+            console.error(`[reassignPartyCampaign] rollback failed: could not restore party ${updatedParty.id} to campaign ${linkedId} after a failed link to ${campaignIdInput.value}:`, rollbackErr);
+          });
         }
         throw err;
       }
@@ -298,6 +346,11 @@ export async function reassignPartyCampaign(
   });
 }
 
+// Deliberately not DM-gated: this is a bulk, party-scoped cleanup operation
+// (e.g. for use when a party itself is deleted) that isn't tied to any single
+// campaign a caller could be authorized against. It has no current caller in
+// the app; any future caller MUST perform its own authorization (e.g. verify
+// the requesting user owns the party) before invoking this.
 export async function removePartyFromAllCampaigns(partyId: string): Promise<void> {
   return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
     const db = await getDatabase();

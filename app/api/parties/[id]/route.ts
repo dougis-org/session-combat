@@ -2,10 +2,18 @@ import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
-import { validateStringArray, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
+import { validateStringArray, validateEntityId, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
 import { PartyCampaignAuthorizationError } from '@/lib/storage/errors';
 
 type Params = { id: string };
+
+function validatePartyIdParam(id: string): { ok: true; value: string } | { ok: false; status: number; error: string } {
+  const result = validateEntityId(id, 'id');
+  if (!result.valid) {
+    return { ok: false, status: 400, error: result.error.message };
+  }
+  return { ok: true, value: result.value };
+}
 
 type MemberReconciliationResult =
   | { ok: true; members: PartyMember[] }
@@ -16,7 +24,8 @@ async function reconcileMembers(
   validatedIds: string[] | undefined,
   campaignIdInput: CampaignIdInput,
   userId: string,
-  now: Date
+  now: Date,
+  currentCampaignId: string | undefined
 ): Promise<MemberReconciliationResult> {
   const existingActiveIds = new Set<string>(
     existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
@@ -26,12 +35,26 @@ async function reconcileMembers(
   // against the new campaign's sharing rules.
   const newIdSet = validatedIds !== undefined ? new Set<string>(validatedIds) : existingActiveIds;
 
+  // currentCampaignId is resolved live (via campaigns.partyIds), never read
+  // off the deprecated party.campaignId field directly — that field is
+  // deleted on every successful reassignment, so trusting it here would
+  // silently skip the sharing re-check for any already-migrated party.
   const effectiveCampaignId = campaignIdInput.kind === 'set'
     ? campaignIdInput.value
-    : existingParty.campaignId;
-  const campaignChanged = effectiveCampaignId !== existingParty.campaignId;
+    : currentCampaignId;
+  const campaignChanged = effectiveCampaignId !== currentCampaignId;
 
   if (effectiveCampaignId) {
+    // Authorize the campaign the sharing check is about to run against —
+    // whether it's a brand-new target or the party's currently-linked
+    // campaign — before running that check. Otherwise a caller with no
+    // authority over the campaign could learn whether a given character is
+    // shared into it purely from the sharing check's own 403.
+    const authorized = await partyRepo.isActiveDm(effectiveCampaignId, userId);
+    if (!authorized) {
+      return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
+    }
+
     const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
     const checks = await Promise.all(
       charsToCheck.map(charId => partyRepo.canAddToCampaignParty(effectiveCampaignId, charId, userId))
@@ -107,8 +130,56 @@ function validatePutBody(body: Record<string, unknown>): PutBodyValidation {
   };
 }
 
+type CampaignReassignmentResult = { ok: true } | { ok: false; status: number; error: string };
+
+/**
+ * Commits the campaign-link change for a PUT and persists the updated party,
+ * rolling the campaign link back to its previous state if saving the party
+ * document fails partway through (so campaigns.partyIds and the party
+ * document never diverge).
+ */
+async function applyCampaignReassignment(
+  updatedParty: Party,
+  campaignIdInput: CampaignIdInput,
+  existingCampaignId: string | undefined,
+  currentCampaignId: string | undefined,
+  callerId: string,
+  partyId: string
+): Promise<CampaignReassignmentResult> {
+  try {
+    await partyRepo.reassignPartyCampaign(updatedParty, campaignIdInput, existingCampaignId, callerId);
+  } catch (err) {
+    if (err instanceof PartyCampaignAuthorizationError) {
+      return { ok: false, status: 403, error: 'Not authorized to link this campaign' };
+    }
+    throw err;
+  }
+
+  try {
+    await partyRepo.saveParty(updatedParty);
+  } catch (err) {
+    if (campaignIdInput.kind !== 'omit') {
+      const newLiveCampaignId = campaignIdInput.kind === 'set' ? campaignIdInput.value : currentCampaignId;
+      const rollbackInput: CampaignIdInput = currentCampaignId !== undefined
+        ? { kind: 'set', value: currentCampaignId }
+        : { kind: 'set', value: '' };
+      await partyRepo.reassignPartyCampaign(updatedParty, rollbackInput, newLiveCampaignId, callerId).catch((rollbackErr) => {
+        console.error(`Failed to roll back campaign reassignment for party ${partyId} after saveParty failure:`, rollbackErr);
+      });
+    }
+    throw err;
+  }
+
+  return { ok: true };
+}
+
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
+    const idValidation = validatePartyIdParam(id);
+    if (!idValidation.ok) {
+      return NextResponse.json({ error: idValidation.error }, { status: idValidation.status });
+    }
+
     const parties = await partyRepo.loadParties(auth.userId);
     const party = parties.find((p) => p.id === id);
     if (!party) {
@@ -123,6 +194,11 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
 
 export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
   try {
+    const idValidation = validatePartyIdParam(id);
+    if (!idValidation.ok) {
+      return NextResponse.json({ error: idValidation.error }, { status: idValidation.status });
+    }
+
     const body = await request.json();
     if (typeof body !== 'object' || body === null || Array.isArray(body)) {
       return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
@@ -142,7 +218,9 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
     }
 
     const now = new Date();
-    const reconciliation = await reconcileMembers(existingParty, validatedIds, campaignIdInput, auth.userId, now);
+    const currentCampaignId = await partyRepo.getCurrentCampaignId(existingParty.id, existingParty.campaignId);
+
+    const reconciliation = await reconcileMembers(existingParty, validatedIds, campaignIdInput, auth.userId, now, currentCampaignId);
     if (!reconciliation.ok) {
       return NextResponse.json({ error: reconciliation.error }, { status: reconciliation.status });
     }
@@ -155,16 +233,10 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       updatedAt: now,
     };
 
-    try {
-      await partyRepo.reassignPartyCampaign(updatedParty, (body as Record<string, unknown>).campaignId, existingParty.campaignId, auth.userId);
-    } catch (err) {
-      if (err instanceof PartyCampaignAuthorizationError) {
-        return NextResponse.json({ error: 'Not authorized to link this campaign' }, { status: 403 });
-      }
-      throw err;
+    const applied = await applyCampaignReassignment(updatedParty, campaignIdInput, existingParty.campaignId, currentCampaignId, auth.userId, id);
+    if (!applied.ok) {
+      return NextResponse.json({ error: applied.error }, { status: applied.status });
     }
-
-    await partyRepo.saveParty(updatedParty);
 
     return NextResponse.json(updatedParty);
   } catch (error) {
@@ -175,6 +247,11 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
 
 export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
+    const idValidation = validatePartyIdParam(id);
+    if (!idValidation.ok) {
+      return NextResponse.json({ error: idValidation.error }, { status: idValidation.status });
+    }
+
     const parties = await partyRepo.loadParties(auth.userId);
     const party = parties.find((p) => p.id === id);
 

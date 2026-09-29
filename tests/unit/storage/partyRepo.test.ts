@@ -111,24 +111,27 @@ describe("reassignPartyCampaign", () => {
   });
 
   it("is a no-op and performs no membership lookup when campaignId is omitted", async () => {
-    await partyRepo.reassignPartyCampaign({ ...PARTY }, undefined, "old-camp", "dm-user");
+    await partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "omit" }, "old-camp", "dm-user");
 
     expect(mockedGetMember).not.toHaveBeenCalled();
     expect(mockDb.collection).not.toHaveBeenCalled();
   });
 
-  it("rejects a non-string, non-undefined campaignId", async () => {
+  it("rejects an invalid campaignId input", async () => {
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, 123, undefined, "dm-user")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "invalid" }, undefined, "dm-user")
     ).rejects.toThrow();
     expect(mockedGetMember).not.toHaveBeenCalled();
   });
 
   it("throws and does not remove the party when caller is not an active DM of the existing campaign (unlink)", async () => {
     mockedGetMember.mockResolvedValue(null);
+    // Not yet migrated (no partyIds field), so the legacy pointer is still
+    // a real, live link and must be authorized.
+    mockCollection.findOne.mockResolvedValue({ id: "old-camp" });
 
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, "", "old-camp", "not-a-dm")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "" }, "old-camp", "not-a-dm")
     ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
     expect(mockCollection.updateOne).not.toHaveBeenCalled();
   });
@@ -137,9 +140,10 @@ describe("reassignPartyCampaign", () => {
     mockedGetMember.mockImplementation(async (campaignId: string) =>
       campaignId === "old-camp" ? null : (ACTIVE_DM as never)
     );
+    mockCollection.findOne.mockResolvedValue({ id: "old-camp" });
 
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, "", "old-camp", "dm-user")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "" }, "old-camp", "dm-user")
     ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
     expect(mockCollection.updateOne).not.toHaveBeenCalled();
   });
@@ -149,7 +153,7 @@ describe("reassignPartyCampaign", () => {
     mockCollection.findOne.mockResolvedValue({ id: "old-camp", partyIds: ["party-1"] });
     const party = { ...PARTY, campaignId: "old-camp" };
 
-    await partyRepo.reassignPartyCampaign(party, "", "old-camp", "dm-user");
+    await partyRepo.reassignPartyCampaign(party, { kind: "set", value: "" }, "old-camp", "dm-user");
 
     expect(mockCollection.updateOne).toHaveBeenCalledWith(
       { id: "old-camp" },
@@ -163,7 +167,7 @@ describe("reassignPartyCampaign", () => {
     mockedGetMember.mockResolvedValue(null);
 
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, "new-camp", undefined, "not-a-dm")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, undefined, "not-a-dm")
     ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
   });
 
@@ -177,7 +181,7 @@ describe("reassignPartyCampaign", () => {
     });
     const party = { ...PARTY, campaignId: "old-camp" };
 
-    await partyRepo.reassignPartyCampaign(party, "new-camp", "old-camp", "dm-user");
+    await partyRepo.reassignPartyCampaign(party, { kind: "set", value: "new-camp" }, "old-camp", "dm-user");
 
     expect(mockCollection.updateOne).toHaveBeenCalledWith(
       { id: "old-camp" },
@@ -195,7 +199,7 @@ describe("reassignPartyCampaign", () => {
     mockCollection.findOne.mockResolvedValue({ id: "stray-camp", partyIds: ["party-1"] });
     const party = { ...PARTY };
 
-    await partyRepo.reassignPartyCampaign(party, "", undefined, "dm-user");
+    await partyRepo.reassignPartyCampaign(party, { kind: "set", value: "" }, undefined, "dm-user");
 
     expect(mockedGetMember).toHaveBeenCalledWith("stray-camp", "dm-user");
     expect(mockCollection.updateOne).toHaveBeenCalledWith(
@@ -213,7 +217,7 @@ describe("reassignPartyCampaign", () => {
       .mockRejectedValueOnce(new Error("boom")); // remove from camp-b fails
 
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, "", "camp-a", "dm-user")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "" }, "camp-a", "dm-user")
     ).rejects.toThrow();
 
     expect(mockCollection.updateOne).toHaveBeenCalledWith(
@@ -227,8 +231,50 @@ describe("reassignPartyCampaign", () => {
     mockCollection.toArray.mockResolvedValue([{ id: "stray-camp", partyIds: ["party-1"] }]);
 
     await expect(
-      partyRepo.reassignPartyCampaign({ ...PARTY }, "", undefined, "not-a-dm")
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "" }, undefined, "not-a-dm")
     ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
     expect(mockCollection.updateOne).not.toHaveBeenCalled();
+  });
+
+  it("restores every previously-linked campaign if the final link step fails", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    mockCollection.toArray.mockResolvedValue([{ id: "old-camp" }]);
+    mockCollection.findOne.mockImplementation(async (filter) => {
+      const { id } = filter as { id: string };
+      if (id === "old-camp") return { id: "old-camp", partyIds: ["party-1"] };
+      if (id === "new-camp") return { id: "new-camp", partyIds: [] };
+      return null;
+    });
+    // Removal from old-camp succeeds; the subsequent link to new-camp fails.
+    mockCollection.updateOne.mockImplementation((async (filter: unknown) => {
+      const { id } = filter as { id: string };
+      if (id === "new-camp") {
+        throw new Error("link failed");
+      }
+      return undefined;
+    }) as never);
+
+    await expect(
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, "old-camp", "dm-user")
+    ).rejects.toThrow();
+
+    // Compensation re-adds the party to every campaign it was linked to
+    // before the reassignment started (not just the ones removed in the loop).
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { id: "old-camp" },
+      { $addToSet: { partyIds: "party-1" } }
+    );
+  });
+
+  it("drops a stale legacy campaignId pointer instead of requiring authorization for a deleted campaign", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    // No live campaign references this party, and the legacy campaign id
+    // no longer exists at all.
+    mockCollection.toArray.mockResolvedValue([]);
+    mockCollection.findOne.mockResolvedValue(null);
+
+    await partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, "deleted-camp", "dm-user");
+
+    expect(mockedGetMember).not.toHaveBeenCalledWith("deleted-camp", "dm-user");
   });
 });

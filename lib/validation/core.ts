@@ -183,6 +183,18 @@ export function validateRecord<T extends string | number | (string | number)>(
   return { valid: true, value: result };
 }
 
+/**
+ * Reusable validator for path/body identifier params (e.g. the `id` segment
+ * of a parameterized route). Intended to be invoked as the first action in a
+ * parameterized handler, before any repository lookup.
+ */
+export function validateEntityId(
+  value: unknown,
+  fieldName: string = 'id'
+): { valid: true; value: string } | { valid: false; error: ValidationError } {
+  return validateString(value, fieldName, { required: true, minLength: 1, maxLength: 200 });
+}
+
 export type CampaignIdInput =
   | { kind: 'omit' }
   | { kind: 'invalid' }
@@ -192,10 +204,21 @@ export function parseCampaignIdInput(value: unknown): CampaignIdInput {
   if (value === undefined) {
     return { kind: 'omit' };
   }
-  if (typeof value === 'string') {
-    return { kind: 'set', value: value.trim() };
+  if (typeof value !== 'string') {
+    return { kind: 'invalid' };
   }
-  return { kind: 'invalid' };
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    // '' is the documented "unlink from any campaign" value — it must stay
+    // representable even though it's shorter than validateEntityId's
+    // minLength.
+    return { kind: 'set', value: '' };
+  }
+  const result = validateEntityId(trimmed, 'campaignId');
+  if (!result.valid) {
+    return { kind: 'invalid' };
+  }
+  return { kind: 'set', value: result.value };
 }
 
 export function validateStringRecord(
