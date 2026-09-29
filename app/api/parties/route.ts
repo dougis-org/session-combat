@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
-import { validateStringArray } from '@/lib/validation/core';
+import { validateStringArray, parseCampaignIdInput } from '@/lib/validation/core';
+import { PartyCampaignAuthorizationError } from '@/lib/storage/errors';
 
 export const GET = withAuth(async (_request, auth) => {
   try {
@@ -17,10 +18,17 @@ export const GET = withAuth(async (_request, auth) => {
 export const POST = withAuth(async (request, auth) => {
   try {
     const body = await request.json();
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+    }
     const { name, description, characterIds, campaignId } = body;
 
     if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
+    }
+
+    if (description !== undefined && typeof description !== 'string') {
+      return NextResponse.json({ error: 'description must be a string' }, { status: 400 });
     }
 
     const idsResult = validateStringArray(characterIds, 'characterIds');
@@ -28,11 +36,16 @@ export const POST = withAuth(async (request, auth) => {
       return NextResponse.json({ error: idsResult.error.message }, { status: 400 });
     }
 
+    const campaignIdInput = parseCampaignIdInput(campaignId);
+    if (campaignIdInput.kind === 'invalid') {
+      return NextResponse.json({ error: 'campaignId must be a string' }, { status: 400 });
+    }
+
     const now = new Date();
     const ids = idsResult.value;
 
-    if (typeof campaignId === 'string' && campaignId.trim()) {
-      const cid = campaignId.trim();
+    if (campaignIdInput.kind === 'set' && campaignIdInput.value) {
+      const cid = campaignIdInput.value;
       const checks = await Promise.all(ids.map(charId => partyRepo.canAddToCampaignParty(cid, charId, auth.userId)));
       if (checks.some(allowed => !allowed)) {
         return NextResponse.json({ error: 'Character not shared into campaign' }, { status: 403 });
@@ -47,7 +60,7 @@ export const POST = withAuth(async (request, auth) => {
       id: partyId,
       userId: auth.userId,
       name: name.trim(),
-      description: description?.trim() || '',
+      description: description !== undefined ? (description as string).trim() : '',
       members,
       createdAt: now,
       updatedAt: now,
@@ -55,11 +68,14 @@ export const POST = withAuth(async (request, auth) => {
 
     await partyRepo.saveParty(party);
 
-    if (typeof campaignId === 'string' && campaignId.trim()) {
+    if (campaignIdInput.kind === 'set' && campaignIdInput.value) {
       try {
-        await partyRepo.addPartyToCampaign(campaignId.trim(), partyId);
+        await partyRepo.addPartyToCampaign(campaignIdInput.value, partyId, auth.userId);
       } catch (err) {
         await partyRepo.deleteParty(partyId, auth.userId);
+        if (err instanceof PartyCampaignAuthorizationError) {
+          return NextResponse.json({ error: 'Not authorized to link this campaign' }, { status: 403 });
+        }
         throw err;
       }
     }

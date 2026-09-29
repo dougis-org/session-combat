@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { Party, PartyMember } from '@/lib/types';
-import { validateStringArray } from '@/lib/validation/core';
+import { validateStringArray, parseCampaignIdInput, CampaignIdInput } from '@/lib/validation/core';
+import { PartyCampaignAuthorizationError } from '@/lib/storage/errors';
 
 type Params = { id: string };
 
@@ -12,26 +13,22 @@ type MemberReconciliationResult =
 
 async function reconcileMembers(
   existingParty: Party,
-  characterIds: unknown,
-  campaignId: unknown,
+  validatedIds: string[] | undefined,
+  campaignIdInput: CampaignIdInput,
   userId: string,
   now: Date
 ): Promise<MemberReconciliationResult> {
-  if (!Array.isArray(characterIds)) {
+  if (validatedIds === undefined) {
     return { ok: true, members: existingParty.members };
   }
 
-  const idsResult = validateStringArray(characterIds, 'characterIds');
-  if (!idsResult.valid) {
-    return { ok: false, status: 400, error: idsResult.error.message };
-  }
-  const newIdSet = new Set<string>(idsResult.value);
+  const newIdSet = new Set<string>(validatedIds);
   const existingActiveIds = new Set<string>(
     existingParty.members.filter(m => !m.leftAt).map(m => m.characterId)
   );
 
-  const effectiveCampaignId = campaignId !== undefined
-    ? (typeof campaignId === 'string' ? campaignId.trim() : '')
+  const effectiveCampaignId = campaignIdInput.kind === 'set'
+    ? campaignIdInput.value
     : existingParty.campaignId;
   const campaignChanged = effectiveCampaignId !== existingParty.campaignId;
 
@@ -60,33 +57,6 @@ async function reconcileMembers(
   return { ok: true, members: updatedMembers };
 }
 
-async function reassignCampaign(
-  updatedParty: Party,
-  campaignId: unknown,
-  existingCampaignId: string | undefined
-): Promise<void> {
-  if (campaignId === undefined) return;
-
-  const normalized = typeof campaignId === 'string' ? campaignId.trim() : '';
-
-  // Remove from all campaigns (UI expects 1-to-1 for now)
-  await partyRepo.removePartyFromAllCampaigns(updatedParty.id);
-
-  if (normalized) {
-    try {
-      await partyRepo.addPartyToCampaign(normalized, updatedParty.id);
-    } catch (err) {
-      if (existingCampaignId) {
-        await partyRepo.addPartyToCampaign(existingCampaignId, updatedParty.id).catch(() => {});
-      }
-      throw err;
-    }
-  }
-
-  // Ensure field stays decoupled
-  delete updatedParty.campaignId;
-}
-
 export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
   try {
     const parties = await partyRepo.loadParties(auth.userId);
@@ -104,7 +74,32 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id }) => {
 export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
   try {
     const body = await request.json();
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Request body must be an object' }, { status: 400 });
+    }
     const { name, description, characterIds, campaignId } = body;
+
+    if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
+      return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
+    }
+
+    if (description !== undefined && typeof description !== 'string') {
+      return NextResponse.json({ error: 'description must be a string' }, { status: 400 });
+    }
+
+    const campaignIdInput = parseCampaignIdInput(campaignId);
+    if (campaignIdInput.kind === 'invalid') {
+      return NextResponse.json({ error: 'campaignId must be a string' }, { status: 400 });
+    }
+
+    let validatedIds: string[] | undefined;
+    if (Array.isArray(characterIds)) {
+      const idsResult = validateStringArray(characterIds, 'characterIds');
+      if (!idsResult.valid) {
+        return NextResponse.json({ error: idsResult.error.message }, { status: 400 });
+      }
+      validatedIds = idsResult.value;
+    }
 
     const parties = await partyRepo.loadParties(auth.userId);
     const existingParty = parties.find((p) => p.id === id);
@@ -113,25 +108,28 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       return NextResponse.json({ error: 'Party not found' }, { status: 404 });
     }
 
-    if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
-      return NextResponse.json({ error: 'Party name is required' }, { status: 400 });
-    }
-
     const now = new Date();
-    const reconciliation = await reconcileMembers(existingParty, characterIds, campaignId, auth.userId, now);
+    const reconciliation = await reconcileMembers(existingParty, validatedIds, campaignIdInput, auth.userId, now);
     if (!reconciliation.ok) {
       return NextResponse.json({ error: reconciliation.error }, { status: reconciliation.status });
     }
 
     const updatedParty: Party = {
       ...existingParty,
-      name: name !== undefined && typeof name === 'string' ? name.trim() : existingParty.name,
-      description: description !== undefined && typeof description === 'string' ? description.trim() : (existingParty.description || ''),
+      name: name !== undefined ? (name as string).trim() : existingParty.name,
+      description: description !== undefined ? (description as string).trim() : (existingParty.description || ''),
       members: reconciliation.members,
       updatedAt: now,
     };
 
-    await reassignCampaign(updatedParty, campaignId, existingParty.campaignId);
+    try {
+      await partyRepo.reassignPartyCampaign(updatedParty, campaignId, existingParty.campaignId, auth.userId);
+    } catch (err) {
+      if (err instanceof PartyCampaignAuthorizationError) {
+        return NextResponse.json({ error: 'Not authorized to link this campaign' }, { status: 403 });
+      }
+      throw err;
+    }
 
     await partyRepo.saveParty(updatedParty);
 

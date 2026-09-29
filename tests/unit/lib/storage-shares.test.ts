@@ -4,6 +4,7 @@
 import { storage } from "@/lib/storage";
 import * as membershipRepo from "@/lib/storage/membershipRepo";
 import { DuplicateShareError } from "@/lib/errors";
+import { PartyCampaignAuthorizationError } from "@/lib/storage/errors";
 import { CampaignCharacterShare } from "@/lib/types";
 
 jest.mock("@/lib/db", () => ({
@@ -22,10 +23,6 @@ const mockedInsertCollection = {
 
 const mockedDeleteCollection = {
   deleteOne: jest.fn(),
-};
-
-const mockedFindCollection = {
-  find: jest.fn(),
 };
 
 jest.mocked(getDatabase).mockResolvedValue(mockedDb as any);
@@ -467,6 +464,9 @@ describe("storage.canAddToCampaignParty", () => {
 describe("storage.addPartyToCampaign", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(membershipRepo, "getMember").mockResolvedValue({
+      id: "mem-1", campaignId: "camp-1", userId: "dm-user", role: "dm", status: "active", history: [],
+    } as any);
   });
 
   it("A3-1: uses $addToSet when campaign.partyIds is already an array", async () => {
@@ -474,7 +474,7 @@ describe("storage.addPartyToCampaign", () => {
     const mockUpdateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne, updateOne: mockUpdateOne });
 
-    await storage.addPartyToCampaign("camp-1", "new-party");
+    await storage.addPartyToCampaign("camp-1", "new-party", "dm-user");
 
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { id: "camp-1" },
@@ -495,7 +495,7 @@ describe("storage.addPartyToCampaign", () => {
       return { findOne: mockFindOne, updateOne: mockUpdateOne };
     });
 
-    await storage.addPartyToCampaign("camp-1", "new-party");
+    await storage.addPartyToCampaign("camp-1", "new-party", "dm-user");
 
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { id: "camp-1" },
@@ -508,7 +508,7 @@ describe("storage.addPartyToCampaign", () => {
     const mockUpdateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne, updateOne: mockUpdateOne });
 
-    await storage.addPartyToCampaign("camp-1", "new-party");
+    await storage.addPartyToCampaign("camp-1", "new-party", "dm-user");
 
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { id: "camp-1" },
@@ -521,12 +521,20 @@ describe("storage.addPartyToCampaign", () => {
     const mockUpdateOne = jest.fn().mockResolvedValue({ modifiedCount: 0 });
     mockedDb.collection.mockReturnValue({ findOne: mockFindOne, updateOne: mockUpdateOne });
 
-    await storage.addPartyToCampaign("camp-1", "new-party");
+    await storage.addPartyToCampaign("camp-1", "new-party", "dm-user");
 
     expect(mockUpdateOne).toHaveBeenCalledWith(
       { id: "camp-1" },
       { $addToSet: { partyIds: "new-party" } }
     );
+  });
+
+  it("throws PartyCampaignAuthorizationError when caller is not an active DM", async () => {
+    jest.spyOn(membershipRepo, "getMember").mockResolvedValue(null);
+
+    await expect(
+      storage.addPartyToCampaign("camp-1", "new-party", "not-a-dm")
+    ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
   });
 });
 

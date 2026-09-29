@@ -183,6 +183,21 @@ export function validateRecord<T extends string | number | (string | number)>(
   return { valid: true, value: result };
 }
 
+export type CampaignIdInput =
+  | { kind: 'omit' }
+  | { kind: 'invalid' }
+  | { kind: 'set'; value: string };
+
+export function parseCampaignIdInput(value: unknown): CampaignIdInput {
+  if (value === undefined) {
+    return { kind: 'omit' };
+  }
+  if (typeof value === 'string') {
+    return { kind: 'set', value: value.trim() };
+  }
+  return { kind: 'invalid' };
+}
+
 export function validateStringRecord(
   value: unknown,
   fieldName: string = 'record'

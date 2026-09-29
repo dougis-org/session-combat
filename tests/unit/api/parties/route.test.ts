@@ -4,6 +4,7 @@
 import { GET, POST } from "@/app/api/parties/route";
 import { GET as GET_ONE, PUT, DELETE } from "@/app/api/parties/[id]/route";
 import * as partyRepo from "@/lib/storage/partyRepo";
+import { PartyCampaignAuthorizationError } from "@/lib/storage/errors";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -24,6 +25,7 @@ jest.mock("@/lib/storage/partyRepo", () => ({
   addPartyToCampaign: jest.fn(),
   removePartyFromCampaign: jest.fn(),
   removePartyFromAllCampaigns: jest.fn(),
+  reassignPartyCampaign: jest.fn(),
 }));
 
 const mockedPartyRepo = jest.mocked(partyRepo);
@@ -169,6 +171,48 @@ describe("POST /api/parties", () => {
     expect(body.error).toContain("characterIds");
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
+
+  it("returns 400 for each non-string, non-undefined campaignId type", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    for (const badValue of [null, 42, true, [], {}]) {
+      const response = await POST(makeRequest({ name: "Party", campaignId: badValue }));
+      expect(response.status).toBe(400);
+    }
+  });
+
+  it("returns 400 when description is not a string", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    const response = await POST(makeRequest({ name: "Party", description: 42 }));
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("no share check or campaign link when campaignId is omitted", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(makeRequest({ name: "No Campaign" }));
+
+    expect(response.status).toBe(201);
+    expect(mockedPartyRepo.addPartyToCampaign).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 and rolls back when addPartyToCampaign rejects with PartyCampaignAuthorizationError", async () => {
+    mockAuthState.payload = MOCK_AUTH;
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.saveParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.addPartyToCampaign.mockRejectedValueOnce(
+      new PartyCampaignAuthorizationError("camp-1", "user-123")
+    );
+    mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
+
+    const response = await POST(
+      makeRequest({ name: "Campaign Party", campaignId: "camp-1", characterIds: [] })
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.deleteParty).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("PUT /api/parties/[id]", () => {
@@ -243,8 +287,12 @@ describe("PUT /api/parties/[id]", () => {
       }),
       { params: Promise.resolve({ id: "party-123" }) }
     );
-    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(saved.campaignId).toBeUndefined();
+    expect(mockedPartyRepo.reassignPartyCampaign).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "party-123" }),
+      " camp-1 ",
+      undefined,
+      "user-123"
+    );
   });
 
   it("removes campaignId when empty string provided", async () => {
@@ -258,8 +306,76 @@ describe("PUT /api/parties/[id]", () => {
       }),
       { params: Promise.resolve({ id: "party-123" }) }
     );
-    const saved = (mockedPartyRepo.saveParty as jest.Mock).mock.calls[0][0];
-    expect(saved.campaignId).toBeUndefined();
+    expect(mockedPartyRepo.reassignPartyCampaign).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "party-123" }),
+      "",
+      "old-camp",
+      "user-123"
+    );
+  });
+
+  it("returns 400 when campaignId is not a string or undefined", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: 123,
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for each non-string, non-undefined campaignId type", async () => {
+    for (const badValue of [null, 42, true, [], {}]) {
+      const response = await PUT(
+        makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+          name: "Name",
+          campaignId: badValue,
+        }),
+        { params: Promise.resolve({ id: "party-123" }) }
+      );
+      expect(response.status).toBe(400);
+    }
+  });
+
+  it("returns 400 when description is not a string, without hitting storage", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        description: 42,
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when body is not a plain object", async () => {
+    for (const badBody of [null, [], "a string", 42]) {
+      const response = await PUT(
+        makeRouteRequest("http://localhost/api/parties/party-123", "PUT", badBody),
+        { params: Promise.resolve({ id: "party-123" }) }
+      );
+      expect(response.status).toBe(400);
+    }
+  });
+
+  it("returns 403 when reassignPartyCampaign rejects with PartyCampaignAuthorizationError", async () => {
+    mockedPartyRepo.reassignPartyCampaign.mockRejectedValueOnce(
+      new PartyCampaignAuthorizationError("camp-1", "user-123")
+    );
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: "camp-1",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 
   it("returns 404 when party not found", async () => {

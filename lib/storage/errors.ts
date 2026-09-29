@@ -14,3 +14,18 @@ export class StorageError extends Error {
     }
   }
 }
+
+export class PartyCampaignAuthorizationError extends Error {
+  readonly campaignId: string;
+  readonly userId: string;
+
+  constructor(campaignId: string, userId: string) {
+    super(`User "${userId}" is not an active DM of campaign "${campaignId}"`);
+    this.name = "PartyCampaignAuthorizationError";
+    this.campaignId = campaignId;
+    this.userId = userId;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, PartyCampaignAuthorizationError);
+    }
+  }
+}
