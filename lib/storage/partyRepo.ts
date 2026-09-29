@@ -1,7 +1,7 @@
 import { getDatabase } from "@/lib/db";
 import { runStorageOp } from "@/lib/storage/runOp";
 import { Party, PartyMember, SharedCharacterEntry, CampaignCharacterShare } from "@/lib/types";
-import { buildEntityQuery, normalizeStoredEntityId } from "@/lib/storage/helpers";
+import { normalizeStoredEntityId } from "@/lib/storage/helpers";
 import { loadCharacterById } from "./characterRepo";
 import { getMember } from "./membershipRepo";
 import { PartyCampaignAuthorizationError } from "./errors";
@@ -17,6 +17,7 @@ async function assertActiveDm(campaignId: string, callerId: string): Promise<voi
 }
 
 type LegacyPartyDoc = Omit<Party, 'members'> & { members?: PartyMember[]; characterIds?: string[] };
+type CampaignPartyDoc = { id: string; partyIds?: string[] };
 
 function migrateParty(party: LegacyPartyDoc): Party {
   if (Array.isArray(party.members)) {
@@ -182,7 +183,7 @@ export async function addPartyToCampaign(campaignId: string, partyId: string, ca
   }, async () => {
     await assertActiveDm(campaignId, callerId);
     const db = await getDatabase();
-    const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+    const campaign = await db.collection<CampaignPartyDoc>("campaigns").findOne({ id: campaignId });
     if (campaign && campaign.partyIds === undefined) {
       const legacyParties = await db
         .collection<LegacyPartyDoc>("parties")
@@ -190,12 +191,12 @@ export async function addPartyToCampaign(campaignId: string, partyId: string, ca
         .toArray();
       const migratedIds = legacyParties.map((p) => p.id);
       migratedIds.push(partyId);
-      await db.collection("campaigns").updateOne(
+      await db.collection<CampaignPartyDoc>("campaigns").updateOne(
         { id: campaignId },
         { $set: { partyIds: migratedIds } }
       );
     } else {
-      await db.collection("campaigns").updateOne(
+      await db.collection<CampaignPartyDoc>("campaigns").updateOne(
         { id: campaignId },
         { $addToSet: { partyIds: partyId } }
       );
@@ -206,24 +207,40 @@ export async function addPartyToCampaign(campaignId: string, partyId: string, ca
 export async function removePartyFromCampaign(campaignId: string, partyId: string): Promise<void> {
   return runStorageOp({ name: "removePartyFromCampaign", collection: "campaigns" }, async () => {
     const db = await getDatabase();
-    const campaign = await db.collection("campaigns").findOne({ id: campaignId });
+    const campaign = await db.collection<CampaignPartyDoc>("campaigns").findOne({ id: campaignId });
     if (campaign && campaign.partyIds === undefined) {
       const legacyParties = await db
         .collection<LegacyPartyDoc>("parties")
         .find({ campaignId } as unknown as Filter<LegacyPartyDoc>)
         .toArray();
       const migratedIds = legacyParties.map((p) => p.id).filter((id: string) => id !== partyId);
-      await db.collection("campaigns").updateOne(
+      await db.collection<CampaignPartyDoc>("campaigns").updateOne(
         { id: campaignId },
         { $set: { partyIds: migratedIds } }
       );
     } else {
-      await db.collection("campaigns").updateOne(
+      await db.collection<CampaignPartyDoc>("campaigns").updateOne(
         { id: campaignId },
-        { $pull: { partyIds: partyId } as any }
+        { $pull: { partyIds: partyId } }
       );
     }
   });
+}
+
+async function findLinkedCampaignIds(partyId: string, legacyCampaignId: string | undefined): Promise<string[]> {
+  const db = await getDatabase();
+  const linked = await db
+    .collection<CampaignPartyDoc>("campaigns")
+    .find({ partyIds: partyId })
+    .toArray();
+  const ids = new Set<string>(linked.map((c) => c.id));
+  // The deprecated Party.campaignId field is the only pointer into
+  // legacy campaigns whose partyIds array hasn't been migrated yet, so it
+  // must be included as a candidate alongside the live partyIds lookup.
+  if (legacyCampaignId) {
+    ids.add(legacyCampaignId);
+  }
+  return Array.from(ids);
 }
 
 export async function reassignPartyCampaign(
@@ -243,20 +260,34 @@ export async function reassignPartyCampaign(
       throw new Error('Invalid campaignId: expected a string or undefined');
     }
 
-    if (existingCampaignId) {
-      await assertActiveDm(existingCampaignId, callerId);
-      // Remove only from the campaign we just authorized — never a blanket
-      // removal, which could silently strip links from campaigns the caller
-      // has no authority over.
-      await removePartyFromCampaign(existingCampaignId, updatedParty.id);
+    const linkedCampaignIds = await findLinkedCampaignIds(updatedParty.id, existingCampaignId);
+
+    // Authorize every campaign this party is actually linked to before
+    // removing it from any of them — never trust a single caller-supplied
+    // "existing" campaign id, and never remove from a campaign the caller
+    // hasn't been verified as an active DM of.
+    for (const linkedId of linkedCampaignIds) {
+      await assertActiveDm(linkedId, callerId);
+    }
+    const removedFrom: string[] = [];
+    try {
+      for (const linkedId of linkedCampaignIds) {
+        await removePartyFromCampaign(linkedId, updatedParty.id);
+        removedFrom.push(linkedId);
+      }
+    } catch (err) {
+      await Promise.all(
+        removedFrom.map(cid => addPartyToCampaign(cid, updatedParty.id, callerId).catch(() => {}))
+      );
+      throw err;
     }
 
     if (parsed.value) {
       try {
         await addPartyToCampaign(parsed.value, updatedParty.id, callerId);
       } catch (err) {
-        if (existingCampaignId) {
-          await addPartyToCampaign(existingCampaignId, updatedParty.id, callerId).catch(() => {});
+        for (const linkedId of linkedCampaignIds) {
+          await addPartyToCampaign(linkedId, updatedParty.id, callerId).catch(() => {});
         }
         throw err;
       }
@@ -270,9 +301,9 @@ export async function reassignPartyCampaign(
 export async function removePartyFromAllCampaigns(partyId: string): Promise<void> {
   return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
     const db = await getDatabase();
-    await db.collection("campaigns").updateMany(
+    await db.collection<CampaignPartyDoc>("campaigns").updateMany(
       { partyIds: partyId },
-      { $pull: { partyIds: partyId } as any }
+      { $pull: { partyIds: partyId } }
     );
   });
 }

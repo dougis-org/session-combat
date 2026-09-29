@@ -280,6 +280,7 @@ describe("PUT /api/parties/[id]", () => {
   });
 
   it("sets campaignId when non-empty string provided", async () => {
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
     await PUT(
       makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
         name: "Name",
@@ -362,6 +363,7 @@ describe("PUT /api/parties/[id]", () => {
   });
 
   it("returns 403 when reassignPartyCampaign rejects with PartyCampaignAuthorizationError", async () => {
+    (mockedPartyRepo as any).canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.reassignPartyCampaign.mockRejectedValueOnce(
       new PartyCampaignAuthorizationError("camp-1", "user-123")
     );
@@ -463,6 +465,19 @@ describe("PUT /api/parties/[id]", () => {
     const body = await response.json();
     expect(body.error).toContain("characterIds");
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when characterIds is supplied but not an array, without hitting storage", async () => {
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        characterIds: "not-an-array",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
   });
 });
 

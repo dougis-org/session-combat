@@ -188,4 +188,47 @@ describe("reassignPartyCampaign", () => {
       { $addToSet: { partyIds: "party-1" } }
     );
   });
+
+  it("authorizes and removes a campaign discovered via a live partyIds lookup, not just the passed-in hint", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    mockCollection.toArray.mockResolvedValue([{ id: "stray-camp", partyIds: ["party-1"] }]);
+    mockCollection.findOne.mockResolvedValue({ id: "stray-camp", partyIds: ["party-1"] });
+    const party = { ...PARTY };
+
+    await partyRepo.reassignPartyCampaign(party, "", undefined, "dm-user");
+
+    expect(mockedGetMember).toHaveBeenCalledWith("stray-camp", "dm-user");
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { id: "stray-camp" },
+      { $pull: { partyIds: "party-1" } }
+    );
+  });
+
+  it("restores an already-removed campaign link if removing a later one fails", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    mockCollection.toArray.mockResolvedValue([{ id: "camp-a" }, { id: "camp-b" }]);
+    mockCollection.findOne.mockResolvedValue({ partyIds: ["party-1"] });
+    mockCollection.updateOne
+      .mockResolvedValueOnce(undefined) // remove from camp-a succeeds
+      .mockRejectedValueOnce(new Error("boom")); // remove from camp-b fails
+
+    await expect(
+      partyRepo.reassignPartyCampaign({ ...PARTY }, "", "camp-a", "dm-user")
+    ).rejects.toThrow();
+
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { id: "camp-a" },
+      { $addToSet: { partyIds: "party-1" } }
+    );
+  });
+
+  it("throws without removing anything when caller is not DM of a campaign found only via live lookup", async () => {
+    mockedGetMember.mockResolvedValue(null);
+    mockCollection.toArray.mockResolvedValue([{ id: "stray-camp", partyIds: ["party-1"] }]);
+
+    await expect(
+      partyRepo.reassignPartyCampaign({ ...PARTY }, "", undefined, "not-a-dm")
+    ).rejects.toBeInstanceOf(PartyCampaignAuthorizationError);
+    expect(mockCollection.updateOne).not.toHaveBeenCalled();
+  });
 });
