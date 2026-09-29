@@ -31,6 +31,46 @@ const ACTIVE_DM = { id: "mem-1", campaignId: "camp-1", userId: "dm-user", role: 
 const ACTIVE_PLAYER = { ...ACTIVE_DM, role: "player" as const };
 const INACTIVE_DM = { ...ACTIVE_DM, status: "invited" as const };
 
+describe("saveParty", () => {
+  let mockCollection: ReturnType<typeof makeMockCollection>;
+  let mockDb: { collection: jest.Mock };
+  const BASE_PARTY: Party = {
+    id: "party-1",
+    userId: "user-1",
+    name: "Fellowship",
+    description: "",
+    members: [],
+    createdAt: new Date("2026-01-01"),
+    updatedAt: new Date("2026-01-01"),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCollection = makeMockCollection();
+    mockDb = { collection: jest.fn(() => mockCollection) };
+    mockedGetDatabase.mockResolvedValue(mockDb as never);
+  });
+
+  it("$sets campaignId directly when the party has one", async () => {
+    await partyRepo.saveParty({ ...BASE_PARTY, campaignId: "camp-1" });
+
+    const [, update] = mockCollection.updateOne.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
+    expect(update.$set).toMatchObject({ campaignId: "camp-1" });
+    expect(update.$unset).toBeUndefined();
+  });
+
+  it("$unsets campaignId (not just omits it) when the party has none — a plain $set would leave a stale value in Mongo", async () => {
+    const party = { ...BASE_PARTY, campaignId: "old-camp" };
+    delete (party as { campaignId?: string }).campaignId;
+
+    await partyRepo.saveParty(party);
+
+    const [, update] = mockCollection.updateOne.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
+    expect(update.$unset).toEqual({ campaignId: "" });
+    expect((update.$set as Record<string, unknown>).campaignId).toBeUndefined();
+  });
+});
+
 describe("addPartyToCampaign", () => {
   let mockCollection: ReturnType<typeof makeMockCollection>;
   let mockDb: { collection: jest.Mock };
@@ -276,5 +316,30 @@ describe("reassignPartyCampaign", () => {
     await partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, "deleted-camp", "dm-user");
 
     expect(mockedGetMember).not.toHaveBeenCalledWith("deleted-camp", "dm-user");
+  });
+
+  it("drops a legacy campaignId pointer when that campaign has already migrated and no longer lists the party", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    // No live campaign references this party via a live partyIds lookup...
+    mockCollection.toArray.mockResolvedValue([]);
+    // ...and the legacy campaign itself exists and HAS migrated (partyIds is
+    // a real array), it's just that this party isn't in it anymore — a
+    // distinct case from "campaign doesn't exist at all".
+    mockCollection.findOne.mockResolvedValue({ id: "old-camp", partyIds: ["some-other-party"] });
+
+    await partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, "old-camp", "dm-user");
+
+    expect(mockedGetMember).not.toHaveBeenCalledWith("old-camp", "dm-user");
+  });
+
+  it("wraps a non-authorization error from the underlying campaign write in a generic failure (not a 403-worthy one)", async () => {
+    mockedGetMember.mockResolvedValue(ACTIVE_DM as never);
+    mockCollection.toArray.mockResolvedValue([]);
+    mockCollection.findOne.mockResolvedValue(null);
+    mockCollection.updateOne.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(
+      partyRepo.reassignPartyCampaign({ ...PARTY }, { kind: "set", value: "new-camp" }, undefined, "dm-user")
+    ).rejects.not.toBeInstanceOf(PartyCampaignAuthorizationError);
   });
 });

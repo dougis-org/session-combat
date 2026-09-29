@@ -301,7 +301,7 @@ describe("storage.saveParty", () => {
     expect(mockCollection).toHaveBeenCalledWith("parties");
     expect(updateOne).toHaveBeenCalledWith(
       { id: party.id, userId: party.userId },
-      { $set: expectedPartyData },
+      { $set: expectedPartyData, $unset: { campaignId: "" } },
       { upsert: true }
     );
   });

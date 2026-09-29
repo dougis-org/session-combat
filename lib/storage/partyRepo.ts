@@ -55,12 +55,20 @@ export async function saveParty(party: Party): Promise<void> {
     { name: "saveParty", collection: "parties" },
     async () => {
       const db = await getDatabase();
-      const { _id, ...partyData } = party;
+      const { _id, campaignId, ...rest } = party;
+      // A plain `$set` never removes a field the caller's in-memory object
+      // no longer has (e.g. after `delete party.campaignId`) — Mongo simply
+      // leaves the previously-stored value in place. When campaignId is
+      // absent, explicitly $unset it so the deprecated field is actually
+      // cleared rather than merely omitted from this write.
+      const update = campaignId !== undefined
+        ? { $set: { ...rest, campaignId } }
+        : { $set: rest, $unset: { campaignId: "" as const } };
       await db
         .collection<Party>("parties")
         .updateOne(
           { id: party.id, userId: party.userId },
-          { $set: partyData },
+          update,
           { upsert: true }
         );
     }
@@ -351,10 +359,11 @@ export async function reassignPartyCampaign(
 }
 
 // Deliberately not DM-gated: this is a bulk, party-scoped cleanup operation
-// (e.g. for use when a party itself is deleted) that isn't tied to any single
-// campaign a caller could be authorized against. It has no current caller in
-// the app; any future caller MUST perform its own authorization (e.g. verify
-// the requesting user owns the party) before invoking this.
+// (invoked after a party itself is deleted, see DELETE /api/parties/[id])
+// that isn't tied to any single campaign a caller could be authorized
+// against. Any caller MUST perform its own authorization (e.g. verify the
+// requesting user owns the party) before invoking this — it does not check
+// on its own.
 export async function removePartyFromAllCampaigns(partyId: string): Promise<void> {
   return runStorageOp({ name: "removePartyFromAllCampaigns", collection: "campaigns" }, async () => {
     const db = await getDatabase();

@@ -16,6 +16,7 @@ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.hel
 jest.mock("@/lib/storage/partyRepo", () => ({
   loadParties: jest.fn(),
   deleteParty: jest.fn(),
+  removePartyFromAllCampaigns: jest.fn(),
 }));
 
 const mockedPartyRepo = jest.mocked(partyRepo);
@@ -53,6 +54,14 @@ describe("GET /api/parties/[id]", () => {
     PARAMS,
     () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
   );
+
+  it("returns 400 when the id path param is empty, whitespace-only, or over-length, without hitting storage", async () => {
+    for (const badId of ["", "   ", "x".repeat(201)]) {
+      const response = await GET_ONE(makeReq(), { params: Promise.resolve({ id: badId }) });
+      expect(response.status).toBe(400);
+    }
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /api/parties/[id]", () => {
@@ -66,6 +75,7 @@ describe("DELETE /api/parties/[id]", () => {
       { id: "party-123", userId: "user-123", name: "Fellowship", members: [] },
     ] as any);
     mockedPartyRepo.deleteParty.mockResolvedValue(undefined as any);
+    mockedPartyRepo.removePartyFromAllCampaigns.mockResolvedValue(undefined as any);
   });
 
   itReturns401WithParams(DELETE, makeReq, PARAMS);
@@ -74,6 +84,15 @@ describe("DELETE /api/parties/[id]", () => {
     const response = await DELETE(makeReq(), { params: PARAMS });
     expect(response.status).toBe(200);
     expect(mockedPartyRepo.deleteParty).toHaveBeenCalledWith("party-123", "user-123");
+    expect(mockedPartyRepo.removePartyFromAllCampaigns).toHaveBeenCalledWith("party-123");
+  });
+
+  it("still returns 200 (and logs) when cleaning up campaign links after deletion fails", async () => {
+    mockedPartyRepo.removePartyFromAllCampaigns.mockRejectedValueOnce(new Error("cleanup failed"));
+
+    const response = await DELETE(makeReq(), { params: PARAMS });
+
+    expect(response.status).toBe(200);
   });
 
   itReturns404WithParams(
@@ -89,4 +108,12 @@ describe("DELETE /api/parties/[id]", () => {
     PARAMS,
     () => mockedPartyRepo.loadParties.mockRejectedValue(new Error("DB error"))
   );
+
+  it("returns 400 when the id path param is empty, whitespace-only, or over-length, without hitting storage", async () => {
+    for (const badId of ["", "   ", "x".repeat(201)]) {
+      const response = await DELETE(makeReq(), { params: Promise.resolve({ id: badId }) });
+      expect(response.status).toBe(400);
+    }
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
+  });
 });

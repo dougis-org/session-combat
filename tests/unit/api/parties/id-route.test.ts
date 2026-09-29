@@ -88,6 +88,27 @@ describe("PUT /api/parties/[id]", () => {
     expect(savedParty._id).toBeUndefined();
   });
 
+  it("returns 400 when the id path param is empty or whitespace-only, without hitting storage", async () => {
+    for (const badId of ["", "   "]) {
+      const response = await PUT(
+        makeRouteRequest(`http://localhost/api/parties/${encodeURIComponent(badId)}`, "PUT", { name: "Name" }),
+        { params: Promise.resolve({ id: badId }) }
+      );
+      expect(response.status).toBe(400);
+    }
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when the id path param exceeds the entity-id length limit, without hitting storage", async () => {
+    const longId = "x".repeat(201);
+    const response = await PUT(
+      makeRouteRequest(`http://localhost/api/parties/${longId}`, "PUT", { name: "Name" }),
+      { params: Promise.resolve({ id: longId }) }
+    );
+    expect(response.status).toBe(400);
+    expect(mockedPartyRepo.loadParties).not.toHaveBeenCalled();
+  });
+
   it("returns 400 (not 500) when the request body is malformed JSON", async () => {
     const response = await PUT(
       makeMalformedJsonRequest("http://localhost/api/parties/party-123", "PUT"),
@@ -232,6 +253,22 @@ describe("PUT /api/parties/[id]", () => {
     );
 
     expect(response.status).toBe(403);
+    expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 (not 403) when reassignPartyCampaign rejects with a generic error", async () => {
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.reassignPartyCampaign.mockRejectedValueOnce(new Error("db blip"));
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: "camp-1",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
+    );
+
+    expect(response.status).toBe(500);
     expect(mockedPartyRepo.saveParty).not.toHaveBeenCalled();
   });
 

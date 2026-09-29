@@ -15,6 +15,8 @@ jest.mock("@/lib/storage/partyRepo", () => ({
   saveParty: jest.fn(),
   deleteParty: jest.fn(),
   canAddToCampaignParty: jest.fn(),
+  addPartyToCampaign: jest.fn(),
+  removePartyFromCampaign: jest.fn(),
   reassignPartyCampaign: jest.fn(),
   getLinkedCampaignIds: jest.fn(),
   isActiveDm: jest.fn(),
@@ -183,10 +185,11 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
     expect(mockedPartyRepo.reassignPartyCampaign).not.toHaveBeenCalled();
   });
 
-  it("B4-5: rolls back the campaign reassignment if saveParty fails afterward", async () => {
+  it("B4-5: rolls back the new campaign link if saveParty fails afterward", async () => {
     mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue([]);
     mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
     mockedPartyRepo.reassignPartyCampaign.mockResolvedValueOnce(undefined as any);
+    mockedPartyRepo.removePartyFromCampaign.mockResolvedValueOnce(undefined as any);
     mockedPartyRepo.saveParty.mockRejectedValueOnce(new Error("db write failed"));
 
     const response = await PUT(
@@ -198,14 +201,32 @@ describe("PUT /api/parties/[id] — campaign authorization and character sharing
     );
 
     expect(response.status).toBe(500);
-    expect(mockedPartyRepo.reassignPartyCampaign).toHaveBeenCalledTimes(2);
-    expect(mockedPartyRepo.reassignPartyCampaign).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ id: "party-123" }),
-      { kind: "set", value: "" },
-      "camp-2",
-      "user-123"
+    expect(mockedPartyRepo.reassignPartyCampaign).toHaveBeenCalledTimes(1);
+    expect(mockedPartyRepo.removePartyFromCampaign).toHaveBeenCalledWith("camp-2", "party-123", "user-123");
+    expect(mockedPartyRepo.addPartyToCampaign).not.toHaveBeenCalled();
+  });
+
+  it("B4-6: restores every previously-linked campaign (not just the first) if saveParty fails after a successful reassignment", async () => {
+    mockedPartyRepo.getLinkedCampaignIds.mockResolvedValue(["camp-a", "camp-b"]);
+    mockedPartyRepo.isActiveDm.mockResolvedValue(true);
+    mockedPartyRepo.canAddToCampaignParty.mockResolvedValue(true);
+    mockedPartyRepo.reassignPartyCampaign.mockResolvedValueOnce(undefined as any);
+    mockedPartyRepo.removePartyFromCampaign.mockResolvedValueOnce(undefined as any);
+    mockedPartyRepo.addPartyToCampaign.mockResolvedValue(undefined as any);
+    mockedPartyRepo.saveParty.mockRejectedValueOnce(new Error("db write failed"));
+
+    const response = await PUT(
+      makeRouteRequest("http://localhost/api/parties/party-123", "PUT", {
+        name: "Name",
+        campaignId: "camp-2",
+      }),
+      { params: Promise.resolve({ id: "party-123" }) }
     );
+
+    expect(response.status).toBe(500);
+    expect(mockedPartyRepo.removePartyFromCampaign).toHaveBeenCalledWith("camp-2", "party-123", "user-123");
+    expect(mockedPartyRepo.addPartyToCampaign).toHaveBeenCalledWith("camp-a", "party-123", "user-123");
+    expect(mockedPartyRepo.addPartyToCampaign).toHaveBeenCalledWith("camp-b", "party-123", "user-123");
   });
 
   it("B5-1: when a party is stray-linked to more than one campaign, requires DM authorization for every linked campaign, not just the first", async () => {

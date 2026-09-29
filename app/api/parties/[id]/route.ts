@@ -40,6 +40,15 @@ async function authorizeCampaignSharing(
     return { ok: true };
   }
 
+  const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
+  if (charsToCheck.length === 0) {
+    // Nothing about this party's membership in these campaign(s) is
+    // actually changing — e.g. a rename with no characterIds/campaignId in
+    // the body. Don't require active-DM status just to leave a
+    // campaign-linked party's roster untouched.
+    return { ok: true };
+  }
+
   for (const campaignId of effectiveCampaignIds) {
     const authorized = await partyRepo.isActiveDm(campaignId, userId);
     if (!authorized) {
@@ -47,7 +56,6 @@ async function authorizeCampaignSharing(
     }
   }
 
-  const charsToCheck = Array.from(newIdSet).filter(charId => campaignChanged || !existingActiveIds.has(charId));
   for (const campaignId of effectiveCampaignIds) {
     const checks = await Promise.all(
       charsToCheck.map(charId => partyRepo.canAddToCampaignParty(campaignId, charId, userId))
@@ -184,13 +192,16 @@ type CampaignReassignmentResult = { ok: true } | { ok: false; status: number; er
  * Commits the campaign-link change for a PUT and persists the updated party,
  * rolling the campaign link back to its previous state if saving the party
  * document fails partway through (so campaigns.partyIds and the party
- * document never diverge).
+ * document never diverge). Restores *every* previously-linked campaign on
+ * rollback, not just one — reassignPartyCampaign may have removed the party
+ * from more than one (see getLinkedCampaignIds), and a rollback that only
+ * restores the first would silently drop the rest.
  */
 async function applyCampaignReassignment(
   updatedParty: Party,
   campaignIdInput: CampaignIdInput,
   existingCampaignId: string | undefined,
-  currentCampaignId: string | undefined,
+  linkedCampaignIds: string[],
   callerId: string,
   partyId: string
 ): Promise<CampaignReassignmentResult> {
@@ -207,13 +218,20 @@ async function applyCampaignReassignment(
     await partyRepo.saveParty(updatedParty);
   } catch (err) {
     if (campaignIdInput.kind !== 'omit') {
-      const newLiveCampaignId = campaignIdInput.kind === 'set' ? campaignIdInput.value : currentCampaignId;
-      const rollbackInput: CampaignIdInput = currentCampaignId !== undefined
-        ? { kind: 'set', value: currentCampaignId }
-        : { kind: 'set', value: '' };
-      await partyRepo.reassignPartyCampaign(updatedParty, rollbackInput, newLiveCampaignId, callerId).catch((rollbackErr) => {
-        console.error(`Failed to roll back campaign reassignment for party ${partyId} after saveParty failure:`, rollbackErr);
-      });
+      // reassignPartyCampaign already succeeded: the party was removed from
+      // every campaign in linkedCampaignIds and, if a new one was set,
+      // added to it. Undo both halves.
+      const newLiveCampaignId = campaignIdInput.kind === 'set' ? campaignIdInput.value : undefined;
+      if (newLiveCampaignId) {
+        await partyRepo.removePartyFromCampaign(newLiveCampaignId, updatedParty.id, callerId).catch((rollbackErr) => {
+          console.error(`Failed to roll back new campaign link ${newLiveCampaignId} for party ${partyId} after saveParty failure:`, rollbackErr);
+        });
+      }
+      await Promise.all(linkedCampaignIds.map(cid =>
+        partyRepo.addPartyToCampaign(cid, updatedParty.id, callerId).catch((rollbackErr) => {
+          console.error(`Failed to roll back campaign reassignment for party ${partyId} (restoring link to ${cid}) after saveParty failure:`, rollbackErr);
+        })
+      ));
     }
     throw err;
   }
@@ -286,7 +304,7 @@ export const PUT = withAuthAndParams<Params>(async (request, auth, { id }) => {
       updatedAt: now,
     };
 
-    const applied = await applyCampaignReassignment(updatedParty, campaignIdInput, existingParty.campaignId, linkedCampaignIds[0], auth.userId, id);
+    const applied = await applyCampaignReassignment(updatedParty, campaignIdInput, existingParty.campaignId, linkedCampaignIds, auth.userId, id);
     if (!applied.ok) {
       return NextResponse.json({ error: applied.error }, { status: applied.status });
     }
@@ -313,6 +331,9 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id }) =
     }
 
     await partyRepo.deleteParty(id, auth.userId);
+    await partyRepo.removePartyFromAllCampaigns(id).catch((cleanupErr) => {
+      console.error(`Failed to clean up campaign links for deleted party ${id}:`, cleanupErr);
+    });
 
     return NextResponse.json({ message: 'Party deleted successfully' });
   } catch (error) {
