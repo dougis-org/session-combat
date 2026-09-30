@@ -245,7 +245,7 @@ describe("dedupeEngine", () => {
     });
 
     it("counts the spell as an error (never inserts it) when the existence check rejects", async () => {
-      // #504: storage.spellExistsByNameAndSource now rejects with StorageError
+      // #504: spellRepo.spellExistsByNameAndSource now rejects with StorageError
       // on a DB failure instead of swallowing to `false`. The import must not
       // fall through and treat the spell as confirmed not-a-duplicate.
       mockedSpellRepo.spellExistsByNameAndSource.mockRejectedValue(
