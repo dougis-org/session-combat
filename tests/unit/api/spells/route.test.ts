@@ -2,20 +2,21 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/spells/route";
-import { storage } from "@/lib/storage";
+import * as spellRepo from "@/lib/storage/spellRepo";
 import { requireAdmin } from "@/lib/api-helpers";
 import { SpellTemplate } from "@/lib/types";
 import { makeRouteRequest, mockAdminDenied } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/spellRepo", () => ({
+  __esModule: true,
+  
     loadSpells: jest.fn(),
     saveSpellTemplate: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedSpellRepo = jest.mocked(spellRepo);
 const mockedRequireAdmin = jest.mocked(requireAdmin);
 
 const BASE_BODY = {
@@ -69,7 +70,7 @@ describe("GET /api/spells", () => {
         updatedAt: new Date(),
       },
     ];
-    mockedStorage.loadSpells.mockResolvedValue(spells);
+    mockedSpellRepo.loadSpells.mockResolvedValue(spells);
 
     const req = makeRouteRequest("http://localhost/api/spells", "GET");
     const res = await GET(req);
@@ -127,7 +128,7 @@ describe("GET /api/spells", () => {
         updatedAt: new Date(),
       },
     ];
-    mockedStorage.loadSpells.mockImplementation((userId?: string, conc?: boolean): Promise<SpellTemplate[]> => {
+    mockedSpellRepo.loadSpells.mockImplementation((userId?: string, conc?: boolean): Promise<SpellTemplate[]> => {
       if (conc === true) return Promise.resolve([allSpells[1]]);
       return Promise.resolve(allSpells);
     });
@@ -142,7 +143,7 @@ describe("GET /api/spells", () => {
   });
 
   it("returns 500 when loadSpells throws", async () => {
-    mockedStorage.loadSpells.mockRejectedValue(new Error("connection refused"));
+    mockedSpellRepo.loadSpells.mockRejectedValue(new Error("connection refused"));
 
     const req = makeRouteRequest("http://localhost/api/spells", "GET");
     const res = await GET(req);
@@ -157,7 +158,7 @@ describe("POST /api/spells", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedRequireAdmin.mockReturnValue(Promise.resolve(null));
-    mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
+    mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
   });
 
   it("creates a spell when admin", async () => {
@@ -208,7 +209,7 @@ describe("POST /api/spells", () => {
   });
 
   it("returns 500 when storage throws", async () => {
-    mockedStorage.saveSpellTemplate.mockRejectedValue(new Error("connection refused"));
+    mockedSpellRepo.saveSpellTemplate.mockRejectedValue(new Error("connection refused"));
 
     const req = makeRouteRequest("http://localhost/api/spells", "POST", BASE_BODY);
     const res = await POST(req);

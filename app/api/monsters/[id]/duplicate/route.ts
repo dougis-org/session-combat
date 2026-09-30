@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '../../../../../lib/middleware';
-import { storage } from '../../../../../lib/storage';
+import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
 import { MonsterTemplate } from '../../../../../lib/types';
 
 export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
   try {
-    const templates = await storage.loadAllMonsterTemplates(auth.userId);
+    const templates = await monsterTemplateRepo.loadAllMonsterTemplates(auth.userId);
     const original = templates.find((t: MonsterTemplate) => t.id === id);
 
     if (!original) {
@@ -22,7 +22,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
       updatedAt: new Date(),
     };
 
-    await storage.saveMonsterTemplate(duplicated);
+    await monsterTemplateRepo.saveMonsterTemplate(duplicated);
 
     return NextResponse.json(duplicated, { status: 201 });
   } catch (error) {

@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { PUT } from "@/app/api/monsters/[id]/route";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -12,14 +12,15 @@ import {
 import { EXISTING_MONSTER } from "./fixtures";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     loadMonsterTemplates: jest.fn(),
     saveMonsterTemplate: jest.fn(),
-  },
+  
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
 
 const PARAMS = Promise.resolve({ id: "monster-1" });
 const makeReqWith = (alignment: string | undefined) =>
@@ -34,8 +35,8 @@ describe("PUT /api/monsters/[id] — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.loadMonsterTemplates.mockResolvedValue([EXISTING_MONSTER] as any);
-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
+    mockedMonsterRepo.loadMonsterTemplates.mockResolvedValue([EXISTING_MONSTER] as any);
+    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
   });
 
   itValidatesAlignmentFieldWithParams(PUT, makeReqWith, PARAMS, 200);

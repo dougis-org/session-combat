@@ -5,11 +5,12 @@ const mockLoadAll = jest.fn();
 const mockSave = jest.fn();
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     loadAllMonsterTemplates: (...args: any[]) => mockLoadAll(...args),
     saveMonsterTemplate: (...args: any[]) => mockSave(...args),
-  },
+  
 }));
 
 import { POST } from "@/app/api/monsters/[id]/duplicate/route";

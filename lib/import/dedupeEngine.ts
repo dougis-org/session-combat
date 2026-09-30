@@ -1,4 +1,5 @@
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+import * as spellRepo from "@/lib/storage/spellRepo";
 import {
   Open5ECreature,
   Open5ESpell,
@@ -23,11 +24,11 @@ export async function shouldImport(
   source: string
 ): Promise<{ should: boolean; existingId?: string }> {
   if (collection === "spells") {
-    const exists = await storage.spellExistsByNameAndSource(name, source);
+    const exists = await spellRepo.spellExistsByNameAndSource(name, source);
     return { should: !exists };
   }
   if (collection === "monsters") {
-    const existing = await storage.findMonsterByNameAndSource(name, source);
+    const existing = await monsterTemplateRepo.findMonsterByNameAndSource(name, source);
     return { should: !existing, existingId: existing?.id };
   }
   return { should: true };
@@ -47,7 +48,7 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
     return { inserted: false, skipped: false, error: true };
   }
 
-  // A thrown existence check (e.g. storage.spellExistsByNameAndSource now
+  // A thrown existence check (e.g. spellRepo.spellExistsByNameAndSource now
   // rejects with StorageError on a DB failure instead of swallowing to
   // `false`) must fail this item cleanly — never fall through and insert it as
   // though it were confirmed not-a-duplicate.
@@ -96,7 +97,7 @@ async function importMonsterSingle(
     return { inserted: false, skipped: false, error: true };
   }
 
-  await storage.saveMonsterTemplate(monster);
+  await monsterTemplateRepo.saveMonsterTemplate(monster);
   return { inserted: true, skipped: false, error: false };
 }
 
@@ -146,6 +147,6 @@ export async function importSpellsFromOpen5E(
       const r = transformSpell(raw as Open5ESpell);
       return { entity: r.spell as unknown as SpellTemplate, valid: r.valid, errors: r.errors };
     },
-    (spell) => storage.saveSpellTemplate(spell)
+    (spell) => spellRepo.saveSpellTemplate(spell)
   );
 }

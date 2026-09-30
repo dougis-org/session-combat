@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
 import { AuthPayload, MonsterTemplate, normalizeAlignment } from '@/lib/types';
 
 async function loadUserTemplate(auth: AuthPayload, id: string): Promise<MonsterTemplate | NextResponse> {
-  const templates = await storage.loadMonsterTemplates(auth.userId);
+  const templates = await monsterTemplateRepo.loadMonsterTemplates(auth.userId);
   return templates.find((t) => t.id === id) ?? NextResponse.json(
     { error: 'Monster template not found' },
     { status: 404 }
@@ -116,7 +116,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       updatedAt: new Date(),
     };
 
-    await storage.saveMonsterTemplate(updatedTemplate);
+    await monsterTemplateRepo.saveMonsterTemplate(updatedTemplate);
 
     return NextResponse.json(updatedTemplate);
   } catch (error) {
@@ -133,7 +133,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
     const template = await loadUserTemplate(auth, id);
     if (template instanceof NextResponse) return template;
 
-    await storage.deleteMonsterTemplate(id, auth.userId);
+    await monsterTemplateRepo.deleteMonsterTemplate(id, auth.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

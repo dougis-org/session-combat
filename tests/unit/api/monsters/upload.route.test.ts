@@ -3,7 +3,7 @@
  */
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/monsters/upload/route";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import { isUserAdmin } from "@/lib/permissions";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import {
@@ -14,18 +14,19 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     findExistingMonsterKeys: jest.fn(),
     saveManyMonsterTemplates: jest.fn(),
     deleteMonsterTemplatesByIds: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/permissions", () => ({ isUserAdmin: jest.fn() }));
 
-const mockedFindKeys = jest.mocked(storage.findExistingMonsterKeys);
-const mockedSaveMany = jest.mocked(storage.saveManyMonsterTemplates);
-const mockedDeleteByIds = jest.mocked(storage.deleteMonsterTemplatesByIds);
+const mockedFindKeys = jest.mocked(monsterTemplateRepo.findExistingMonsterKeys);
+const mockedSaveMany = jest.mocked(monsterTemplateRepo.saveManyMonsterTemplates);
+const mockedDeleteByIds = jest.mocked(monsterTemplateRepo.deleteMonsterTemplatesByIds);
 const mockedIsAdmin = jest.mocked(isUserAdmin);
 
 const BASE_URL = "http://localhost/api/monsters/upload";

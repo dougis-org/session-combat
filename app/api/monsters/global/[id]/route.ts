@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { isUserAdmin } from '@/lib/permissions';
 
@@ -11,7 +11,7 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const templates = await storage.loadGlobalMonsterTemplates();
+    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
     const template = templates.find((t) => t.id === id);
 
     if (!template) {
@@ -77,7 +77,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
     } = body;
 
     // Get the existing template to verify it's global
-    const templates = await storage.loadGlobalMonsterTemplates();
+    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
     const existingTemplate = templates.find((t) => t.id === id);
 
     if (!existingTemplate) {
@@ -141,7 +141,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id 
       updatedAt: new Date(),
     };
 
-    await storage.saveMonsterTemplate(updatedTemplate);
+    await monsterTemplateRepo.saveMonsterTemplate(updatedTemplate);
 
     return NextResponse.json(updatedTemplate);
   } catch (error) {
@@ -166,7 +166,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
   }
 
   try {
-    const templates = await storage.loadGlobalMonsterTemplates();
+    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
     const template = templates.find((t) => t.id === id);
 
     if (!template) {
@@ -176,7 +176,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, { 
       );
     }
 
-    await storage.deleteMonsterTemplate(id, 'GLOBAL');
+    await monsterTemplateRepo.deleteMonsterTemplate(id, 'GLOBAL');
 
     return NextResponse.json({ success: true });
   } catch (error) {

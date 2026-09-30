@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import { MonsterTemplate, normalizeAlignment } from "@/lib/types";
 import { GLOBAL_USER_ID } from "@/lib/constants";
 import { randomUUID } from "crypto";
@@ -10,7 +10,7 @@ import { shouldImport } from "@/lib/import/dedupeEngine";
 
 export async function GET(request: NextRequest) {
   try {
-    const templates = await storage.loadGlobalMonsterTemplates();
+    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
     return NextResponse.json(templates);
   } catch (error) {
     console.error('Error fetching global monster templates:', error);
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     };
 
-    await storage.saveMonsterTemplate(template);
+    await monsterTemplateRepo.saveMonsterTemplate(template);
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
@@ -160,7 +160,7 @@ export async function PUT(request: NextRequest) {
       }
 
       try {
-        await storage.saveMonsterTemplate(monster);
+        await monsterTemplateRepo.saveMonsterTemplate(monster);
         inserted++;
       } catch {
         errors++;

@@ -1,0 +1,1031 @@
+diff --git a/app/api/monsters/[id]/duplicate/route.ts b/app/api/monsters/[id]/duplicate/route.ts
+index 5a7bb7b9..ff532cdc 100644
+--- a/app/api/monsters/[id]/duplicate/route.ts
++++ b/app/api/monsters/[id]/duplicate/route.ts
+@@ -1,11 +1,11 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ import { withAuthAndParams } from '../../../../../lib/middleware';
+-import { storage } from '../../../../../lib/storage';
++import * as monsterTemplateRepo from '../../../../../lib/storage/monsterTemplateRepo';
+ import { MonsterTemplate } from '../../../../../lib/types';
+ 
+ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id }) => {
+   try {
+-    const templates = await storage.loadAllMonsterTemplates(auth.userId);
++    const templates = await monsterTemplateRepo.loadAllMonsterTemplates(auth.userId);
+     const original = templates.find((t: MonsterTemplate) => t.id === id);
+ 
+     if (!original) {
+@@ -22,7 +22,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
+       updatedAt: new Date(),
+     };
+ 
+-    await storage.saveMonsterTemplate(duplicated);
++    await monsterTemplateRepo.saveMonsterTemplate(duplicated);
+ 
+     return NextResponse.json(duplicated, { status: 201 });
+   } catch (error) {
+diff --git a/app/api/monsters/[id]/route.ts b/app/api/monsters/[id]/route.ts
+index 53354365..6c8fb617 100644
+--- a/app/api/monsters/[id]/route.ts
++++ b/app/api/monsters/[id]/route.ts
+@@ -1,10 +1,10 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ import { withAuthAndParams } from '@/lib/middleware';
+-import { storage } from '@/lib/storage';
++import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
+ import { AuthPayload, MonsterTemplate, normalizeAlignment } from '@/lib/types';
+ 
+ async function loadUserTemplate(auth: AuthPayload, id: string): Promise<MonsterTemplate | NextResponse> {
+-  const templates = await storage.loadMonsterTemplates(auth.userId);
++  const templates = await monsterTemplateRepo.loadMonsterTemplates(auth.userId);
+   return templates.find((t) => t.id === id) ?? NextResponse.json(
+     { error: 'Monster template not found' },
+     { status: 404 }
+@@ -116,7 +116,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id
+       updatedAt: new Date(),
+     };
+ 
+-    await storage.saveMonsterTemplate(updatedTemplate);
++    await monsterTemplateRepo.saveMonsterTemplate(updatedTemplate);
+ 
+     return NextResponse.json(updatedTemplate);
+   } catch (error) {
+@@ -133,7 +133,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, {
+     const template = await loadUserTemplate(auth, id);
+     if (template instanceof NextResponse) return template;
+ 
+-    await storage.deleteMonsterTemplate(id, auth.userId);
++    await monsterTemplateRepo.deleteMonsterTemplate(id, auth.userId);
+ 
+     return NextResponse.json({ success: true });
+   } catch (error) {
+diff --git a/app/api/monsters/global/[id]/route.ts b/app/api/monsters/global/[id]/route.ts
+index 90dfef30..b9fbec5e 100644
+--- a/app/api/monsters/global/[id]/route.ts
++++ b/app/api/monsters/global/[id]/route.ts
+@@ -1,6 +1,6 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ import { withAuthAndParams } from '@/lib/middleware';
+-import { storage } from '@/lib/storage';
++import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
+ import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
+ import { isUserAdmin } from '@/lib/permissions';
+ 
+@@ -11,7 +11,7 @@ export async function GET(
+   const { id } = await params;
+ 
+   try {
+-    const templates = await storage.loadGlobalMonsterTemplates();
++    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
+     const template = templates.find((t) => t.id === id);
+ 
+     if (!template) {
+@@ -77,7 +77,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id
+     } = body;
+ 
+     // Get the existing template to verify it's global
+-    const templates = await storage.loadGlobalMonsterTemplates();
++    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
+     const existingTemplate = templates.find((t) => t.id === id);
+ 
+     if (!existingTemplate) {
+@@ -141,7 +141,7 @@ export const PUT = withAuthAndParams<{ id: string }>(async (request, auth, { id
+       updatedAt: new Date(),
+     };
+ 
+-    await storage.saveMonsterTemplate(updatedTemplate);
++    await monsterTemplateRepo.saveMonsterTemplate(updatedTemplate);
+ 
+     return NextResponse.json(updatedTemplate);
+   } catch (error) {
+@@ -166,7 +166,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, {
+   }
+ 
+   try {
+-    const templates = await storage.loadGlobalMonsterTemplates();
++    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
+     const template = templates.find((t) => t.id === id);
+ 
+     if (!template) {
+@@ -176,7 +176,7 @@ export const DELETE = withAuthAndParams<{ id: string }>(async (request, auth, {
+       );
+     }
+ 
+-    await storage.deleteMonsterTemplate(id, 'GLOBAL');
++    await monsterTemplateRepo.deleteMonsterTemplate(id, 'GLOBAL');
+ 
+     return NextResponse.json({ success: true });
+   } catch (error) {
+diff --git a/app/api/monsters/global/route.ts b/app/api/monsters/global/route.ts
+index c56984a5..a21ec730 100644
+--- a/app/api/monsters/global/route.ts
++++ b/app/api/monsters/global/route.ts
+@@ -1,5 +1,5 @@
+ import { NextRequest, NextResponse } from "next/server";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import { MonsterTemplate, normalizeAlignment } from "@/lib/types";
+ import { GLOBAL_USER_ID } from "@/lib/constants";
+ import { randomUUID } from "crypto";
+@@ -10,7 +10,7 @@ import { shouldImport } from "@/lib/import/dedupeEngine";
+ 
+ export async function GET(request: NextRequest) {
+   try {
+-    const templates = await storage.loadGlobalMonsterTemplates();
++    const templates = await monsterTemplateRepo.loadGlobalMonsterTemplates();
+     return NextResponse.json(templates);
+   } catch (error) {
+     console.error('Error fetching global monster templates:', error);
+@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
+       updatedAt: new Date(),
+     };
+ 
+-    await storage.saveMonsterTemplate(template);
++    await monsterTemplateRepo.saveMonsterTemplate(template);
+ 
+     return NextResponse.json(template, { status: 201 });
+   } catch (error) {
+@@ -160,7 +160,7 @@ export async function PUT(request: NextRequest) {
+       }
+ 
+       try {
+-        await storage.saveMonsterTemplate(monster);
++        await monsterTemplateRepo.saveMonsterTemplate(monster);
+         inserted++;
+       } catch {
+         errors++;
+diff --git a/app/api/monsters/route.ts b/app/api/monsters/route.ts
+index f37daeaf..dfebb4b7 100644
+--- a/app/api/monsters/route.ts
++++ b/app/api/monsters/route.ts
+@@ -1,13 +1,13 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ import { withAuth } from '@/lib/middleware';
+-import { storage } from '@/lib/storage';
++import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
+ import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
+ import { getDatabase } from '@/lib/db';
+ 
+ export const GET = withAuth(async (request, auth) => {
+   try {
+     // Return all templates (user's private + global)
+-    const templates = await storage.loadAllMonsterTemplates(auth.userId);
++    const templates = await monsterTemplateRepo.loadAllMonsterTemplates(auth.userId);
+     return NextResponse.json(templates);
+   } catch (error) {
+     console.error('Error fetching monster templates:', error);
+@@ -109,7 +109,7 @@ export const POST = withAuth(async (request, auth) => {
+       updatedAt: new Date(),
+     };
+ 
+-    await storage.saveMonsterTemplate(template);
++    await monsterTemplateRepo.saveMonsterTemplate(template);
+ 
+     return NextResponse.json(template, { status: 201 });
+   } catch (error) {
+diff --git a/app/api/monsters/upload/route.ts b/app/api/monsters/upload/route.ts
+index 09844125..85f8ec73 100644
+--- a/app/api/monsters/upload/route.ts
++++ b/app/api/monsters/upload/route.ts
+@@ -23,7 +23,7 @@
+ import { NextResponse } from 'next/server';
+ import { withAuth } from '@/lib/middleware';
+ import { isUserAdmin } from '@/lib/permissions';
+-import { storage } from '@/lib/storage';
++import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
+ import { GLOBAL_USER_ID } from '@/lib/constants';
+ import {
+   validateMonsterUploadDocument,
+@@ -109,7 +109,7 @@ async function ingest(
+   }
+ 
+   // Step 4 — DB dedupe against the target library.
+-  const existingKeys = await storage.findExistingMonsterKeys(
++  const existingKeys = await monsterTemplateRepo.findExistingMonsterKeys(
+     unique.map((r) => ({ name: r.name, source: r.source ?? '' })),
+     targetUserId,
+   );
+@@ -135,12 +135,12 @@ async function ingest(
+   const generatedIds = templates.map((t) => t.id);
+ 
+   try {
+-    await storage.saveManyMonsterTemplates(templates);
++    await monsterTemplateRepo.saveManyMonsterTemplates(templates);
+   } catch (error) {
+     // Step 6 — compensating delete of everything this batch generated.
+     let orphanedMonsterIds: string[] = [];
+     try {
+-      await storage.deleteMonsterTemplatesByIds(generatedIds, targetUserId);
++      await monsterTemplateRepo.deleteMonsterTemplatesByIds(generatedIds, targetUserId);
+     } catch (cleanupError) {
+       orphanedMonsterIds = generatedIds;
+       console.error('Monster import: compensating delete failed', {
+diff --git a/app/api/spells/[id]/route.ts b/app/api/spells/[id]/route.ts
+index 42017062..134b4dda 100644
+--- a/app/api/spells/[id]/route.ts
++++ b/app/api/spells/[id]/route.ts
+@@ -1,5 +1,5 @@
+ import { NextRequest, NextResponse } from "next/server";
+-import { storage } from "@/lib/storage";
++import * as spellRepo from "@/lib/storage/spellRepo";
+ import { requireAdmin } from "@/lib/api-helpers";
+ import { applySpellUpdates, SpellBody } from "@/lib/api/spell-helpers";
+ 
+@@ -10,7 +10,7 @@ interface RouteParams {
+ export async function GET(request: NextRequest, { params }: RouteParams) {
+   try {
+     const { id } = await params;
+-    const spell = await storage.loadSpellById(id);
++    const spell = await spellRepo.loadSpellById(id);
+ 
+     if (!spell) {
+       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
+@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
+ 
+   try {
+     const { id } = await params;
+-    const existing = await storage.loadSpellById(id);
++    const existing = await spellRepo.loadSpellById(id);
+     if (!existing) {
+       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
+     }
+@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
+       return NextResponse.json({ error: errors[0].message }, { status: 400 });
+     }
+ 
+-    await storage.saveSpellTemplate(updated);
++    await spellRepo.saveSpellTemplate(updated);
+ 
+     return NextResponse.json(updated);
+   } catch (error) {
+@@ -66,12 +66,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
+ 
+   try {
+     const { id } = await params;
+-    const existing = await storage.loadSpellById(id);
++    const existing = await spellRepo.loadSpellById(id);
+     if (!existing) {
+       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
+     }
+ 
+-    await storage.deleteSpellTemplate(id);
++    await spellRepo.deleteSpellTemplate(id);
+ 
+     return new NextResponse(null, { status: 204 });
+   } catch (error) {
+diff --git a/app/api/spells/route.ts b/app/api/spells/route.ts
+index 0bad31d4..b66c0baf 100644
+--- a/app/api/spells/route.ts
++++ b/app/api/spells/route.ts
+@@ -1,5 +1,5 @@
+ import { NextRequest, NextResponse } from "next/server";
+-import { storage } from "@/lib/storage";
++import * as spellRepo from "@/lib/storage/spellRepo";
+ import { requireAdmin } from "@/lib/api-helpers";
+ import {
+   validateSpellName,
+@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
+     const { searchParams } = new URL(request.url);
+     const concentration = searchParams.get("concentration");
+ 
+-    let spells = await storage.loadSpells(
++    let spells = await spellRepo.loadSpells(
+       undefined,
+       concentration === "true" ? true : undefined
+     );
+@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
+ 
+     const spell = buildSpellFromBody(body);
+ 
+-    await storage.saveSpellTemplate(spell);
++    await spellRepo.saveSpellTemplate(spell);
+ 
+     return NextResponse.json(spell, { status: 201 });
+   } catch (error) {
+diff --git a/lib/import/dedupeEngine.ts b/lib/import/dedupeEngine.ts
+index 0ad7483a..58464ebe 100644
+--- a/lib/import/dedupeEngine.ts
++++ b/lib/import/dedupeEngine.ts
+@@ -1,4 +1,5 @@
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
++import * as spellRepo from "@/lib/storage/spellRepo";
+ import {
+   Open5ECreature,
+   Open5ESpell,
+@@ -23,11 +24,11 @@ export async function shouldImport(
+   source: string
+ ): Promise<{ should: boolean; existingId?: string }> {
+   if (collection === "spells") {
+-    const exists = await storage.spellExistsByNameAndSource(name, source);
++    const exists = await spellRepo.spellExistsByNameAndSource(name, source);
+     return { should: !exists };
+   }
+   if (collection === "monsters") {
+-    const existing = await storage.findMonsterByNameAndSource(name, source);
++    const existing = await monsterTemplateRepo.findMonsterByNameAndSource(name, source);
+     return { should: !existing, existingId: existing?.id };
+   }
+   return { should: true };
+@@ -47,7 +48,7 @@ async function importSingle<T extends MonsterTemplate | SpellTemplate>(
+     return { inserted: false, skipped: false, error: true };
+   }
+ 
+-  // A thrown existence check (e.g. storage.spellExistsByNameAndSource now
++  // A thrown existence check (e.g. spellRepo.spellExistsByNameAndSource now
+   // rejects with StorageError on a DB failure instead of swallowing to
+   // `false`) must fail this item cleanly — never fall through and insert it as
+   // though it were confirmed not-a-duplicate.
+@@ -96,7 +97,7 @@ async function importMonsterSingle(
+     return { inserted: false, skipped: false, error: true };
+   }
+ 
+-  await storage.saveMonsterTemplate(monster);
++  await monsterTemplateRepo.saveMonsterTemplate(monster);
+   return { inserted: true, skipped: false, error: false };
+ }
+ 
+@@ -146,6 +147,6 @@ export async function importSpellsFromOpen5E(
+       const r = transformSpell(raw as Open5ESpell);
+       return { entity: r.spell as unknown as SpellTemplate, valid: r.valid, errors: r.errors };
+     },
+-    (spell) => storage.saveSpellTemplate(spell)
++    (spell) => spellRepo.saveSpellTemplate(spell)
+   );
+ }
+diff --git a/tests/unit/api/monsters/duplicate.test.ts b/tests/unit/api/monsters/duplicate.test.ts
+index 0c8b6df0..5928f927 100644
+--- a/tests/unit/api/monsters/duplicate.test.ts
++++ b/tests/unit/api/monsters/duplicate.test.ts
+@@ -5,11 +5,12 @@ const mockLoadAll = jest.fn();
+ const mockSave = jest.fn();
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     loadAllMonsterTemplates: (...args: any[]) => mockLoadAll(...args),
+     saveMonsterTemplate: (...args: any[]) => mockSave(...args),
+-  },
++  
+ }));
+ 
+ import { POST } from "@/app/api/monsters/[id]/duplicate/route";
+diff --git a/tests/unit/api/monsters/global.id.route.test.ts b/tests/unit/api/monsters/global.id.route.test.ts
+index 33e0fff9..27cceb60 100644
+--- a/tests/unit/api/monsters/global.id.route.test.ts
++++ b/tests/unit/api/monsters/global.id.route.test.ts
+@@ -2,7 +2,7 @@
+  * @jest-environment node
+  */
+ import { PUT, DELETE } from "@/app/api/monsters/global/[id]/route";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import { getDatabase } from "@/lib/db";
+ import {
+   ADMIN_AUTH,
+@@ -14,11 +14,12 @@ import {
+ import { EXISTING_GLOBAL_MONSTER } from "./fixtures";
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     loadGlobalMonsterTemplates: jest.fn(),
+     saveMonsterTemplate: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+ jest.mock("mongodb", () => {
+@@ -27,7 +28,7 @@ jest.mock("mongodb", () => {
+   return { ObjectId };
+ });
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
+ const mockedGetDatabase = jest.mocked(getDatabase);
+ 
+ const PARAMS = Promise.resolve({ id: EXISTING_GLOBAL_MONSTER.id });
+@@ -43,8 +44,8 @@ describe("PUT /api/monsters/global/[id] — alignment validation", () => {
+   beforeEach(() => {
+     jest.clearAllMocks();
+     mockAuthState.payload = ADMIN_AUTH;
+-    mockedStorage.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_MONSTER] as any);
+-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
++    mockedMonsterRepo.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_MONSTER] as any);
++    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
+     mockDbCollection(mockedGetDatabase, {
+       findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
+     });
+diff --git a/tests/unit/api/monsters/global.route.test.ts b/tests/unit/api/monsters/global.route.test.ts
+index e39ea74a..79297b23 100644
+--- a/tests/unit/api/monsters/global.route.test.ts
++++ b/tests/unit/api/monsters/global.route.test.ts
+@@ -2,7 +2,7 @@
+  * @jest-environment node
+  */
+ import { POST, PUT } from "@/app/api/monsters/global/route";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import { getDatabase } from "@/lib/db";
+ import {
+   ADMIN_AUTH,
+@@ -13,11 +13,12 @@ import {
+ } from "@/tests/unit/helpers/route.test.helpers";
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     loadGlobalMonsterTemplates: jest.fn(),
+     saveMonsterTemplate: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+ jest.mock("@/lib/import/open5eAdapter", () => ({
+@@ -36,7 +37,7 @@ jest.mock("mongodb", () => {
+   return { ObjectId };
+ });
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
+ const mockedGetDatabase = jest.mocked(getDatabase);
+ 
+ const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
+@@ -50,7 +51,7 @@ describe("POST /api/monsters/global — alignment validation", () => {
+   beforeEach(() => {
+     jest.clearAllMocks();
+     mockAuthState.payload = ADMIN_AUTH;
+-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
++    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
+     mockDbCollection(mockedGetDatabase, {
+       findOne: jest.fn().mockResolvedValue({ tokenVersion: 0, isAdmin: true }),
+     });
+diff --git a/tests/unit/api/monsters/id.route.test.ts b/tests/unit/api/monsters/id.route.test.ts
+index 472ecf81..c2da8a96 100644
+--- a/tests/unit/api/monsters/id.route.test.ts
++++ b/tests/unit/api/monsters/id.route.test.ts
+@@ -2,7 +2,7 @@
+  * @jest-environment node
+  */
+ import { PUT } from "@/app/api/monsters/[id]/route";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import {
+   MOCK_AUTH,
+   makeRouteRequest,
+@@ -12,14 +12,15 @@ import {
+ import { EXISTING_MONSTER } from "./fixtures";
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     loadMonsterTemplates: jest.fn(),
+     saveMonsterTemplate: jest.fn(),
+-  },
++  
+ }));
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
+ 
+ const PARAMS = Promise.resolve({ id: "monster-1" });
+ const makeReqWith = (alignment: string | undefined) =>
+@@ -34,8 +35,8 @@ describe("PUT /api/monsters/[id] — alignment validation", () => {
+   beforeEach(() => {
+     jest.clearAllMocks();
+     mockAuthState.payload = MOCK_AUTH;
+-    mockedStorage.loadMonsterTemplates.mockResolvedValue([EXISTING_MONSTER] as any);
+-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
++    mockedMonsterRepo.loadMonsterTemplates.mockResolvedValue([EXISTING_MONSTER] as any);
++    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
+   });
+ 
+   itValidatesAlignmentFieldWithParams(PUT, makeReqWith, PARAMS, 200);
+diff --git a/tests/unit/api/monsters/route.test.ts b/tests/unit/api/monsters/route.test.ts
+index 97cd3838..f6b0f9f4 100644
+--- a/tests/unit/api/monsters/route.test.ts
++++ b/tests/unit/api/monsters/route.test.ts
+@@ -2,7 +2,7 @@
+  * @jest-environment node
+  */
+ import { POST } from "@/app/api/monsters/route";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import {
+   MOCK_AUTH,
+   makeRouteRequest,
+@@ -11,15 +11,16 @@ import {
+ } from "@/tests/unit/helpers/route.test.helpers";
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     loadAllMonsterTemplates: jest.fn(),
+     saveMonsterTemplate: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
+ 
+ const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
+ const makeReqWith = (alignment: string | undefined) =>
+@@ -32,7 +33,7 @@ describe("POST /api/monsters — alignment validation", () => {
+   beforeEach(() => {
+     jest.clearAllMocks();
+     mockAuthState.payload = MOCK_AUTH;
+-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
++    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
+   });
+ 
+   itValidatesAlignmentField(POST, makeReqWith, 201);
+diff --git a/tests/unit/api/monsters/upload.route.test.ts b/tests/unit/api/monsters/upload.route.test.ts
+index 0cd4dbda..e48482dc 100644
+--- a/tests/unit/api/monsters/upload.route.test.ts
++++ b/tests/unit/api/monsters/upload.route.test.ts
+@@ -3,7 +3,7 @@
+  */
+ import { NextRequest } from "next/server";
+ import { POST } from "@/app/api/monsters/upload/route";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
+ import { isUserAdmin } from "@/lib/permissions";
+ import { GLOBAL_USER_ID } from "@/lib/constants";
+ import {
+@@ -14,18 +14,19 @@ import {
+ } from "@/tests/unit/helpers/route.test.helpers";
+ 
+ jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
++  __esModule: true,
++  
+     findExistingMonsterKeys: jest.fn(),
+     saveManyMonsterTemplates: jest.fn(),
+     deleteMonsterTemplatesByIds: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/permissions", () => ({ isUserAdmin: jest.fn() }));
+ 
+-const mockedFindKeys = jest.mocked(storage.findExistingMonsterKeys);
+-const mockedSaveMany = jest.mocked(storage.saveManyMonsterTemplates);
+-const mockedDeleteByIds = jest.mocked(storage.deleteMonsterTemplatesByIds);
++const mockedFindKeys = jest.mocked(monsterTemplateRepo.findExistingMonsterKeys);
++const mockedSaveMany = jest.mocked(monsterTemplateRepo.saveManyMonsterTemplates);
++const mockedDeleteByIds = jest.mocked(monsterTemplateRepo.deleteMonsterTemplatesByIds);
+ const mockedIsAdmin = jest.mocked(isUserAdmin);
+ 
+ const BASE_URL = "http://localhost/api/monsters/upload";
+diff --git a/tests/unit/api/spells/[id].route.test.ts b/tests/unit/api/spells/[id].route.test.ts
+index 6f278573..5c8702a8 100644
+--- a/tests/unit/api/spells/[id].route.test.ts
++++ b/tests/unit/api/spells/[id].route.test.ts
+@@ -3,23 +3,24 @@
+  */
+ import { NextResponse } from "next/server";
+ import { GET, PUT, DELETE } from "@/app/api/spells/[id]/route";
+-import { storage } from "@/lib/storage";
++import * as spellRepo from "@/lib/storage/spellRepo";
+ import { StorageError } from "@/lib/storage/errors";
+ import { requireAdmin } from "@/lib/api-helpers";
+ import {
+   makeRouteRequest,
+ } from "@/tests/unit/helpers/route.test.helpers";
+ 
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/spellRepo", () => ({
++  __esModule: true,
++  
+     loadSpellById: jest.fn(),
+     saveSpellTemplate: jest.fn(),
+     deleteSpellTemplate: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedSpellRepo = jest.mocked(spellRepo);
+ const mockedRequireAdmin = jest.mocked(requireAdmin);
+ 
+ const EXISTING_SPELL = {
+@@ -57,7 +58,7 @@ describe("GET /api/spells/[id]", () => {
+   beforeEach(() => jest.clearAllMocks());
+ 
+   it("returns spell when found", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+ 
+     const req = makeRouteRequest("http://localhost/api/spells/spell-123", "GET");
+     const res = await GET(req, { params });
+@@ -68,7 +69,7 @@ describe("GET /api/spells/[id]", () => {
+   });
+ 
+   it("returns 404 when spell not found", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(null);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
+ 
+     const req = makeRouteRequest("http://localhost/api/spells/spell-123", "GET");
+     const res = await GET(req, { params });
+@@ -78,7 +79,7 @@ describe("GET /api/spells/[id]", () => {
+ 
+   it("returns 500 (not 404) and logs the failure when loadSpellById rejects with a StorageError", async () => {
+     const consoleError = jest.spyOn(console, "error").mockImplementation();
+-    mockedStorage.loadSpellById.mockRejectedValue(
++    mockedSpellRepo.loadSpellById.mockRejectedValue(
+       new StorageError("loadSpellById", "spellTemplates", { cause: new Error("connection refused") }),
+     );
+ 
+@@ -100,8 +101,8 @@ describe("PUT /api/spells/[id]", () => {
+   });
+ 
+   it("updates spell when admin", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+-    mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
++    mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
+ 
+     const req = makePutReq({ name: "Updated Fireball" });
+     const res = await PUT(req, { params });
+@@ -123,7 +124,7 @@ describe("PUT /api/spells/[id]", () => {
+   });
+ 
+   it("returns 404 when spell not found", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(null);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
+ 
+     const req = makePutReq({ name: "Updated Fireball" });
+     const res = await PUT(req, { params });
+@@ -132,7 +133,7 @@ describe("PUT /api/spells/[id]", () => {
+   });
+ 
+   it("returns 500 when storage throws on load", async () => {
+-    mockedStorage.loadSpellById.mockRejectedValue(new Error("connection refused"));
++    mockedSpellRepo.loadSpellById.mockRejectedValue(new Error("connection refused"));
+ 
+     const req = makePutReq({ name: "Updated Fireball" });
+     const res = await PUT(req, { params });
+@@ -150,8 +151,8 @@ describe("DELETE /api/spells/[id]", () => {
+   });
+ 
+   it("deletes spell when admin", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+-    mockedStorage.deleteSpellTemplate.mockResolvedValue(undefined);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
++    mockedSpellRepo.deleteSpellTemplate.mockResolvedValue(undefined);
+ 
+     const req = makeDeleteReq();
+     const res = await DELETE(req, { params });
+@@ -171,7 +172,7 @@ describe("DELETE /api/spells/[id]", () => {
+   });
+ 
+   it("returns 404 when spell not found", async () => {
+-    mockedStorage.loadSpellById.mockResolvedValue(null);
++    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
+ 
+     const req = makeDeleteReq();
+     const res = await DELETE(req, { params });
+@@ -180,7 +181,7 @@ describe("DELETE /api/spells/[id]", () => {
+   });
+ 
+   it("returns 500 when storage throws on delete", async () => {
+-    mockedStorage.loadSpellById.mockRejectedValue(new Error("connection refused"));
++    mockedSpellRepo.loadSpellById.mockRejectedValue(new Error("connection refused"));
+ 
+     const req = makeDeleteReq();
+     const res = await DELETE(req, { params });
+diff --git a/tests/unit/api/spells/route.test.ts b/tests/unit/api/spells/route.test.ts
+index 42f6d5fd..0fa8b0a3 100644
+--- a/tests/unit/api/spells/route.test.ts
++++ b/tests/unit/api/spells/route.test.ts
+@@ -2,20 +2,21 @@
+  * @jest-environment node
+  */
+ import { GET, POST } from "@/app/api/spells/route";
+-import { storage } from "@/lib/storage";
++import * as spellRepo from "@/lib/storage/spellRepo";
+ import { requireAdmin } from "@/lib/api-helpers";
+ import { SpellTemplate } from "@/lib/types";
+ import { makeRouteRequest, mockAdminDenied } from "@/tests/unit/helpers/route.test.helpers";
+ 
+-jest.mock("@/lib/storage", () => ({
+-  storage: {
++jest.mock("@/lib/storage/spellRepo", () => ({
++  __esModule: true,
++  
+     loadSpells: jest.fn(),
+     saveSpellTemplate: jest.fn(),
+-  },
++  
+ }));
+ jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedSpellRepo = jest.mocked(spellRepo);
+ const mockedRequireAdmin = jest.mocked(requireAdmin);
+ 
+ const BASE_BODY = {
+@@ -69,7 +70,7 @@ describe("GET /api/spells", () => {
+         updatedAt: new Date(),
+       },
+     ];
+-    mockedStorage.loadSpells.mockResolvedValue(spells);
++    mockedSpellRepo.loadSpells.mockResolvedValue(spells);
+ 
+     const req = makeRouteRequest("http://localhost/api/spells", "GET");
+     const res = await GET(req);
+@@ -127,7 +128,7 @@ describe("GET /api/spells", () => {
+         updatedAt: new Date(),
+       },
+     ];
+-    mockedStorage.loadSpells.mockImplementation((userId?: string, conc?: boolean): Promise<SpellTemplate[]> => {
++    mockedSpellRepo.loadSpells.mockImplementation((userId?: string, conc?: boolean): Promise<SpellTemplate[]> => {
+       if (conc === true) return Promise.resolve([allSpells[1]]);
+       return Promise.resolve(allSpells);
+     });
+@@ -142,7 +143,7 @@ describe("GET /api/spells", () => {
+   });
+ 
+   it("returns 500 when loadSpells throws", async () => {
+-    mockedStorage.loadSpells.mockRejectedValue(new Error("connection refused"));
++    mockedSpellRepo.loadSpells.mockRejectedValue(new Error("connection refused"));
+ 
+     const req = makeRouteRequest("http://localhost/api/spells", "GET");
+     const res = await GET(req);
+@@ -157,7 +158,7 @@ describe("POST /api/spells", () => {
+   beforeEach(() => {
+     jest.clearAllMocks();
+     mockedRequireAdmin.mockReturnValue(Promise.resolve(null));
+-    mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
++    mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
+   });
+ 
+   it("creates a spell when admin", async () => {
+@@ -208,7 +209,7 @@ describe("POST /api/spells", () => {
+   });
+ 
+   it("returns 500 when storage throws", async () => {
+-    mockedStorage.saveSpellTemplate.mockRejectedValue(new Error("connection refused"));
++    mockedSpellRepo.saveSpellTemplate.mockRejectedValue(new Error("connection refused"));
+ 
+     const req = makeRouteRequest("http://localhost/api/spells", "POST", BASE_BODY);
+     const res = await POST(req);
+diff --git a/tests/unit/import/dedupeEngine.test.ts b/tests/unit/import/dedupeEngine.test.ts
+index 919001f7..bbafa547 100644
+--- a/tests/unit/import/dedupeEngine.test.ts
++++ b/tests/unit/import/dedupeEngine.test.ts
+@@ -7,7 +7,7 @@ import {
+   importMonstersFromOpen5E,
+   importSpellsFromOpen5E,
+ } from "@/lib/import/dedupeEngine";
+-import { storage } from "@/lib/storage";
++import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";\nimport * as spellRepo from "@/lib/storage/spellRepo";
+ import { transformMonster } from "@/lib/import/transformMonster";
+ import {
+   createMockClient,
+@@ -15,10 +15,10 @@ import {
+   createTestSpell,
+ } from "@/tests/helpers/open5eTestHelpers";
+ 
+-jest.mock("@/lib/storage");
++jest.mock("@/lib/storage/monsterTemplateRepo");\njest.mock("@/lib/storage/spellRepo");
+ jest.mock("@/lib/import/transformMonster");
+ 
+-const mockedStorage = jest.mocked(storage);
++const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);\nconst mockedSpellRepo = jest.mocked(spellRepo);
+ const mockedTransformMonster = jest.mocked(transformMonster);
+ 
+ describe("dedupeEngine", () => {
+@@ -39,19 +39,19 @@ describe("dedupeEngine", () => {
+ 
+   describe("shouldImport", () => {
+     it("returns should=false for spells that exist by name and source", async () => {
+-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
++      mockedSpellRepo.spellExistsByNameAndSource.mockResolvedValue(true);
+ 
+       const result = await shouldImport("spells", "Fireball", "open5e");
+ 
+       expect(result.should).toBe(false);
+-      expect(mockedStorage.spellExistsByNameAndSource).toHaveBeenCalledWith(
++      expect(mockedSpellRepo.spellExistsByNameAndSource).toHaveBeenCalledWith(
+         "Fireball",
+         "open5e"
+       );
+     });
+ 
+     it("returns should=true for spells that do not exist", async () => {
+-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
++      mockedSpellRepo.spellExistsByNameAndSource.mockResolvedValue(false);
+ 
+       const result = await shouldImport("spells", "New Spell", "open5e");
+ 
+@@ -59,17 +59,17 @@ describe("dedupeEngine", () => {
+     });
+ 
+     it("returns should=true and no existingId for new monsters", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue(null);
+ 
+       const result = await shouldImport("monsters", "Goblin", "open5e");
+ 
+       expect(result.should).toBe(true);
+       expect(result.existingId).toBeUndefined();
+-      expect(mockedStorage.findMonsterByNameAndSource).toHaveBeenCalledWith("Goblin", "open5e");
++      expect(mockedMonsterRepo.findMonsterByNameAndSource).toHaveBeenCalledWith("Goblin", "open5e");
+     });
+ 
+     it("returns should=false and existingId for existing monsters", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id-123" } as any);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id-123" } as any);
+ 
+       const result = await shouldImport("monsters", "Goblin", "open5e");
+ 
+@@ -80,8 +80,8 @@ describe("dedupeEngine", () => {
+ 
+   describe("importMonstersFromOpen5E", () => {
+     it("inserts monster when not duplicate and valid", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
+-      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue(null);
++      mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined);
+ 
+       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+       const client = createMockClient([creature], []);
+@@ -91,11 +91,11 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(1);
+       expect(result.skipped).toBe(0);
+       expect(result.errors).toBe(0);
+-      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
++      expect(mockedMonsterRepo.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+     });
+ 
+     it("skips monster when it already exists", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+ 
+       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+       const client = createMockClient([creature], []);
+@@ -105,11 +105,11 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(0);
+       expect(result.skipped).toBe(1);
+       expect(result.errors).toBe(0);
+-      expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
++      expect(mockedMonsterRepo.saveMonsterTemplate).not.toHaveBeenCalled();
+     });
+ 
+     it("does not call transformMonster when duplicate is detected", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+ 
+       const creature = createTestCreature({ key: "goblin", name: "Goblin" });
+       const client = createMockClient([creature], []);
+@@ -120,7 +120,7 @@ describe("dedupeEngine", () => {
+     });
+ 
+     it("returns skipped (not error) for invalid+duplicate monster", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue({ id: "existing-id" } as any);
+       mockedTransformMonster.mockReturnValue({
+         monster: {} as any,
+         valid: false,
+@@ -139,7 +139,7 @@ describe("dedupeEngine", () => {
+     });
+ 
+     it("counts error when monster transform is invalid", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue(null);
+       const invalidCreature = createTestCreature({ name: "" });
+       const client = createMockClient([invalidCreature], []);
+ 
+@@ -148,14 +148,14 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(0);
+       expect(result.skipped).toBe(0);
+       expect(result.errors).toBe(1);
+-      expect(mockedStorage.saveMonsterTemplate).not.toHaveBeenCalled();
++      expect(mockedMonsterRepo.saveMonsterTemplate).not.toHaveBeenCalled();
+     });
+ 
+     it("counts one error, saves nothing, and keeps processing when the dup check rejects", async () => {
+-      mockedStorage.findMonsterByNameAndSource
++      mockedMonsterRepo.findMonsterByNameAndSource
+         .mockRejectedValueOnce(new Error("Storage operation \"findMonsterByNameAndSource\" failed"))
+         .mockResolvedValueOnce(null);
+-      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
++      mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined);
+ 
+       const failing = createTestCreature({ key: "goblin", name: "Goblin" });
+       const ok = createTestCreature({ key: "orc", name: "Orc" });
+@@ -165,12 +165,12 @@ describe("dedupeEngine", () => {
+ 
+       expect(result.errors).toBe(1);
+       expect(result.inserted).toBe(1);
+-      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(1);
++      expect(mockedMonsterRepo.saveMonsterTemplate).toHaveBeenCalledTimes(1);
+     });
+ 
+     it("processes multiple monsters", async () => {
+-      mockedStorage.findMonsterByNameAndSource.mockResolvedValue(null);
+-      mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined);
++      mockedMonsterRepo.findMonsterByNameAndSource.mockResolvedValue(null);
++      mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined);
+ 
+       const goblin = createTestCreature({
+         key: "goblin",
+@@ -207,14 +207,14 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(2);
+       expect(result.skipped).toBe(0);
+       expect(result.errors).toBe(0);
+-      expect(mockedStorage.saveMonsterTemplate).toHaveBeenCalledTimes(2);
++      expect(mockedMonsterRepo.saveMonsterTemplate).toHaveBeenCalledTimes(2);
+     });
+   });
+ 
+   describe("importSpellsFromOpen5E", () => {
+     it("inserts spell when not duplicate and valid", async () => {
+-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
+-      mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
++      mockedSpellRepo.spellExistsByNameAndSource.mockResolvedValue(false);
++      mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
+ 
+       const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
+       const client = createMockClient([], [spell]);
+@@ -224,11 +224,11 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(1);
+       expect(result.skipped).toBe(0);
+       expect(result.errors).toBe(0);
+-      expect(mockedStorage.saveSpellTemplate).toHaveBeenCalledTimes(1);
++      expect(mockedSpellRepo.saveSpellTemplate).toHaveBeenCalledTimes(1);
+     });
+ 
+     it("skips spell when storage returns exists=true", async () => {
+-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(true);
++      mockedSpellRepo.spellExistsByNameAndSource.mockResolvedValue(true);
+ 
+       const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
+       const client = createMockClient([], [spell]);
+@@ -238,17 +238,17 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(0);
+       expect(result.skipped).toBe(1);
+       expect(result.errors).toBe(0);
+-      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
++      expect(mockedSpellRepo.saveSpellTemplate).not.toHaveBeenCalled();
+     });
+ 
+     it("counts the spell as an error (never inserts it) when the existence check rejects", async () => {
+       // #504: storage.spellExistsByNameAndSource now rejects with StorageError
+       // on a DB failure instead of swallowing to `false`. The import must not
+       // fall through and treat the spell as confirmed not-a-duplicate.
+-      mockedStorage.spellExistsByNameAndSource.mockRejectedValue(
++      mockedSpellRepo.spellExistsByNameAndSource.mockRejectedValue(
+         new Error("Storage operation \"spellExistsByNameAndSource\" failed"),
+       );
+-      mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
++      mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
+ 
+       const spell = createTestSpell({ key: "fireball", name: "Fireball", level: 3 });
+       const client = createMockClient([], [spell]);
+@@ -257,11 +257,11 @@ describe("dedupeEngine", () => {
+ 
+       expect(result.inserted).toBe(0);
+       expect(result.errors).toBe(1);
+-      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
++      expect(mockedSpellRepo.saveSpellTemplate).not.toHaveBeenCalled();
+     });
+ 
+     it("counts error when spell transform is invalid", async () => {
+-      mockedStorage.spellExistsByNameAndSource.mockResolvedValue(false);
++      mockedSpellRepo.spellExistsByNameAndSource.mockResolvedValue(false);
+ 
+       const invalidSpell: Open5ESpell = {
+         key: "bad",
+@@ -283,7 +283,7 @@ describe("dedupeEngine", () => {
+       expect(result.inserted).toBe(0);
+       expect(result.skipped).toBe(0);
+       expect(result.errors).toBe(1);
+-      expect(mockedStorage.saveSpellTemplate).not.toHaveBeenCalled();
++      expect(mockedSpellRepo.saveSpellTemplate).not.toHaveBeenCalled();
+     });
+   });
+ });
+\ No newline at end of file

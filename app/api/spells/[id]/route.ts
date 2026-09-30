@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storage } from "@/lib/storage";
+import * as spellRepo from "@/lib/storage/spellRepo";
 import { requireAdmin } from "@/lib/api-helpers";
 import { applySpellUpdates, SpellBody } from "@/lib/api/spell-helpers";
 
@@ -10,7 +10,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const spell = await storage.loadSpellById(id);
+    const spell = await spellRepo.loadSpellById(id);
 
     if (!spell) {
       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params;
-    const existing = await storage.loadSpellById(id);
+    const existing = await spellRepo.loadSpellById(id);
     if (!existing) {
       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
     }
@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: errors[0].message }, { status: 400 });
     }
 
-    await storage.saveSpellTemplate(updated);
+    await spellRepo.saveSpellTemplate(updated);
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -66,12 +66,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params;
-    const existing = await storage.loadSpellById(id);
+    const existing = await spellRepo.loadSpellById(id);
     if (!existing) {
       return NextResponse.json({ error: "Spell not found" }, { status: 404 });
     }
 
-    await storage.deleteSpellTemplate(id);
+    await spellRepo.deleteSpellTemplate(id);
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {

@@ -3,23 +3,24 @@
  */
 import { NextResponse } from "next/server";
 import { GET, PUT, DELETE } from "@/app/api/spells/[id]/route";
-import { storage } from "@/lib/storage";
+import * as spellRepo from "@/lib/storage/spellRepo";
 import { StorageError } from "@/lib/storage/errors";
 import { requireAdmin } from "@/lib/api-helpers";
 import {
   makeRouteRequest,
 } from "@/tests/unit/helpers/route.test.helpers";
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/spellRepo", () => ({
+  __esModule: true,
+  
     loadSpellById: jest.fn(),
     saveSpellTemplate: jest.fn(),
     deleteSpellTemplate: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedSpellRepo = jest.mocked(spellRepo);
 const mockedRequireAdmin = jest.mocked(requireAdmin);
 
 const EXISTING_SPELL = {
@@ -57,7 +58,7 @@ describe("GET /api/spells/[id]", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns spell when found", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
 
     const req = makeRouteRequest("http://localhost/api/spells/spell-123", "GET");
     const res = await GET(req, { params });
@@ -68,7 +69,7 @@ describe("GET /api/spells/[id]", () => {
   });
 
   it("returns 404 when spell not found", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(null);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
 
     const req = makeRouteRequest("http://localhost/api/spells/spell-123", "GET");
     const res = await GET(req, { params });
@@ -78,7 +79,7 @@ describe("GET /api/spells/[id]", () => {
 
   it("returns 500 (not 404) and logs the failure when loadSpellById rejects with a StorageError", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation();
-    mockedStorage.loadSpellById.mockRejectedValue(
+    mockedSpellRepo.loadSpellById.mockRejectedValue(
       new StorageError("loadSpellById", "spellTemplates", { cause: new Error("connection refused") }),
     );
 
@@ -100,8 +101,8 @@ describe("PUT /api/spells/[id]", () => {
   });
 
   it("updates spell when admin", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
-    mockedStorage.saveSpellTemplate.mockResolvedValue(undefined);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+    mockedSpellRepo.saveSpellTemplate.mockResolvedValue(undefined);
 
     const req = makePutReq({ name: "Updated Fireball" });
     const res = await PUT(req, { params });
@@ -123,7 +124,7 @@ describe("PUT /api/spells/[id]", () => {
   });
 
   it("returns 404 when spell not found", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(null);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
 
     const req = makePutReq({ name: "Updated Fireball" });
     const res = await PUT(req, { params });
@@ -132,7 +133,7 @@ describe("PUT /api/spells/[id]", () => {
   });
 
   it("returns 500 when storage throws on load", async () => {
-    mockedStorage.loadSpellById.mockRejectedValue(new Error("connection refused"));
+    mockedSpellRepo.loadSpellById.mockRejectedValue(new Error("connection refused"));
 
     const req = makePutReq({ name: "Updated Fireball" });
     const res = await PUT(req, { params });
@@ -150,8 +151,8 @@ describe("DELETE /api/spells/[id]", () => {
   });
 
   it("deletes spell when admin", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(EXISTING_SPELL);
-    mockedStorage.deleteSpellTemplate.mockResolvedValue(undefined);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(EXISTING_SPELL);
+    mockedSpellRepo.deleteSpellTemplate.mockResolvedValue(undefined);
 
     const req = makeDeleteReq();
     const res = await DELETE(req, { params });
@@ -171,7 +172,7 @@ describe("DELETE /api/spells/[id]", () => {
   });
 
   it("returns 404 when spell not found", async () => {
-    mockedStorage.loadSpellById.mockResolvedValue(null);
+    mockedSpellRepo.loadSpellById.mockResolvedValue(null);
 
     const req = makeDeleteReq();
     const res = await DELETE(req, { params });
@@ -180,7 +181,7 @@ describe("DELETE /api/spells/[id]", () => {
   });
 
   it("returns 500 when storage throws on delete", async () => {
-    mockedStorage.loadSpellById.mockRejectedValue(new Error("connection refused"));
+    mockedSpellRepo.loadSpellById.mockRejectedValue(new Error("connection refused"));
 
     const req = makeDeleteReq();
     const res = await DELETE(req, { params });

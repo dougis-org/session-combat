@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { POST, PUT } from "@/app/api/monsters/global/route";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import { getDatabase } from "@/lib/db";
 import {
   ADMIN_AUTH,
@@ -13,11 +13,12 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     loadGlobalMonsterTemplates: jest.fn(),
     saveMonsterTemplate: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 jest.mock("@/lib/import/open5eAdapter", () => ({
@@ -36,7 +37,7 @@ jest.mock("mongodb", () => {
   return { ObjectId };
 });
 
-const mockedStorage = jest.mocked(storage);
+const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
 const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
@@ -50,7 +51,7 @@ describe("POST /api/monsters/global — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = ADMIN_AUTH;
-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
+    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue({ tokenVersion: 0, isAdmin: true }),
     });
