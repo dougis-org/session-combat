@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { POST } from "@/app/api/monsters/route";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -11,15 +11,16 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     loadAllMonsterTemplates: jest.fn(),
     saveMonsterTemplate: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
 
 const BASE_BODY = { name: "Goblin", maxHp: 10, hp: 10 };
 const makeReqWith = (alignment: string | undefined) =>
@@ -32,7 +33,7 @@ describe("POST /api/monsters — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = MOCK_AUTH;
-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
+    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
   });
 
   itValidatesAlignmentField(POST, makeReqWith, 201);

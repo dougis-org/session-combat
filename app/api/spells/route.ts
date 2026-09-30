@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storage } from "@/lib/storage";
+import * as spellRepo from "@/lib/storage/spellRepo";
 import { requireAdmin } from "@/lib/api-helpers";
 import {
   validateSpellName,
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const concentration = searchParams.get("concentration");
 
-    let spells = await storage.loadSpells(
+    let spells = await spellRepo.loadSpells(
       undefined,
       concentration === "true" ? true : undefined
     );
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const spell = buildSpellFromBody(body);
 
-    await storage.saveSpellTemplate(spell);
+    await spellRepo.saveSpellTemplate(spell);
 
     return NextResponse.json(spell, { status: 201 });
   } catch (error) {

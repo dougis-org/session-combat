@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
 import { MonsterTemplate, normalizeAlignment } from '@/lib/types';
 import { getDatabase } from '@/lib/db';
 
 export const GET = withAuth(async (request, auth) => {
   try {
     // Return all templates (user's private + global)
-    const templates = await storage.loadAllMonsterTemplates(auth.userId);
+    const templates = await monsterTemplateRepo.loadAllMonsterTemplates(auth.userId);
     return NextResponse.json(templates);
   } catch (error) {
     console.error('Error fetching monster templates:', error);
@@ -109,7 +109,7 @@ export const POST = withAuth(async (request, auth) => {
       updatedAt: new Date(),
     };
 
-    await storage.saveMonsterTemplate(template);
+    await monsterTemplateRepo.saveMonsterTemplate(template);
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {

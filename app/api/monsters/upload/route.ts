@@ -23,7 +23,7 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
 import { isUserAdmin } from '@/lib/permissions';
-import { storage } from '@/lib/storage';
+import * as monsterTemplateRepo from '@/lib/storage/monsterTemplateRepo';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import {
   validateMonsterUploadDocument,
@@ -109,7 +109,7 @@ async function ingest(
   }
 
   // Step 4 — DB dedupe against the target library.
-  const existingKeys = await storage.findExistingMonsterKeys(
+  const existingKeys = await monsterTemplateRepo.findExistingMonsterKeys(
     unique.map((r) => ({ name: r.name, source: r.source ?? '' })),
     targetUserId,
   );
@@ -135,12 +135,12 @@ async function ingest(
   const generatedIds = templates.map((t) => t.id);
 
   try {
-    await storage.saveManyMonsterTemplates(templates);
+    await monsterTemplateRepo.saveManyMonsterTemplates(templates);
   } catch (error) {
     // Step 6 — compensating delete of everything this batch generated.
     let orphanedMonsterIds: string[] = [];
     try {
-      await storage.deleteMonsterTemplatesByIds(generatedIds, targetUserId);
+      await monsterTemplateRepo.deleteMonsterTemplatesByIds(generatedIds, targetUserId);
     } catch (cleanupError) {
       orphanedMonsterIds = generatedIds;
       console.error('Monster import: compensating delete failed', {

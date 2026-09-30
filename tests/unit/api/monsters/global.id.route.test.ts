@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { PUT, DELETE } from "@/app/api/monsters/global/[id]/route";
-import { storage } from "@/lib/storage";
+import * as monsterTemplateRepo from "@/lib/storage/monsterTemplateRepo";
 import { getDatabase } from "@/lib/db";
 import {
   ADMIN_AUTH,
@@ -14,11 +14,12 @@ import {
 import { EXISTING_GLOBAL_MONSTER } from "./fixtures";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
+jest.mock("@/lib/storage/monsterTemplateRepo", () => ({
+  __esModule: true,
+  
     loadGlobalMonsterTemplates: jest.fn(),
     saveMonsterTemplate: jest.fn(),
-  },
+  
 }));
 jest.mock("@/lib/db", () => ({ getDatabase: jest.fn() }));
 jest.mock("mongodb", () => {
@@ -27,7 +28,7 @@ jest.mock("mongodb", () => {
   return { ObjectId };
 });
 
-const mockedStorage = jest.mocked(storage);
+const mockedMonsterRepo = jest.mocked(monsterTemplateRepo);
 const mockedGetDatabase = jest.mocked(getDatabase);
 
 const PARAMS = Promise.resolve({ id: EXISTING_GLOBAL_MONSTER.id });
@@ -43,8 +44,8 @@ describe("PUT /api/monsters/global/[id] — alignment validation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAuthState.payload = ADMIN_AUTH;
-    mockedStorage.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_MONSTER] as any);
-    mockedStorage.saveMonsterTemplate.mockResolvedValue(undefined as any);
+    mockedMonsterRepo.loadGlobalMonsterTemplates.mockResolvedValue([EXISTING_GLOBAL_MONSTER] as any);
+    mockedMonsterRepo.saveMonsterTemplate.mockResolvedValue(undefined as any);
     mockDbCollection(mockedGetDatabase, {
       findOne: jest.fn().mockResolvedValue({ isAdmin: true }),
     });
