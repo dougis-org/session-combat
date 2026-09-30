@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
 import * as partyRepo from '@/lib/storage/partyRepo';

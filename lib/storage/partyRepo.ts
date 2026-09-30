@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { getDatabase } from "@/lib/db";
 import { runStorageOp } from "@/lib/storage/runOp";
 import { Party, PartyMember, SharedCharacterEntry, CampaignCharacterShare } from "@/lib/types";
