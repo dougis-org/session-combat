@@ -111,7 +111,7 @@ export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRoll
   return (
     <div
       ref={rootRef}
-      className="relative flex items-stretch gap-3 bg-gray-800 rounded-lg p-4 border border-gray-700"
+      className="relative flex items-stretch justify-center gap-3 bg-gray-800 rounded-lg p-4 border border-gray-700"
     >
       {/* Close button whenever the parent provided an onClose handler */}
       {onClose && (

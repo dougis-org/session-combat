@@ -8,7 +8,6 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActiveCombatView } from '@/lib/components/ActiveCombatView';
-import { LEFT_PIXEL_MARGIN } from '@/lib/hooks/useInitiativeModal';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
 import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelpers';
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
@@ -352,14 +351,15 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
+      const expectedCenterLeft = window.innerWidth / 2 + window.scrollX;
       expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${cardRect.left + LEFT_PIXEL_MARGIN}px`);
+      expect(modal.style.left).toBe(`${expectedCenterLeft}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
     }
   });
 
-  it('sizes the modal to exactly the width of its target card, not a fixed width', () => {
+  it('keeps the modal auto-width instead of forcing the card width', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
 
@@ -373,7 +373,8 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
-      expect(modal.style.width).toBe(`${cardRect.width}px`);
+      expect(modal.style.width).toBe('auto');
+      expect(modal.style.transform).toBe('translateX(-50%)');
       expect(modal.className).not.toMatch(/\bw-80\b/);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
@@ -404,9 +405,11 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
       const modal = screen.getByTestId('initiative-modal');
       const left = parseFloat(modal.style.left);
       const top = parseFloat(modal.style.top);
-      expect(left + modalRect.width).toBeLessThanOrEqual(400 - 16);
+      const leftEdge = left - modalRect.width / 2;
+      const rightEdge = left + modalRect.width / 2;
+      expect(rightEdge).toBeLessThanOrEqual(400 - 16);
+      expect(leftEdge).toBeGreaterThanOrEqual(16);
       expect(top + modalRect.height).toBeLessThanOrEqual(300 - 16);
-      expect(left).toBeGreaterThanOrEqual(16);
       expect(top).toBeGreaterThanOrEqual(16);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
@@ -441,9 +444,9 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
       const modal = screen.getByTestId('initiative-modal');
       const left = parseFloat(modal.style.left);
       const top = parseFloat(modal.style.top);
-      // Must clamp to the scrolled viewport's edge (scrollX/scrollY + margin), not
-      // the bare 16px margin from the document origin.
-      expect(left).toBe(500 + 16);
+      // The modal stays centered in the visible viewport, while the top remains
+      // scroll-aware and clamped to the viewport edge.
+      expect(left).toBe(500 + window.innerWidth / 2);
       expect(top).toBe(1000 + 16);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
@@ -468,8 +471,9 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
+      const expectedCenterLeft = window.innerWidth / 2 + window.scrollX;
       expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${cardRect.left + LEFT_PIXEL_MARGIN}px`);
+      expect(modal.style.left).toBe(`${expectedCenterLeft}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
     }

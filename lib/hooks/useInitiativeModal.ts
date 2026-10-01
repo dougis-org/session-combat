@@ -33,8 +33,6 @@ export interface UseInitiativeModalResult {
 }
 
 const MODAL_VIEWPORT_MARGIN = 16;
-// used to define how far the modal should move left of the character card
-export const LEFT_PIXEL_MARGIN = 30;
 /**
  * Owns the initiative-modal's anchoring, dismissal, auto-open, and
  * viewport-clamp state. Extracted verbatim (including effect-dependency
@@ -57,10 +55,9 @@ export function useInitiativeModal({
   // for auto-reopen. Resets on remount (e.g. full page reload).
   const dismissedInitiativeIds = useRef<Set<string>>(new Set());
 
-  // The modal takes the same shape as its target card: same width, same left
-  // edge, sitting directly below it. That means it can only ever overflow the
-  // bottom of the viewport (the card itself is already constrained
-  // horizontally by the page layout), so only vertical clamping is needed.
+  // The modal stays vertically aligned with the card but is centered in the
+  // viewport, so its natural content width drives the horizontal layout instead
+  // of the card's own width.
   const getCardAnchorPosition = (
     id: string,
   ): { top: number; left: number; width: number } | null => {
@@ -72,12 +69,12 @@ export function useInitiativeModal({
       return null;
     }
     const rect = el.getBoundingClientRect();
-    // Pinned to the card's own top-left corner (not rectToPosition's
-    // bottom-edge convention used elsewhere) so the modal overlays the card
-    // it belongs to instead of floating below it.
+    // Keep the modal vertically aligned with the target card, but center it on
+    // the viewport so the content uses its natural auto width instead of matching
+    // the card's fixed width.
     return {
       top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX + LEFT_PIXEL_MARGIN,
+      left: window.scrollX + window.innerWidth / 2,
       width: rect.width,
     };
   };
@@ -164,9 +161,8 @@ export function useInitiativeModal({
   }, [initiativeEditId, combatState]);
 
   // Measure the rendered modal and clamp its position so it never overflows the
-  // viewport. The modal is always exactly as wide as its target card and
-  // shares its left edge, so it can only overflow vertically (below the
-  // viewport) — the horizontal clamp is a defensive no-op for that shape.
+  // viewport while keeping the card's vertical alignment and centering the
+  // content on-screen.
   const clampModalToViewport = useCallback(() => {
     if (
       !initiativeEditId ||
@@ -175,22 +171,23 @@ export function useInitiativeModal({
     )
       return;
     const el = initiativeModalRef.current;
-    el.style.width = `${initiativeEditPosition.width}px`;
+    el.style.width = 'auto';
+    el.style.transform = 'translateX(-50%)';
 
     const rect = el.getBoundingClientRect();
-    const maxLeft = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN;
     const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
 
     let { top, left } = initiativeEditPosition;
-    const overflowRight = left + rect.width - maxLeft;
-    if (overflowRight > 0) left -= overflowRight;
+    const minCenterX = window.scrollX + MODAL_VIEWPORT_MARGIN + rect.width / 2;
+    const maxCenterX = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN - rect.width / 2;
+    left = Math.min(Math.max(left, minCenterX), maxCenterX);
+
     const overflowBottom = top + rect.height - maxTop;
     if (overflowBottom > 0) top -= overflowBottom;
     // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
     // clamp must also be scroll-aware — clamping to the bare margin would pin
     // the modal to the document origin instead of the visible viewport edge
     // when the page is scrolled.
-    left = Math.max(window.scrollX + MODAL_VIEWPORT_MARGIN, left);
     top = Math.max(window.scrollY + MODAL_VIEWPORT_MARGIN, top);
 
     el.style.left = `${left}px`;
