@@ -37,11 +37,13 @@ const BASE_COMBATANT: Partial<CombatantState> = {
 function renderEntry(
   overrides: Partial<CombatantState> = {},
   onSet = jest.fn(),
-  onClose = jest.fn()
+  onClose = jest.fn(),
+  unrolledMonsterCount?: number,
+  onRollAllMonsters = jest.fn()
 ) {
   const combatant = { ...BASE_COMBATANT, ...overrides } as CombatantState;
-  render(<InitiativeEntry combatant={combatant} onSet={onSet} onClose={onClose} />);
-  return { onSet, onClose };
+  render(<InitiativeEntry combatant={combatant} unrolledMonsterCount={unrolledMonsterCount} onRollAllMonsters={onRollAllMonsters} onSet={onSet} onClose={onClose} />);
+  return { onSet, onClose, onRollAllMonsters };
 }
 
 beforeEach(() => {
@@ -283,6 +285,43 @@ describe('InitiativeEntry', () => {
     });
   });
 });
+
+
+  describe('batch roll button', () => {
+    it('appears when the combatant is a monster and there are multiple unrolled monsters', () => {
+      renderEntry({ type: 'monster' }, undefined, undefined, 3);
+      expect(screen.getByRole('button', { name: 'Roll d20 for all 3 unrolled Monsters' })).toBeInTheDocument();
+    });
+
+    it('does not appear if there is only 1 unrolled monster', () => {
+      renderEntry({ type: 'monster' }, undefined, undefined, 1);
+      expect(screen.queryByRole('button', { name: /Roll d20 for all/ })).not.toBeInTheDocument();
+    });
+
+    it('does not appear if the combatant is a player, even if there are multiple unrolled monsters', () => {
+      renderEntry({ type: 'player' }, undefined, undefined, 3);
+      expect(screen.queryByRole('button', { name: /Roll d20 for all/ })).not.toBeInTheDocument();
+    });
+
+    it('calls onRollAllMonsters with advantage and flat bonus when clicked', async () => {
+      const user = userEvent.setup();
+      const { onRollAllMonsters } = renderEntry({ type: 'monster' }, undefined, undefined, 3);
+      
+      // Set advantage
+      await user.click(screen.getByLabelText('Advantage'));
+      
+      // Set flat bonus
+      const input = screen.getByLabelText('Flat initiative bonus');
+      await user.clear(input);
+      await user.type(input, '2');
+      await user.keyboard('{Enter}');
+      
+      // Click batch roll
+      await user.click(screen.getByRole('button', { name: 'Roll d20 for all 3 unrolled Monsters' }));
+      
+      expect(onRollAllMonsters).toHaveBeenCalledWith(true, 2);
+    });
+  });
 
 describe('layout structure', () => {
   const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING;

@@ -151,6 +151,9 @@ test.describe("Combat flows - legendary actions and end-to-end", () => {
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
 
+    // Roll initiatives to clear the modal
+    await page.getByText(/Roll d20 for all/).click();
+
     // Open Aboleth detail panel and use 2 actions
     const aboletCard = page.locator('[data-testid="initiative-order"] > *').filter({ hasText: "Aboleth" });
     const detailToggle = aboletCard.locator('[data-testid="combatant-detail-toggle"]');
