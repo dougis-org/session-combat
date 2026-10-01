@@ -52,15 +52,7 @@ The system SHALL re-measure and re-clamp the initiative modal to the viewport wh
 
 ## MODIFIED Requirements
 
-### Requirement: Pinned Initiative Modal Overlay
-
-The system SHALL continue to anchor the modal to the card's top-left corner at the card's width, clamped to the viewport with a 16px margin, and SHALL re-apply that clamp whenever the modal's rendered size changes due to an entry mode change (in addition to when it opens).
-
-#### Scenario: Clamp applies on open and on mode change
-
-- **Given** an open initiative modal
-- **When** it first opens, and again when the entry mode changes
-- **Then** in both cases the rendered bounding box is within the viewport with at least a 16px margin.
+None. The existing "Pinned Initiative Modal Overlay" requirement is unchanged; the re-clamp on mode change is added as a separate requirement above.
 
 ## REMOVED Requirements
 
@@ -70,7 +62,7 @@ None.
 
 - Proposal element (focus ring clipped) -> Requirement: Initiative entry controls are never visually clipped
 - Proposal element (blank space) -> Requirement: Entry row spans the available width
-- Proposal element (stale clamp) -> Requirement: Modal is re-clamped after entry mode changes / MODIFIED Pinned Initiative Modal Overlay
+- Proposal element (stale clamp) -> Requirement: Modal is re-clamped after entry mode changes
 - Design Decision 1 -> Never visually clipped; Decision 2 -> Entry row spans width; Decision 3 -> Re-clamped after mode change
 - Requirement -> Task(s): see `tasks.md` Execution items 1–4
 

@@ -28,5 +28,5 @@ Component tests live in `tests/unit/combat/initiativeEntry.test.tsx`; hook tests
 - [ ] Task 3 / "Re-clamp after mode change": clicking "Enter Dice Roll" and "Enter Total" calls `onModeChange` with `'dice'` / `'total'`; no call when the prop is omitted (no error)
 - [ ] Task 4 / "Switching to a taller mode near the viewport bottom": with a mocked `getBoundingClientRect` that grows after the mode change, invoking the re-measure moves `top` up so the bottom edge is at least 16px inside the viewport
 - [ ] Task 4 / "Re-measure with an unmounted modal": invoking the re-measure with no modal ref is a no-op and does not throw
-- [ ] Task 4 / "Clamp applies on open and on mode change": the existing open-time clamp tests still pass after extracting the clamp function
+- [ ] Task 4 / regression: the existing open-time clamp tests still pass after extracting the clamp function
 - [ ] Task 6 / manual: Playwright check at narrow card width that the focused input's full border is visible and the entry row fills the width
