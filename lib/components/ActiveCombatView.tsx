@@ -89,6 +89,11 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     [characters],
   );
 
+  const unrolledMonsterCount = useMemo(() => {
+    if (!combatState) return 0;
+    return combatState.combatants.filter(c => c.type === 'monster' && !c.initiativeRoll).length;
+  }, [combatState]);
+
   const {
     handleConSaveRequired,
     onShowDetails,
@@ -242,7 +247,6 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
         {initiativeEditId && initiativeEditPosition && (() => {
           const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
-          const unrolledMonsterCount = combatState.combatants.filter(c => c.type === 'monster' && !c.initiativeRoll).length;
           return combatant ? (
             <div
               ref={initiativeModalRef}
