@@ -174,6 +174,31 @@ describe('CombatSetupView', () => {
       expect(setSelectedEncounterId).toHaveBeenLastCalledWith('');
     });
 
+    it('keeps the listbox to a single tab stop on the selected option', () => {
+      render(<CombatSetupView combat={makeUseCombat({ encounters, selectedEncounterId: 'e3' })} user={null} />);
+      const tabbable = encounterOptionNames().filter(o => o.tabIndex === 0);
+      expect(tabbable.map(o => o.textContent)).toEqual(['Dragon Lair']);
+    });
+
+    it('moves focus with arrow keys, Home and End, and selects with Enter', async () => {
+      const user = userEvent.setup();
+      const setSelectedEncounterId = jest.fn();
+      render(<CombatSetupView combat={makeUseCombat({ encounters, setSelectedEncounterId })} user={null} />);
+      encounterOptionNames()[0].focus();
+      await user.keyboard('{ArrowDown}');
+      expect(screen.getByRole('option', { name: 'Dragon Lair' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}{ArrowUp}{ArrowUp}{ArrowUp}');
+      expect(screen.getByRole('option', { name: 'No encounter' })).toHaveFocus();
+      await user.keyboard('{End}');
+      expect(screen.getByRole('option', { name: 'Owlbear Den' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}');
+      expect(screen.getByRole('option', { name: 'Owlbear Den' })).toHaveFocus();
+      await user.keyboard('{Home}');
+      expect(screen.getByRole('option', { name: 'No encounter' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}{Enter}');
+      expect(setSelectedEncounterId).toHaveBeenLastCalledWith('e3');
+    });
+
     it('marks "No encounter" selected when nothing is chosen', () => {
       render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
       expect(screen.getByRole('option', { name: 'No encounter' })).toHaveAttribute('aria-selected', 'true');

@@ -12,7 +12,7 @@ The system SHALL list encounter options in the combat setup "Select Encounter" c
 - **THEN** the options after "No encounter" appear as "Dragon Lair", "goblin Ambush", "Owlbear Den"
 
 ### Requirement: Encounter search filters options by name
-The system SHALL provide a search input labelled "Search encounters" above the encounter list that filters the visible option list in real time, on every keystroke, by case-insensitive substring match on the trimmed query. Clicking an option SHALL select it, the selected option SHALL be marked `aria-selected` and visually highlighted, and "No encounter" SHALL clear the selection. The input SHALL be keyboard focusable and be the only element with that accessible name.
+The system SHALL provide a search input labelled "Search encounters" above the encounter list that filters the visible option list in real time, on every keystroke, by case-insensitive substring match on the trimmed query. Clicking an option SHALL select it, the selected option SHALL be marked `aria-selected` and visually highlighted, and "No encounter" SHALL clear the selection. The list SHALL follow the ARIA listbox pattern: a single tab stop (the selected option), ArrowUp/ArrowDown/Home/End moving focus, and Enter or Space selecting the focused option. The input SHALL be keyboard focusable and be the only element with that accessible name.
 
 #### Scenario: Search filters options by name
 - **GIVEN** encounters "Goblin Ambush" and "Owlbear Den"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { ActiveCampaignBanner } from '@/lib/components/ActiveCampaignBanner';
@@ -12,6 +12,21 @@ import { AuthUser } from '@/lib/hooks/useAuth';
 export interface CombatSetupViewProps {
   combat: UseCombatReturn;
   user: AuthUser | null;
+}
+
+function moveListboxFocus(e: KeyboardEvent<HTMLUListElement>) {
+  const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+  if (!keys.includes(e.key)) return;
+  const options = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[role="option"]'));
+  if (options.length === 0) return;
+  e.preventDefault();
+  const current = options.indexOf(document.activeElement as HTMLElement);
+  let next = current;
+  if (e.key === 'ArrowDown') next = Math.min(current + 1, options.length - 1);
+  else if (e.key === 'ArrowUp') next = Math.max(current - 1, 0);
+  else if (e.key === 'Home') next = 0;
+  else next = options.length - 1;
+  options[next].focus();
 }
 
 export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
@@ -104,6 +119,7 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                     <ul
                       role="listbox"
                       aria-label="Encounters"
+                      onKeyDown={moveListboxFocus}
                       className="max-h-48 overflow-y-auto bg-gray-700 rounded divide-y divide-gray-600"
                     >
                       {[{ id: '', name: 'No encounter' }, ...encounterOptions].map(encounter => {
@@ -114,6 +130,7 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                               type="button"
                               role="option"
                               aria-selected={selected}
+                              tabIndex={selected ? 0 : -1}
                               onClick={() => setSelectedEncounterId(encounter.id)}
                               className={`w-full text-left px-3 py-2 text-sm ${
                                 selected ? 'bg-blue-600 text-white' : 'text-gray-200 hover:bg-gray-600'
