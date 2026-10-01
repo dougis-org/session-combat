@@ -48,10 +48,10 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
     () => filterAndSortEncounters(encounters, encounterQuery, selectedEncounterId),
     [encounters, encounterQuery, selectedEncounterId],
   );
-  const hasEncounterMatch = useMemo(
-    () => filterAndSortEncounters(encounters, encounterQuery, '').length > 0,
-    [encounters, encounterQuery],
-  );
+  const hasEncounterMatch = useMemo(() => {
+    const normalizedQuery = encounterQuery.trim().toLowerCase();
+    return encounters.some(e => e.name.toLowerCase().includes(normalizedQuery));
+  }, [encounters, encounterQuery]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -114,7 +114,7 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                       ))}
                     </select>
                     {encounterQuery.trim() !== '' && !hasEncounterMatch && (
-                      <p className="text-gray-400 text-xs mt-1">No encounters match</p>
+                      <p role="status" className="text-gray-400 text-xs mt-1">No encounters match</p>
                     )}
                   </>
                 )}
