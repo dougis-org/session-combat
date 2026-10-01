@@ -51,9 +51,9 @@ describe('sortCombatants', () => {
     expect(sorted.map(c => c.name)).toEqual(['Lair A', 'Lair B', 'Lair C']);
   });
 
-  test('existing player-before-monster tiebreaker preserved at same initiative', () => {
-    const player = make('p', 'Alice', 'player', 15);
-    const monster = make('m', 'Goblin', 'monster', 15);
+  test('existing player-before-monster tiebreaker preserved at same initiative for rolled combatants', () => {
+    const player = { ...make('p', 'Alice', 'player', 15), initiativeRoll: { roll: 15, bonus: 0, total: 15, method: 'rolled' as const } };
+    const monster = { ...make('m', 'Goblin', 'monster', 15), initiativeRoll: { roll: 15, bonus: 0, total: 15, method: 'rolled' as const } };
     const sorted = sortCombatants([monster, player]);
     expect(sorted[0].type).toBe('player');
     expect(sorted[1].type).toBe('monster');
@@ -96,5 +96,21 @@ describe('sortCombatants', () => {
     const sorted = sortCombatants([unrolled, rolled]);
     expect(sorted[0].id).toBe('u');
     expect(sorted[1].id).toBe('r');
+  });
+
+  test('unrolled monster sorts before unrolled player', () => {
+    const uPlayer = make('up', 'Unrolled Player', 'player', 0);
+    const uMonster = make('um', 'Unrolled Monster', 'monster', 0);
+    const sorted = sortCombatants([uPlayer, uMonster]);
+    expect(sorted[0].id).toBe('um');
+    expect(sorted[1].id).toBe('up');
+  });
+
+  test('rolled player sorts before rolled monster on tie', () => {
+    const rPlayer = { ...make('rp', 'Rolled Player', 'player', 18), initiativeRoll: { roll: 18, bonus: 0, total: 18, method: 'rolled' as const } };
+    const rMonster = { ...make('rm', 'Rolled Monster', 'monster', 18), initiativeRoll: { roll: 18, bonus: 0, total: 18, method: 'rolled' as const } };
+    const sorted = sortCombatants([rMonster, rPlayer]);
+    expect(sorted[0].id).toBe('rp');
+    expect(sorted[1].id).toBe('rm');
   });
 });

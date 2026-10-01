@@ -8,14 +8,16 @@ type EntryMode = 'roll' | 'dice' | 'total';
 
 interface InitiativeEntryProps {
   combatant: CombatantState;
+  unrolledMonsterCount?: number;
   onSet: (initiativeRoll: InitiativeRoll) => void;
+  onRollAllMonsters?: (advantage?: boolean, flatBonus?: number) => void;
   onClose?: () => void; // optional: close the edit form
   onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
   // Fired when the entry mode changes, so the host can re-clamp the modal after it resizes
   onModeChange?: (mode: EntryMode) => void;
 }
 
-export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, onModeChange }: InitiativeEntryProps) {
+export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRollAllMonsters, onClose, onSettingsChange, onModeChange }: InitiativeEntryProps) {
   const [entryMode, setEntryMode] = useState<EntryMode>('roll');
   const [diceRoll, setDiceRoll] = useState('');
   const [totalValue, setTotalValue] = useState('');
@@ -185,6 +187,15 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, o
               Enter Total
             </button>
           </div>
+
+          {combatant.type === 'monster' && unrolledMonsterCount !== undefined && unrolledMonsterCount > 1 && (
+            <button
+              onClick={() => onRollAllMonsters?.(advantage, flatBonus)}
+              className="w-full bg-blue-700 hover:bg-blue-600 px-2 py-2 rounded text-sm flex-none font-semibold text-blue-100"
+            >
+              Roll d20 for all {unrolledMonsterCount} unrolled Monsters
+            </button>
+          )}
 
           <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">

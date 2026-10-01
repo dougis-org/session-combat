@@ -63,6 +63,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     setRemoveConfirmPosition,
     setSelectedDetailCombatantId,
     restartRound,
+    rollUnrolledMonsters,
     endCombat,
     nextTurn,
     updateCombatant,
@@ -241,6 +242,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
         {initiativeEditId && initiativeEditPosition && (() => {
           const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
+          const unrolledMonsterCount = combatState.combatants.filter(c => c.type === 'monster' && !c.initiativeRoll).length;
           return combatant ? (
             <div
               ref={initiativeModalRef}
@@ -255,6 +257,8 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
               <InitiativeEntry
                 key={initiativeEditId}
                 combatant={combatant}
+                unrolledMonsterCount={unrolledMonsterCount}
+                onRollAllMonsters={(adv, fb) => rollUnrolledMonsters(adv, fb)}
                 onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
                 onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
                 onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
