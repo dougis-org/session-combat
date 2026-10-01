@@ -25,13 +25,13 @@
 
 ## Phase 3: Review and Delivery
 
-- [ ] Task 3.1: Local AI Code Review
+- [x] Task 3.1: Local AI Code Review
   - Run the `openspec-review-code` skill or `pr-reviewer-toolkit` on the local changes before committing.
   - Fix any issues identified.
-- [ ] Task 3.2: PR Review
+- [x] Task 3.2: PR Review
   - Create Pull Request
   - Wait for CI checks (Lint, Typecheck, Tests)
   - Address any reviewer feedback
-- [ ] Task 3.3: Merge
+- [x] Task 3.3: Merge
   - Wait for required approvals
   - Merge to `main`
