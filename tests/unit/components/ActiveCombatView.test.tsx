@@ -381,6 +381,47 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     }
   });
 
+  it('re-syncs the modal to the card’s current rendered top after a reorder', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    let cardTop = 60;
+
+    const originalGBCR = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
+      if (this.getAttribute('data-combatant-id') === 'c1') {
+        return {
+          top: cardTop,
+          left: 20,
+          bottom: cardTop + 80,
+          right: 280,
+          width: 260,
+          height: 80,
+          x: 20,
+          y: cardTop,
+          toJSON() {},
+        } as DOMRect;
+      }
+      return originalGBCR.call(this);
+    });
+
+    try {
+      const firstCombat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+      const { rerender } = render(<ActiveCombatView combat={firstCombat} user={null} />);
+
+      expect(screen.getByTestId('initiative-modal').style.top).toBe('60px');
+
+      cardTop = 220;
+      const reorderedCombat = makeCombat(
+        { combatState: makeCombatState({ combatants: [goblin] }) },
+        [goblin],
+      );
+      rerender(<ActiveCombatView combat={reorderedCombat} user={null} />);
+
+      expect(screen.getByTestId('initiative-modal').style.top).toBe('220px');
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGBCR;
+    }
+  });
+
   it('clamps the modal position so it never overflows the viewport', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);

@@ -79,6 +79,23 @@ export function useInitiativeModal({
     };
   };
 
+  useEffect(() => {
+    if (!initiativeEditId) return;
+
+    const position = getCardAnchorPosition(initiativeEditId);
+    if (!position) return;
+
+    setInitiativeEditPosition((current) => {
+      if (!current) return position;
+
+      const topChanged = Math.abs(current.top - position.top) > 0.5;
+      const leftChanged = Math.abs(current.left - position.left) > 0.5;
+      if (!topChanged && !leftChanged) return current;
+
+      return position;
+    });
+  }, [initiativeEditId, combatState]);
+
   // Single place that updates the (id, position) pair together so the two
   // pieces of state never drift out of sync.
   const openInitiativeModal = (
@@ -171,18 +188,29 @@ export function useInitiativeModal({
     )
       return;
     const el = initiativeModalRef.current;
+    const maxModalWidth = Math.max(
+      0,
+      window.innerWidth - MODAL_VIEWPORT_MARGIN * 2,
+    );
     el.style.width = 'auto';
+    el.style.maxWidth = `${maxModalWidth}px`;
     el.style.transform = 'translateX(-50%)';
 
     const rect = el.getBoundingClientRect();
+    const width = Math.min(rect.width, maxModalWidth);
+    if (width !== rect.width) {
+      el.style.width = `${width}px`;
+    }
+
+    const measuredRect = el.getBoundingClientRect();
     const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
 
     let { top, left } = initiativeEditPosition;
-    const minCenterX = window.scrollX + MODAL_VIEWPORT_MARGIN + rect.width / 2;
-    const maxCenterX = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN - rect.width / 2;
+    const minCenterX = window.scrollX + MODAL_VIEWPORT_MARGIN + measuredRect.width / 2;
+    const maxCenterX = window.scrollX + window.innerWidth - MODAL_VIEWPORT_MARGIN - measuredRect.width / 2;
     left = Math.min(Math.max(left, minCenterX), maxCenterX);
 
-    const overflowBottom = top + rect.height - maxTop;
+    const overflowBottom = top + measuredRect.height - maxTop;
     if (overflowBottom > 0) top -= overflowBottom;
     // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
     // clamp must also be scroll-aware — clamping to the bare margin would pin
@@ -195,6 +223,24 @@ export function useInitiativeModal({
   }, [initiativeEditId, initiativeEditPosition]);
 
   useLayoutEffect(clampModalToViewport, [clampModalToViewport]);
+
+  useEffect(() => {
+    if (!initiativeModalRef.current || !initiativeEditId) return;
+
+    const el = initiativeModalRef.current;
+    const observer = new ResizeObserver(() => clampModalToViewport());
+    observer.observe(el);
+
+    const handleViewportChange = () => clampModalToViewport();
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange);
+    };
+  }, [clampModalToViewport, initiativeEditId]);
 
   // Also exposed as `remeasureInitiativeModal`: content added after open (e.g. the
   // entry row when switching modes) changes the modal's height, so the host re-runs it.
