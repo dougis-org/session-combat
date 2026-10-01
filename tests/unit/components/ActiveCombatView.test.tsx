@@ -335,6 +335,50 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
   });
 
+  it('advances the initiative modal to the first unrolled player after batch rolling monsters', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    const player = makeCombatant({ id: 'p1', name: 'Aria', type: 'player' });
+    const rollUnrolledMonsters = jest.fn();
+
+    // Holds combatants in real React state and updates them immutably, so the
+    // batch roll only becomes visible on the next render, like the real hook.
+    function Harness() {
+      const [combatants, setCombatants] = React.useState([goblin, orc, player]);
+      const combat = makeCombat(
+        {
+          combatState: makeCombatState({ combatants }),
+          rollUnrolledMonsters: (...args: [boolean?, number?]) => {
+            rollUnrolledMonsters(...args);
+            setCombatants((prev) =>
+              prev.map((c) =>
+                c.type === 'monster' ? { ...c, initiative: ROLLED.total, initiativeRoll: ROLLED } : c,
+              ),
+            );
+          },
+        },
+        combatants,
+      );
+      return <ActiveCombatView combat={combat} user={null} />;
+    }
+
+    render(<Harness />);
+
+    await user.click(
+      within(screen.getByTestId('initiative-modal')).getByRole('button', {
+        name: /roll d20 for all 2 unrolled monsters/i,
+      }),
+    );
+
+    expect(rollUnrolledMonsters).toHaveBeenCalledWith(false, 0);
+    expect(
+      within(screen.getByTestId('initiative-modal')).getByRole('heading', {
+        name: 'Aria',
+      }),
+    ).toBeInTheDocument();
+  });
+
   it('anchors the modal to the combatant card rect, not the Initiative button rect', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);

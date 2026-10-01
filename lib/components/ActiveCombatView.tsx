@@ -149,6 +149,18 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   if (!combatState) return null;
 
+  const initiativeCombatant = initiativeEditId
+    ? combatState.combatants.find(c => c.id === initiativeEditId)
+    : undefined;
+
+  // Closing never reads monster state, so it is safe right after the batch roll:
+  // the auto-open effect in useInitiativeModal re-fires once the rolled monsters
+  // leave the unrolled set and advances to the next unrolled combatant.
+  const handleRollAllMonsters = (advantage?: boolean, flatBonus?: number) => {
+    rollUnrolledMonsters(advantage, flatBonus);
+    closeInitiativeModal(false);
+  };
+
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
       key={combatant.id}
@@ -245,33 +257,30 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">{error}</div>
         )}
 
-        {initiativeEditId && initiativeEditPosition && (() => {
-          const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
-          return combatant ? (
-            <div
-              ref={initiativeModalRef}
-              className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
-              style={{
-                top: initiativeEditPosition.top,
-                left: initiativeEditPosition.left,
-                width: 'auto',
-                transform: 'translateX(-50%)',
-              }}
-              data-testid="initiative-modal"
-            >
-              <InitiativeEntry
-                key={initiativeEditId}
-                combatant={combatant}
-                unrolledMonsterCount={unrolledMonsterCount}
-                onRollAllMonsters={(adv, fb) => rollUnrolledMonsters(adv, fb)}
-                onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
-                onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
-                onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
-                onModeChange={remeasureInitiativeModal}
-              />
-            </div>
-          ) : null;
-        })()}
+        {initiativeCombatant && initiativeEditPosition && (
+          <div
+            ref={initiativeModalRef}
+            className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
+            style={{
+              top: initiativeEditPosition.top,
+              left: initiativeEditPosition.left,
+              width: 'auto',
+              transform: 'translateX(-50%)',
+            }}
+            data-testid="initiative-modal"
+          >
+            <InitiativeEntry
+              key={initiativeCombatant.id}
+              combatant={initiativeCombatant}
+              unrolledMonsterCount={unrolledMonsterCount}
+              onRollAllMonsters={handleRollAllMonsters}
+              onSet={(initiativeRoll) => handleSetInitiative(initiativeCombatant.id, initiativeRoll)}
+              onClose={() => closeInitiativeModal(!initiativeCombatant.initiativeRoll)}
+              onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeCombatant.id, adv, fb)}
+              onModeChange={remeasureInitiativeModal}
+            />
+          </div>
+        )}
 
         <div className="space-y-2" data-testid="initiative-order">
           <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>
