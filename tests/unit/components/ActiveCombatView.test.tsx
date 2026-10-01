@@ -335,6 +335,40 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
   });
 
+  it('advances the initiative modal to the first unrolled player after batch rolling monsters', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    const player = makeCombatant({ id: 'p1', name: 'Aria', type: 'player' });
+    const combatState = makeCombatState({ combatants: [goblin, orc, player] });
+    const rollUnrolledMonsters = jest.fn(() => {
+      combatState.combatants = combatState.combatants.map((combatant) =>
+        combatant.type === 'monster'
+          ? { ...combatant, initiative: ROLLED.total, initiativeRoll: ROLLED }
+          : combatant,
+      );
+    });
+    const combat = makeCombat(
+      { combatState, rollUnrolledMonsters },
+      [goblin, orc, player],
+    );
+
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    await user.click(
+      within(screen.getByTestId('initiative-modal')).getByRole('button', {
+        name: /roll d20 for all 2 unrolled monsters/i,
+      }),
+    );
+
+    expect(rollUnrolledMonsters).toHaveBeenCalledWith(false, 0);
+    expect(
+      within(screen.getByTestId('initiative-modal')).getByRole('heading', {
+        name: 'Aria',
+      }),
+    ).toBeInTheDocument();
+  });
+
   it('anchors the modal to the combatant card rect, not the Initiative button rect', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);

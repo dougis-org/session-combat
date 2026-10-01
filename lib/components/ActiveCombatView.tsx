@@ -263,7 +263,10 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
                 key={initiativeEditId}
                 combatant={combatant}
                 unrolledMonsterCount={unrolledMonsterCount}
-                onRollAllMonsters={(adv, fb) => rollUnrolledMonsters(adv, fb)}
+                onRollAllMonsters={(adv, fb) => {
+                  rollUnrolledMonsters(adv, fb);
+                  closeInitiativeModal(false);
+                }}
                 onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
                 onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
                 onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
