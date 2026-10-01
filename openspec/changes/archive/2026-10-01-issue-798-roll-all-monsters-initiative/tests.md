@@ -34,3 +34,4 @@ For each task in `tasks.md`:
 - [ ] Test that `InitiativeEntry` renders the batch roll button when `combatant.type === 'monster'` and `unrolledMonsterCount > 1`.
 - [ ] Test that the batch roll button is hidden if `unrolledMonsterCount <= 1` or if `combatant.type !== 'monster'`.
 - [ ] Test that clicking the batch roll button calls `onRollAllMonsters` with the current `advantage` and `flatBonus` state.
+- [x] Test that batch rolling closes the current monster modal and advances it to the first remaining unrolled player.

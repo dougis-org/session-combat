@@ -1,5 +1,5 @@
 import { test, expect } from "./fixtures";
-import { registerTestUser } from "./helpers/actions";
+import { registerTestUser, dismissInitiativeModal } from "./helpers/actions";
 import type { Page, TestInfo } from "@playwright/test";
 import { LEGENDARY_MONSTER as LEGENDARY_MONSTER_BASE } from "./helpers/monsterFixtures";
 
@@ -52,6 +52,7 @@ test.describe("Combat flows - lair actions", () => {
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
+    await dismissInitiativeModal(page);
   }
 
   async function addLairSlot(page: Page, name: string, seedMonster?: string) {
@@ -108,6 +109,7 @@ test.describe("Combat flows - lair actions", () => {
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector(`[data-testid="${waitSelector}"]`, { timeout: 15000 });
+    await dismissInitiativeModal(page);
   }
 
   async function setupActiveSeededLairCombat(page: Page) {

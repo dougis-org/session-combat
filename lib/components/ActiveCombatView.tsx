@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
 import { CombatantCard } from '@/lib/components/CombatantCard';
@@ -11,6 +11,7 @@ import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiv
 import { CombatantState } from '@/lib/types';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { useInitiativeModal } from '@/lib/hooks/useInitiativeModal';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useCombatantPopups } from '@/lib/hooks/useCombatantPopups';
 import { Toast } from '@/lib/components/Toast';
 import { usePreferences } from '@/lib/preferences/usePreferences';
@@ -75,14 +76,29 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const {
     initiativeEditId,
-    initiativeEditPosition,
-    initiativeModalRef,
     openInitiativeModal,
     handleSetInitiative,
     closeInitiativeModal,
-    remeasureInitiativeModal,
-    getCardAnchorPosition,
   } = useInitiativeModal({ combatState, setInitiativeRoll });
+
+  const initiativeCombatant = initiativeEditId
+    ? combatState?.combatants.find(c => c.id === initiativeEditId)
+    : undefined;
+  const initiativeDialogRef = useRef<HTMLDivElement>(null);
+  const initiativeTitleId = useId();
+  const initiativeNameId = useId();
+  useFocusTrap(initiativeDialogRef, !!initiativeCombatant, initiativeCombatant?.id);
+
+  // Lock page scroll while the dimmed backdrop is mounted (same pattern as Modal.tsx).
+  const initiativeOpen = !!initiativeCombatant;
+  useEffect(() => {
+    if (!initiativeOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [initiativeOpen]);
 
   const characterMap = useMemo(
     () => new Map((characters ?? []).map(c => [c.id, c])),
@@ -149,6 +165,14 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   if (!combatState) return null;
 
+  // Closing never reads monster state, so it is safe right after the batch roll:
+  // the auto-open effect in useInitiativeModal re-fires once the rolled monsters
+  // leave the unrolled set and advances to the next unrolled combatant.
+  const handleRollAllMonsters = (advantage?: boolean, flatBonus?: number) => {
+    rollUnrolledMonsters(advantage, flatBonus);
+    closeInitiativeModal(false);
+  };
+
   const renderCard = (combatant: CombatantState) => (
     <CombatantCard
       key={combatant.id}
@@ -159,10 +183,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
       onRemove={() => removeCombatant(combatant.id)}
       onNextTurn={handleNextTurn}
       onShowDetails={onShowDetails}
-      onSetInitiative={(id) => {
-        const position = getCardAnchorPosition(id);
-        if (position) openInitiativeModal(id, position);
-      }}
+      onSetInitiative={openInitiativeModal}
       onShowRemoveConfirm={onShowRemoveConfirm}
       allCombatants={combatState.combatants}
       onUpdateCombatant={(id, updates) => updateCombatant(id, updates)}
@@ -245,33 +266,33 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           <div className="p-4 bg-red-900 border border-red-700 rounded text-red-200 mb-6">{error}</div>
         )}
 
-        {initiativeEditId && initiativeEditPosition && (() => {
-          const combatant = combatState.combatants.find(c => c.id === initiativeEditId);
-          return combatant ? (
+        {initiativeCombatant && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4 bg-black/40"
+            data-testid="initiative-modal-backdrop"
+          >
             <div
-              ref={initiativeModalRef}
-              className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
-              style={{
-                top: initiativeEditPosition.top,
-                left: initiativeEditPosition.left,
-                width: 'auto',
-                transform: 'translateX(-50%)',
-              }}
+              ref={initiativeDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`${initiativeTitleId} ${initiativeNameId}`}
+              className="w-max max-w-full p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
               data-testid="initiative-modal"
             >
               <InitiativeEntry
-                key={initiativeEditId}
-                combatant={combatant}
+                key={initiativeCombatant.id}
+                combatant={initiativeCombatant}
+                titleId={initiativeTitleId}
+                nameId={initiativeNameId}
                 unrolledMonsterCount={unrolledMonsterCount}
-                onRollAllMonsters={(adv, fb) => rollUnrolledMonsters(adv, fb)}
-                onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
-                onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
-                onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
-                onModeChange={remeasureInitiativeModal}
+                onRollAllMonsters={handleRollAllMonsters}
+                onSet={(initiativeRoll) => handleSetInitiative(initiativeCombatant.id, initiativeRoll)}
+                onClose={() => closeInitiativeModal(!initiativeCombatant.initiativeRoll)}
+                onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeCombatant.id, adv, fb)}
               />
             </div>
-          ) : null;
-        })()}
+          </div>
+        )}
 
         <div className="space-y-2" data-testid="initiative-order">
           <h2 className="text-xl font-semibold text-yellow-400 mb-4">Initiative Order</h2>

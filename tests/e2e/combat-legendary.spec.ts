@@ -1,5 +1,6 @@
 import { test, expect } from "./fixtures";
 import {
+  dismissInitiativeModal,
   registerTestUser,
   createCharacter,
   createParty,
@@ -41,6 +42,7 @@ test.describe("Combat flows - legendary actions and end-to-end", () => {
     await page.locator('[data-testid="start-combat-quick"]').waitFor({ state: "visible", timeout: 10000 });
     await page.locator('[data-testid="start-combat-quick"]').click();
     await page.waitForSelector('[data-testid="initiative-order"]', { timeout: 15000 });
+    await dismissInitiativeModal(page);
   }
 
   test("legendary monster badge visible in combatant row with correct count", async ({

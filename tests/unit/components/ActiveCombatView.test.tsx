@@ -106,8 +106,8 @@ describe('ActiveCombatView', () => {
   });
 
   it('renders no combatant elements when getDisplayCombatants returns []', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
-    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster', initiativeRoll: ROLLED });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster', initiativeRoll: ROLLED });
     // combatState has combatants, but getDisplayCombatants filters them all out
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, []);
     render(<ActiveCombatView combat={combat} user={null} />);
@@ -241,7 +241,7 @@ describe('ActiveCombatView', () => {
   });
 });
 
-describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', () => {
+describe('ActiveCombatView — initiative auto-open, dismiss, and backdrop', () => {
   it('auto-opens the initiative modal on mount for the first unrolled combatant, no click required', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
@@ -335,206 +335,167 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
   });
 
-  it('anchors the modal to the combatant card rect, not the Initiative button rect', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+  it('advances the initiative modal to the first unrolled player after batch rolling monsters', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
+    const player = makeCombatant({ id: 'p1', name: 'Aria', type: 'player' });
+    const rollUnrolledMonsters = jest.fn();
 
-    const cardRect = { top: 40, left: 40, bottom: 400, right: 300, width: 260, height: 360, x: 40, y: 40, toJSON() {} } as DOMRect;
-    const buttonRect = { top: 60, left: 250, bottom: 80, right: 300, width: 50, height: 20, x: 250, y: 60, toJSON() {} } as DOMRect;
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
-      if (this.matches('[data-card-section="initiative"] button')) return buttonRect;
-      return originalGBCR.call(this);
-    });
-
-    try {
-      render(<ActiveCombatView combat={combat} user={null} />);
-      const modal = screen.getByTestId('initiative-modal');
-      const expectedCenterLeft = window.innerWidth / 2 + window.scrollX;
-      expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${expectedCenterLeft}px`);
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
-    }
-  });
-
-  it('keeps the modal auto-width instead of forcing the card width', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
-
-    const cardRect = { top: 40, left: 16, bottom: 400, right: 1264, width: 1248, height: 360, x: 16, y: 40, toJSON() {} } as DOMRect;
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
-      return originalGBCR.call(this);
-    });
-
-    try {
-      render(<ActiveCombatView combat={combat} user={null} />);
-      const modal = screen.getByTestId('initiative-modal');
-      expect(modal.style.width).toBe('auto');
-      expect(modal.style.transform).toBe('translateX(-50%)');
-      expect(modal.className).not.toMatch(/\bw-80\b/);
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
-    }
-  });
-
-  it('re-syncs the modal to the card’s current rendered top after a reorder', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    let cardTop = 60;
-
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-combatant-id') === 'c1') {
-        return {
-          top: cardTop,
-          left: 20,
-          bottom: cardTop + 80,
-          right: 280,
-          width: 260,
-          height: 80,
-          x: 20,
-          y: cardTop,
-          toJSON() {},
-        } as DOMRect;
-      }
-      return originalGBCR.call(this);
-    });
-
-    try {
-      const firstCombat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
-      const { rerender } = render(<ActiveCombatView combat={firstCombat} user={null} />);
-
-      expect(screen.getByTestId('initiative-modal').style.top).toBe('60px');
-
-      cardTop = 220;
-      const reorderedCombat = makeCombat(
-        { combatState: makeCombatState({ combatants: [goblin] }) },
-        [goblin],
+    // Holds combatants in real React state and updates them immutably, so the
+    // batch roll only becomes visible on the next render, like the real hook.
+    function Harness() {
+      const [combatants, setCombatants] = React.useState([goblin, orc, player]);
+      const combat = makeCombat(
+        {
+          combatState: makeCombatState({ combatants }),
+          rollUnrolledMonsters: (...args: [boolean?, number?]) => {
+            rollUnrolledMonsters(...args);
+            setCombatants((prev) =>
+              prev.map((c) =>
+                c.type === 'monster' ? { ...c, initiative: ROLLED.total, initiativeRoll: ROLLED } : c,
+              ),
+            );
+          },
+        },
+        combatants,
       );
-      rerender(<ActiveCombatView combat={reorderedCombat} user={null} />);
-
-      expect(screen.getByTestId('initiative-modal').style.top).toBe('220px');
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
+      return <ActiveCombatView combat={combat} user={null} />;
     }
-  });
 
-  it('clamps the modal position so it never overflows the viewport', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<Harness />);
 
-    const originalInnerWidth = window.innerWidth;
-    const originalInnerHeight = window.innerHeight;
-    Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true });
-    Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true });
-
-    const cardRect = { top: 250, left: 380, bottom: 260, right: 400, width: 20, height: 10, x: 380, y: 250, toJSON() {} } as DOMRect;
-    const modalRect = { top: 260, left: 380, bottom: 460, right: 700, width: 320, height: 200, x: 380, y: 260, toJSON() {} } as DOMRect;
-
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
-      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
-      return originalGBCR.call(this);
-    });
-
-    try {
-      render(<ActiveCombatView combat={combat} user={null} />);
-      const modal = screen.getByTestId('initiative-modal');
-      const left = parseFloat(modal.style.left);
-      const top = parseFloat(modal.style.top);
-      const leftEdge = left - modalRect.width / 2;
-      const rightEdge = left + modalRect.width / 2;
-      expect(rightEdge).toBeLessThanOrEqual(400 - 16);
-      expect(leftEdge).toBeGreaterThanOrEqual(16);
-      expect(top + modalRect.height).toBeLessThanOrEqual(300 - 16);
-      expect(top).toBeGreaterThanOrEqual(16);
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
-      Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, configurable: true });
-      Object.defineProperty(window, 'innerHeight', { value: originalInnerHeight, configurable: true });
-    }
-  });
-
-  it('clamps the minimum position to the visible viewport edge, not the document origin, when the page is scrolled', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
-
-    const originalScrollX = window.scrollX;
-    const originalScrollY = window.scrollY;
-    Object.defineProperty(window, 'scrollX', { value: 500, configurable: true });
-    Object.defineProperty(window, 'scrollY', { value: 1000, configurable: true });
-
-    // Card rect is in page coordinates that land above/left of the current visible
-    // viewport (e.g. the DM scrolled down after the card was anchored).
-    const cardRect = { top: -900, left: -450, bottom: -880, right: -400, width: 50, height: 20, x: -450, y: -900, toJSON() {} } as DOMRect;
-    const modalRect = { top: -880, left: -450, bottom: -680, right: -130, width: 320, height: 200, x: -450, y: -880, toJSON() {} } as DOMRect;
-
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
-      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
-      return originalGBCR.call(this);
-    });
-
-    try {
-      render(<ActiveCombatView combat={combat} user={null} />);
-      const modal = screen.getByTestId('initiative-modal');
-      const left = parseFloat(modal.style.left);
-      const top = parseFloat(modal.style.top);
-      // The modal stays centered in the visible viewport, while the top remains
-      // scroll-aware and clamped to the viewport edge.
-      expect(left).toBe(500 + window.innerWidth / 2);
-      expect(top).toBe(1000 + 16);
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
-      Object.defineProperty(window, 'scrollX', { value: originalScrollX, configurable: true });
-      Object.defineProperty(window, 'scrollY', { value: originalScrollY, configurable: true });
-    }
-  });
-
-  it('does not clamp when the card is comfortably within the viewport', () => {
-    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
-
-    const cardRect = { top: 40, left: 20, bottom: 100, right: 320, width: 300, height: 60, x: 20, y: 40, toJSON() {} } as DOMRect;
-    const modalRect = { top: 40, left: 20, bottom: 240, right: 340, width: 320, height: 200, x: 20, y: 40, toJSON() {} } as DOMRect;
-
-    const originalGBCR = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn(function (this: Element) {
-      if (this.getAttribute('data-testid') === 'initiative-modal') return modalRect;
-      if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
-      return originalGBCR.call(this);
-    });
-    try {
-      render(<ActiveCombatView combat={combat} user={null} />);
-      const modal = screen.getByTestId('initiative-modal');
-      const expectedCenterLeft = window.innerWidth / 2 + window.scrollX;
-      expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${expectedCenterLeft}px`);
-    } finally {
-      Element.prototype.getBoundingClientRect = originalGBCR;
-    }
-  });
-
-  it('the INITIATIVE_MODAL_WIDTH constant and its left-offset subtraction no longer exist', () => {
-    const source = require('fs').readFileSync(
-      require.resolve('@/lib/components/ActiveCombatView'),
-      'utf8',
+    await user.click(
+      within(screen.getByTestId('initiative-modal')).getByRole('button', {
+        name: /roll d20 for all 2 unrolled monsters/i,
+      }),
     );
-    expect(source).not.toMatch(/INITIATIVE_MODAL_WIDTH/);
+
+    expect(rollUnrolledMonsters).toHaveBeenCalledWith(false, 0);
+    expect(
+      within(screen.getByTestId('initiative-modal')).getByRole('heading', {
+        name: 'Aria',
+      }),
+    ).toBeInTheDocument();
   });
 
-  it('does not throw and shows no modal when the auto-open target has no rendered card', () => {
+  it('renders a fixed, faint, flex-centered backdrop with a content-sized dialog and no inline position', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
-    // combatState has an unrolled combatant, but getDisplayCombatants filters it out
-    // so no card (and no [data-combatant-id]) is ever rendered for it.
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const backdrop = screen.getByTestId('initiative-modal-backdrop');
+    expect(backdrop.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['fixed', 'inset-0', 'bg-black/40', 'items-center', 'justify-center', 'p-4', 'overflow-y-auto']),
+    );
+
+    const dialog = screen.getByTestId('initiative-modal');
+    expect(backdrop).toContainElement(dialog);
+    expect(dialog.className.split(/\s+/)).toEqual(expect.arrayContaining(['w-max', 'max-w-full']));
+    for (const prop of ['top', 'left', 'width', 'transform']) {
+      expect(dialog.style.getPropertyValue(prop)).toBe('');
+    }
+  });
+
+  it('has no backdrop when every combatant has rolled', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', initiativeRoll: ROLLED });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.queryByTestId('initiative-modal-backdrop')).not.toBeInTheDocument();
+  });
+
+  it('opens even when no card is rendered for the target (no anchor needed)', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, []);
-    expect(() => render(<ActiveCombatView combat={combat} user={null} />)).not.toThrow();
-    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+    render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.getByTestId('initiative-modal')).toBeInTheDocument();
+  });
+
+  it('clicking the backdrop closes the modal; clicking inside the dialog does not', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    await user.click(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Goblin' }));
+    expect(screen.getByTestId('initiative-modal')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('initiative-modal-backdrop'));
+    expect(screen.queryByTestId('initiative-modal-backdrop')).not.toBeInTheDocument();
+  });
+
+  it('keeps the same backdrop node across auto-advance and removes it after the last combatant', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const backdrop = screen.getByTestId('initiative-modal-backdrop');
+    await user.click(within(screen.getByTestId('initiative-modal')).getByRole('button', { name: 'Roll d20' }));
+
+    expect(screen.getByTestId('initiative-modal-backdrop')).toBe(backdrop);
+    expect(within(screen.getByTestId('initiative-modal')).getByRole('heading', { name: 'Orc' })).toBeInTheDocument();
+  });
+
+  it('removes the backdrop after the last unrolled combatant is saved', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+    await user.click(within(screen.getByTestId('initiative-modal')).getByRole('button', { name: 'Roll d20' }));
+    expect(screen.queryByTestId('initiative-modal-backdrop')).not.toBeInTheDocument();
+  });
+
+  it('locks page scroll while open and restores the previous overflow on close and unmount', async () => {
+    const user = userEvent.setup();
+    document.body.style.overflow = 'scroll';
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    const { unmount } = render(<ActiveCombatView combat={combat} user={null} />);
+    expect(document.body.style.overflow).toBe('hidden');
+
+    await user.keyboard('{Escape}');
+    expect(document.body.style.overflow).toBe('scroll');
+
+    await user.click(
+      document.querySelector('[data-combatant-id="c1"] [data-card-section="initiative"] button') as HTMLElement,
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+    unmount();
+    expect(document.body.style.overflow).toBe('scroll');
+    document.body.style.overflow = '';
+  });
+
+  it('exposes an accessible modal dialog named by its headings', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const dialog = screen.getByRole('dialog', { name: /set\s*initiative goblin/i });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('moves focus into the dialog on open, keeps it inside after auto-advance, and restores it on close', async () => {
+    const user = userEvent.setup();
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin', initiativeRoll: ROLLED });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    const rolled = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);
+    const { rerender } = render(<ActiveCombatView combat={rolled} user={null} />);
+
+    const opener = document.querySelector(
+      '[data-combatant-id="c1"] [data-card-section="initiative"] button',
+    ) as HTMLElement;
+    opener.focus();
+    await user.click(opener);
+    expect(screen.getByTestId('initiative-modal')).toContainElement(document.activeElement as HTMLElement);
+
+    await user.keyboard('{Escape}');
+    expect(opener).toHaveFocus();
+
+    const two = makeCombat({ combatState: makeCombatState({ combatants: [goblin, orc] }) }, [goblin, orc]);
+    rerender(<ActiveCombatView combat={two} user={null} />);
+    expect(screen.getByTestId('initiative-modal')).toContainElement(document.activeElement as HTMLElement);
   });
 
   it('closes gracefully without throwing when the open modal target combatant is removed mid-session', () => {
