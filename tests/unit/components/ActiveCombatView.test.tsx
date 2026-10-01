@@ -386,12 +386,12 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and backdrop', () 
 
     const backdrop = screen.getByTestId('initiative-modal-backdrop');
     expect(backdrop.className.split(/\s+/)).toEqual(
-      expect.arrayContaining(['fixed', 'inset-0', 'bg-black/40', 'items-center', 'justify-center', 'p-4', 'overflow-y-auto']),
+      expect.arrayContaining(['fixed', 'inset-0', 'bg-black/40', 'flex', 'p-4', 'overflow-y-auto']),
     );
 
     const dialog = screen.getByTestId('initiative-modal');
     expect(backdrop).toContainElement(dialog);
-    expect(dialog.className.split(/\s+/)).toEqual(expect.arrayContaining(['w-max', 'max-w-full']));
+    expect(dialog.className.split(/\s+/)).toEqual(expect.arrayContaining(['m-auto', 'w-max', 'max-w-full']));
     for (const prop of ['top', 'left', 'width', 'transform']) {
       expect(dialog.style.getPropertyValue(prop)).toBe('');
     }
