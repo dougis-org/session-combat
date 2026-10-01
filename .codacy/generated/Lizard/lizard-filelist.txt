@@ -1,2 +1,1 @@
-/home/doug/dev/session-combat/.worktrees/fix-initiative-set-button-layout/lib/components/InitiativeEntry.tsx
-/home/doug/dev/session-combat/.worktrees/fix-initiative-set-button-layout/tests/unit/components/InitiativeEntry.test.tsx
+/home/doug/dev/session-combat/app/api/auth/login/route.ts
