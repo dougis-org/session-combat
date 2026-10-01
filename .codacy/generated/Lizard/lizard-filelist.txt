@@ -1,1 +1,1 @@
-/home/doug/dev/session-combat/app/api/auth/login/route.ts
+/home/doug/dev2/session-combat/.worktrees/encounter-picker-sort-search/lib/components/CombatSetupView.tsx
