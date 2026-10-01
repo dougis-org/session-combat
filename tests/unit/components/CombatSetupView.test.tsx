@@ -5,7 +5,7 @@ jest.mock('next/link', () => ({
 }));
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CombatSetupView } from '@/lib/components/CombatSetupView';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
@@ -70,8 +70,7 @@ describe('CombatSetupView', () => {
     const encounter = makeEncounter({ id: 'e1', name: 'Goblin Ambush' });
     const combat = makeUseCombat({ encounters: [encounter], setSelectedEncounterId });
     render(<CombatSetupView combat={combat} user={null} />);
-    const encounterSelect = screen.getByDisplayValue('No encounter');
-    await user.selectOptions(encounterSelect, 'e1');
+    await user.click(screen.getByRole('option', { name: 'Goblin Ambush' }));
     expect(setSelectedEncounterId).toHaveBeenCalledWith('e1');
   });
 
@@ -122,14 +121,14 @@ describe('CombatSetupView', () => {
     const combat = makeUseCombat({ campaignId: 'campaign-1', encounters: [encounter] });
     render(<CombatSetupView combat={combat} user={null} />);
     expect(screen.queryByText('No encounters linked to this campaign.')).not.toBeInTheDocument();
-    expect(screen.getByDisplayValue('No encounter')).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: 'Encounters' })).toBeInTheDocument();
   });
 
   it('renders the encounter select instead of the empty state when campaignId is unset, even with no encounters', () => {
     const combat = makeUseCombat({ campaignId: undefined, encounters: [] });
     render(<CombatSetupView combat={combat} user={null} />);
     expect(screen.queryByText('No encounters linked to this campaign.')).not.toBeInTheDocument();
-    expect(screen.getByDisplayValue('No encounter')).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: 'Encounters' })).toBeInTheDocument();
   });
 
   it('encodes special characters in campaignId when building the empty-state link href', () => {
@@ -147,14 +146,62 @@ describe('CombatSetupView', () => {
     ];
 
     const encounterOptionNames = () =>
-      screen
-        .getByDisplayValue('No encounter')
-        .querySelectorAll('option');
+      within(screen.getByRole('listbox', { name: 'Encounters' })).getAllByRole('option');
 
     it('renders options alphabetically after "No encounter"', () => {
       render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
       const labels = Array.from(encounterOptionNames()).map(o => o.textContent);
       expect(labels).toEqual(['No encounter', 'Dragon Lair', 'goblin Ambush', 'Owlbear Den']);
+    });
+
+    it('narrows the visible list on every keystroke', async () => {
+      const user = userEvent.setup();
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      const input = screen.getByRole('textbox', { name: 'Search encounters' });
+      await user.type(input, 'o');
+      expect(encounterOptionNames().map(o => o.textContent)).toEqual(['No encounter', 'Dragon Lair', 'goblin Ambush', 'Owlbear Den']);
+      await user.type(input, 'w');
+      expect(encounterOptionNames().map(o => o.textContent)).toEqual(['No encounter', 'Owlbear Den']);
+    });
+
+    it('clicking an option selects it, and "No encounter" clears the selection', async () => {
+      const user = userEvent.setup();
+      const setSelectedEncounterId = jest.fn();
+      render(<CombatSetupView combat={makeUseCombat({ encounters, selectedEncounterId: 'e1', setSelectedEncounterId })} user={null} />);
+      await user.click(screen.getByRole('option', { name: 'Dragon Lair' }));
+      expect(setSelectedEncounterId).toHaveBeenLastCalledWith('e3');
+      await user.click(screen.getByRole('option', { name: 'No encounter' }));
+      expect(setSelectedEncounterId).toHaveBeenLastCalledWith('');
+    });
+
+    it('keeps the listbox to a single tab stop on the selected option', () => {
+      render(<CombatSetupView combat={makeUseCombat({ encounters, selectedEncounterId: 'e3' })} user={null} />);
+      const tabbable = encounterOptionNames().filter(o => o.tabIndex === 0);
+      expect(tabbable.map(o => o.textContent)).toEqual(['Dragon Lair']);
+    });
+
+    it('moves focus with arrow keys, Home and End, and selects with Enter', async () => {
+      const user = userEvent.setup();
+      const setSelectedEncounterId = jest.fn();
+      render(<CombatSetupView combat={makeUseCombat({ encounters, setSelectedEncounterId })} user={null} />);
+      encounterOptionNames()[0].focus();
+      await user.keyboard('{ArrowDown}');
+      expect(screen.getByRole('option', { name: 'Dragon Lair' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}{ArrowUp}{ArrowUp}{ArrowUp}');
+      expect(screen.getByRole('option', { name: 'No encounter' })).toHaveFocus();
+      await user.keyboard('{End}');
+      expect(screen.getByRole('option', { name: 'Owlbear Den' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}');
+      expect(screen.getByRole('option', { name: 'Owlbear Den' })).toHaveFocus();
+      await user.keyboard('{Home}');
+      expect(screen.getByRole('option', { name: 'No encounter' })).toHaveFocus();
+      await user.keyboard('{ArrowDown}{Enter}');
+      expect(setSelectedEncounterId).toHaveBeenLastCalledWith('e3');
+    });
+
+    it('marks "No encounter" selected when nothing is chosen', () => {
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      expect(screen.getByRole('option', { name: 'No encounter' })).toHaveAttribute('aria-selected', 'true');
     });
 
     it('exposes the search input by accessible name', () => {
@@ -186,8 +233,9 @@ describe('CombatSetupView', () => {
       const combat = makeUseCombat({ encounters, selectedEncounterId: 'e1' });
       render(<CombatSetupView combat={combat} user={null} />);
       await user.type(screen.getByRole('textbox', { name: 'Search encounters' }), 'gob');
-      const labels = Array.from(screen.getByDisplayValue('Owlbear Den').querySelectorAll('option')).map(o => o.textContent);
+      const labels = Array.from(encounterOptionNames()).map(o => o.textContent);
       expect(labels).toEqual(['No encounter', 'goblin Ambush', 'Owlbear Den']);
+      expect(screen.getByRole('option', { name: 'Owlbear Den' })).toHaveAttribute('aria-selected', 'true');
       expect(screen.queryByText('No encounters match')).not.toBeInTheDocument();
     });
 

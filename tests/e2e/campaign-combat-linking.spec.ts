@@ -73,8 +73,9 @@ test.describe("Campaign Encounters tab — link/unlink reflected in combat-setup
     // Confirm it appears in the combat-setup "From Library" picker
     await page.goto(`/campaigns/${campaignId}/combat`);
     await expect(page.getByRole("heading", { name: "From Library" })).toBeVisible({ timeout: 15000 });
-    const librarySelect = page.locator("select").first();
-    await expect(librarySelect.locator(`option:text("${encounterName}")`)).toHaveCount(1, { timeout: 15000 });
+    await expect(
+      page.getByRole("listbox", { name: "Encounters" }).getByRole("option", { name: encounterName })
+    ).toHaveCount(1, { timeout: 15000 });
 
     // Unlink it from the campaign
     await page.goto(`/campaigns/${campaignId}/encounters`);
@@ -87,7 +88,7 @@ test.describe("Campaign Encounters tab — link/unlink reflected in combat-setup
     await page.goto(`/campaigns/${campaignId}/combat`);
     await expect(page.getByRole("heading", { name: "From Library" })).toBeVisible({ timeout: 15000 });
     await expect(
-      page.locator("select").first().locator(`option:text("${encounterName}")`)
+      page.getByRole("listbox", { name: "Encounters" }).getByRole("option", { name: encounterName })
     ).toHaveCount(0, { timeout: 15000 });
 
     // Confirm it still exists on the global /encounters list
@@ -117,7 +118,7 @@ test.describe("Ad hoc combat — unaffected by campaign scoping", () => {
     await page.goto("/combat");
     await expect(page.getByRole("heading", { name: "From Library" })).toBeVisible({ timeout: 15000 });
     await expect(
-      page.locator("select").first().locator(`option:text("${encounterName}")`)
+      page.getByRole("listbox", { name: "Encounters" }).getByRole("option", { name: encounterName })
     ).toHaveCount(1, { timeout: 15000 });
 
     await page.getByRole("button", { name: "+ Add Enemy" }).first().click();
