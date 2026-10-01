@@ -29,7 +29,7 @@
 
 ### Decision 1: CSS-sized, flex-centered fixed overlay replaces JS measure-and-clamp
 
-- Chosen: `<div fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-black/40 data-testid="initiative-modal-backdrop">` containing `<div role="dialog" aria-modal="true" class="w-max max-w-full ..." data-testid="initiative-modal">`. The backdrop's `p-4` provides the 16px viewport margin; `w-max max-w-full` makes the browser size the dialog to its content, capped at the available width.
+- Chosen: `<div fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4 bg-black/40 data-testid="initiative-modal-backdrop">` containing `<div role="dialog" aria-modal="true" class="w-max max-w-full ..." data-testid="initiative-modal">`. The backdrop's `p-4` provides the 16px viewport margin; `w-max max-w-full` makes the browser size the dialog to its content, capped at the available width.
 - Alternatives considered:
   - A. Keep absolute positioning but measure with the modal unconstrained (`left:0; width:max-content`) and then place it. Fixes #807 but keeps all the measuring/clamping code and listeners.
   - B′. Flex-centered horizontally, vertically offset to the card's top. Keeps a measurement of the card and the card-anchoring requirement the requester no longer needs.
@@ -60,7 +60,7 @@
 
 ### Decision 5: Focus trap via a small reusable `useFocusTrap` hook
 
-- Chosen: `useFocusTrap(ref, active, { restoreFocus })` in `lib/hooks/useFocusTrap.ts`. On activation it remembers `document.activeElement`, moves focus to the first tabbable descendant (falling back to the container with `tabIndex={-1}`), wraps Tab/Shift+Tab at the ends via a `keydown` listener on the container, and restores focus to the remembered element on deactivation if it is still in the document. Re-focuses the first control when the target combatant changes (auto-advance) without restoring focus in between. It does not handle Escape (already handled by `InitiativeEntry`).
+- Chosen: `useFocusTrap(ref, active, focusKey?)` in `lib/hooks/useFocusTrap.ts`. On activation it remembers `document.activeElement`, moves focus to the first tabbable descendant (falling back to the container with `tabIndex={-1}`), wraps Tab/Shift+Tab at the ends via a `keydown` listener on the container, and restores focus to the remembered element on deactivation if it is still in the document. Re-focuses the first control when the target combatant changes (auto-advance) without restoring focus in between. It does not handle Escape (already handled by `InitiativeEntry`).
 - Alternatives considered: `focus-trap-react` or similar library (new dependency for ~40 lines); `inert` on the page behind (broad browser/React 19 plumbing, and the tracker is not wrapped in a single root); no trap (violates the accessibility requirement).
 - Rationale: The repo has no focus-trap helper (`Modal.tsx` has `aria-modal` only). A small hook is testable in jsdom and reusable by other modals later.
 - Trade-offs: Tabbable-element detection uses a selector list (`button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])`, excluding `disabled`); sufficient for this dialog.

@@ -7,54 +7,54 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] Confirm the dedicated worktree `.worktrees/centered-dimmed-initiative-modal` exists and `cd` into it; confirm the branch is on the remote (`git push -u origin centered-dimmed-initiative-modal` if not). Never check out another branch in the primary checkout.
-- [ ] **Issue lifecycle: mark in-progress** (#807): run `gh issue edit 807 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update (the label update still proceeds).
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic (e.g. body-scroll-lock pattern in `lib/components/Modal.tsx`).
-- [ ] Follow strict TDD per `tests.md`: write the failing test, make it pass, refactor.
+- [x] Confirm the dedicated worktree `.worktrees/centered-dimmed-initiative-modal` exists and `cd` into it; confirm the branch is on the remote (`git push -u origin centered-dimmed-initiative-modal` if not). Never check out another branch in the primary checkout.
+- [x] **Issue lifecycle: mark in-progress** (#807): run `gh issue edit 807 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update (the label update still proceeds).
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic (e.g. body-scroll-lock pattern in `lib/components/Modal.tsx`).
+- [x] Follow strict TDD per `tests.md`: write the failing test, make it pass, refactor.
 
 ### 1. Focus-trap hook (design Decision 5)
 
-- [ ] 1.1 Add `lib/hooks/useFocusTrap.ts`: on activation remember `document.activeElement`, focus the first tabbable descendant (fallback: container with `tabIndex={-1}`); wrap Tab/Shift+Tab at the ends; on deactivation restore focus if the remembered element is still in the document; expose a way to re-focus the first control when a key (the combatant id) changes without restoring focus in between. Do not handle Escape.
+- [x] 1.1 Add `lib/hooks/useFocusTrap.ts`: on activation remember `document.activeElement`, focus the first tabbable descendant (fallback: container with `tabIndex={-1}`); wrap Tab/Shift+Tab at the ends; on deactivation restore focus if the remembered element is still in the document; expose a way to re-focus the first control when a key (the combatant id) changes without restoring focus in between. Do not handle Escape.
 
 ### 2. Hook simplification (design Decision 4)
 
-- [ ] 2.1 In `lib/hooks/useInitiativeModal.ts`: remove `initiativeEditPosition`, `initiativeModalRef`, `getCardAnchorPosition`, `remeasureInitiativeModal`, `MODAL_VIEWPORT_MARGIN`, `clampModalToViewport`, and the `ResizeObserver`/scroll/resize effect; change `openInitiativeModal` to take `id: string | null` only; auto-open and manual open no longer require a card element. Keep the dismissal set, auto-open effect, removed-combatant recovery effect, `handleSetInitiative`, and `closeInitiativeModal`.
-- [ ] 2.2 Update the `UseInitiativeModalResult` / args types and the file's header comment to match.
+- [x] 2.1 In `lib/hooks/useInitiativeModal.ts`: remove `initiativeEditPosition`, `initiativeModalRef`, `getCardAnchorPosition`, `remeasureInitiativeModal`, `MODAL_VIEWPORT_MARGIN`, `clampModalToViewport`, and the `ResizeObserver`/scroll/resize effect; change `openInitiativeModal` to take `id: string | null` only; auto-open and manual open no longer require a card element. Keep the dismissal set, auto-open effect, removed-combatant recovery effect, `handleSetInitiative`, and `closeInitiativeModal`.
+- [x] 2.2 Update the `UseInitiativeModalResult` / args types and the file's header comment to match.
 
 ### 3. Modal markup (design Decisions 1, 2, 3, 6, 7)
 
-- [ ] 3.1 In `lib/components/ActiveCombatView.tsx`: replace the absolutely positioned modal `div` with the backdrop (`fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-black/40`, `data-testid="initiative-modal-backdrop"`) containing the dialog (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`, `w-max max-w-full`, existing surface classes, `data-testid="initiative-modal"`, no inline position/width/transform). Keep the backdrop mounted while `initiativeEditId` is set and key only `InitiativeEntry` by combatant id. Wire `useFocusTrap` to the dialog and add the body scroll lock with restore. Update `onSetInitiative` to `openInitiativeModal(id)`. Remove the unused destructured bindings.
-- [ ] 3.2 In `lib/components/InitiativeEntry.tsx`: remove the `onModeChange` prop and its notifying effect; remove `max-h-[70vh] overflow-y-auto` from the controls column (keep `p-1`); add id props for the "Set Initiative" heading and the name heading; let the name wrap (`break-words`).
-- [ ] 3.3 Check the render site's ancestors for `transform`/`filter` that would break `fixed`; portal to `document.body` only if one exists. Check stacking against the detail panel and remove-confirm popup.
+- [x] 3.1 In `lib/components/ActiveCombatView.tsx`: replace the absolutely positioned modal `div` with the backdrop (`fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4 bg-black/40`, `data-testid="initiative-modal-backdrop"`) containing the dialog (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`, `w-max max-w-full`, existing surface classes, `data-testid="initiative-modal"`, no inline position/width/transform). Keep the backdrop mounted while `initiativeEditId` is set and key only `InitiativeEntry` by combatant id. Wire `useFocusTrap` to the dialog and add the body scroll lock with restore. Update `onSetInitiative` to `openInitiativeModal(id)`. Remove the unused destructured bindings.
+- [x] 3.2 In `lib/components/InitiativeEntry.tsx`: remove the `onModeChange` prop and its notifying effect; remove `max-h-[70vh] overflow-y-auto` from the controls column (keep `p-1`); add id props for the "Set Initiative" heading and the name heading; let the name wrap (`break-words`).
+- [x] 3.3 Check the render site's ancestors for `transform`/`filter` that would break `fixed`; portal to `document.body` only if one exists. Check stacking against the detail panel and remove-confirm popup.
 
 ### 4. Tests (see `tests.md`)
 
-- [ ] 4.1 Remove tests for anchoring, clamping, scroll-aware clamp, and re-measure in `tests/unit/components/ActiveCombatView.test.tsx` and `tests/unit/hooks/useInitiativeModal.test.tsx`; remove the `onModeChange` tests in `tests/unit/combat/initiativeEntry.test.tsx`.
-- [ ] 4.2 Add the new unit tests (hook, backdrop, classes, accessibility, focus) and the Playwright long-name/keyboard test in `tests/e2e/combat-core.spec.ts` or a new `tests/e2e/combat-initiative-modal.spec.ts`.
+- [x] 4.1 Remove tests for anchoring, clamping, scroll-aware clamp, and re-measure in `tests/unit/components/ActiveCombatView.test.tsx` and `tests/unit/hooks/useInitiativeModal.test.tsx`; remove the `onModeChange` tests in `tests/unit/combat/initiativeEntry.test.tsx`.
+- [x] 4.2 Add the new unit tests (hook, backdrop, classes, accessibility, focus) and the Playwright long-name/keyboard test in `tests/e2e/combat-core.spec.ts` or a new `tests/e2e/combat-initiative-modal.spec.ts`.
 
 ### 5. Documentation
 
-- [ ] 5.1 Update `.wolf/anatomy.md` descriptions for changed/new files (`useFocusTrap.ts`, `useInitiativeModal.ts`, `ActiveCombatView.tsx`, `InitiativeEntry.tsx`) and append to `.wolf/memory.md`.
-- [ ] 5.2 Confirm the delta spec in `openspec/changes/centered-dimmed-initiative-modal/specs/modal-initiative-entry/spec.md` still matches the implemented behavior; update artifacts first if scope changed.
+- [x] 5.1 Update `.wolf/anatomy.md` descriptions for changed/new files (`useFocusTrap.ts`, `useInitiativeModal.ts`, `ActiveCombatView.tsx`, `InitiativeEntry.tsx`) and append to `.wolf/memory.md`.
+- [x] 5.2 Confirm the delta spec in `openspec/changes/centered-dimmed-initiative-modal/specs/modal-initiative-entry/spec.md` still matches the implemented behavior; update artifacts first if scope changed.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit tests: `npm run test:unit`
-- [ ] Run integration tests: `npm run test:integration`
-- [ ] Run E2E tests on a free port (not 3000): `npm run test:e2e`
-- [ ] Run type checks: `npm run typecheck`
-- [ ] Run lint: `npm run lint`
-- [ ] Run build: `npm run build`
+- [x] Run unit tests: `npm run test:unit`
+- [x] Run integration tests: `npm run test:integration`
+- [x] Run E2E tests on a free port (not 3000): `npm run test:e2e`
+- [x] Run type checks: `npm run typecheck`
+- [x] Run lint: `npm run lint`
+- [x] Run build: `npm run build`
 - [ ] Run security/code quality checks required by project standards (Codacy / Verity gate); fix findings, do not waive without an explicit human-accepted risk
-- [ ] Manually verify at a desktop width (about 1400px) and a narrow width with a very long character name: no scrollbar, centered, faint dim, Tab cycles inside, focus returns on close
+- [x] Manually verify at a desktop width (about 1400px) and a narrow width with a very long character name: no scrollbar, centered, faint dim, Tab cycles inside, focus returns on close
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 

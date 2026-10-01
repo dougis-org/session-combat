@@ -353,17 +353,13 @@ describe('initiative display — flat bonus', () => {
 });
 
 describe('layout — clipping and width (#802)', () => {
-  function scrollContainer(): HTMLElement {
-    return container.querySelector('.overflow-y-auto') as HTMLElement;
-  }
-
-  test('scroll container pads all sides and keeps the scroll safeguard', () => {
+  test('controls column pads all sides and has no inner scroller', () => {
     render({ ...BASE }, jest.fn());
-    const cls = scrollContainer().className.split(/\s+/);
+    expect(container.querySelector('.overflow-y-auto')).toBeNull();
+    const cls = (container.querySelector('.p-1') as HTMLElement).className.split(/\s+/);
     expect(cls).toContain('p-1');
     expect(cls).not.toContain('pr-1');
-    expect(cls).toContain('max-h-[70vh]');
-    expect(cls).toContain('overflow-y-auto');
+    expect(cls).not.toContain('max-h-[70vh]');
   });
 
   test.each([
@@ -384,27 +380,27 @@ describe('layout — clipping and width (#802)', () => {
   });
 });
 
-describe('onModeChange (#802)', () => {
-  function renderWithModeChange(onModeChange?: (m: 'roll' | 'dice' | 'total') => void) {
+describe('InitiativeEntry — headings and mode switching', () => {
+  test('applies heading ids from props and lets a long name wrap', () => {
+    const longName = 'A'.repeat(120);
     act(() => {
       root = createRoot(container);
-      root.render(<InitiativeEntry combatant={BASE} onSet={jest.fn() as any} onModeChange={onModeChange} />);
+      root.render(
+        <InitiativeEntry combatant={{ ...BASE, name: longName }} onSet={jest.fn() as any} titleId="t-id" nameId="n-id" />,
+      );
     });
-  }
-
-  test('is called with the new mode when Enter Dice Roll / Enter Total are clicked', () => {
-    const onModeChange = jest.fn();
-    renderWithModeChange(onModeChange);
-
-    act(() => { findButton('Enter Dice Roll').click(); });
-    expect(onModeChange).toHaveBeenLastCalledWith('dice');
-    act(() => { findButton('Enter Total').click(); });
-    expect(onModeChange).toHaveBeenLastCalledWith('total');
+    expect(container.querySelector('#t-id')?.textContent).toContain('Initiative');
+    const name = container.querySelector('#n-id') as HTMLElement;
+    expect(name.textContent).toBe(longName);
+    expect(name.className).toContain('break-words');
   });
 
-  test('does not throw when the prop is omitted', () => {
-    renderWithModeChange(undefined);
-    expect(() => act(() => { findButton('Enter Dice Roll').click(); })).not.toThrow();
+  test('switching modes renders the matching entry row', () => {
+    render({ ...BASE }, jest.fn());
+    act(() => { findButton('Enter Dice Roll').click(); });
+    expect(container.querySelector('input[placeholder="1-20"]')).not.toBeNull();
+    act(() => { findButton('Enter Total').click(); });
+    expect(container.querySelector('input[placeholder="Total initiative"]')).not.toBeNull();
   });
 });
 
