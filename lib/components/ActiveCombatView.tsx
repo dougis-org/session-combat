@@ -248,7 +248,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
               style={{
                 top: initiativeEditPosition.top,
                 left: initiativeEditPosition.left,
-                width: initiativeEditPosition.width,
+                width: "auto",
               }}
               data-testid="initiative-modal"
             >

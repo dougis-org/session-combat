@@ -1,28 +1,40 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { InitiativeRoll } from '@/lib/types';
-import type { UseCombatReturn } from '@/lib/hooks/useCombat';
-import { sortCombatants } from '@/lib/utils/combat';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type { InitiativeRoll } from "@/lib/types";
+import type { UseCombatReturn } from "@/lib/hooks/useCombat";
+import { sortCombatants } from "@/lib/utils/combat";
 
 export interface UseInitiativeModalArgs {
-  combatState: UseCombatReturn['combatState'];
-  setInitiativeRoll: UseCombatReturn['setInitiativeRoll'];
+  combatState: UseCombatReturn["combatState"];
+  setInitiativeRoll: UseCombatReturn["setInitiativeRoll"];
 }
 
 export interface UseInitiativeModalResult {
   initiativeEditId: string | null;
   initiativeEditPosition: { top: number; left: number; width: number } | null;
   initiativeModalRef: React.RefObject<HTMLDivElement | null>;
-  openInitiativeModal: (id: string | null, position: { top: number; left: number; width: number } | null) => void;
+  openInitiativeModal: (
+    id: string | null,
+    position: { top: number; left: number; width: number } | null,
+  ) => void;
   handleSetInitiative: (id: string, roll: InitiativeRoll) => void;
   closeInitiativeModal: (dismissed: boolean) => void;
   remeasureInitiativeModal: () => void;
-  getCardAnchorPosition: (id: string) => { top: number; left: number; width: number } | null;
+  getCardAnchorPosition: (
+    id: string,
+  ) => { top: number; left: number; width: number } | null;
 }
 
 const MODAL_VIEWPORT_MARGIN = 16;
-
+// used to define how far the modal should move left of the character card
+export const LEFT_PIXEL_MARGIN = 30;
 /**
  * Owns the initiative-modal's anchoring, dismissal, auto-open, and
  * viewport-clamp state. Extracted verbatim (including effect-dependency
@@ -34,7 +46,11 @@ export function useInitiativeModal({
   setInitiativeRoll,
 }: UseInitiativeModalArgs): UseInitiativeModalResult {
   const [initiativeEditId, setInitiativeEditId] = useState<string | null>(null);
-  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{top: number, left: number, width: number} | null>(null);
+  const [initiativeEditPosition, setInitiativeEditPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
   const initiativeModalRef = useRef<HTMLDivElement | null>(null);
   // Combatants whose auto-opened initiative modal the DM has manually dismissed
   // this session; they stay eligible for the manual click-to-open flow, just not
@@ -45,22 +61,33 @@ export function useInitiativeModal({
   // edge, sitting directly below it. That means it can only ever overflow the
   // bottom of the viewport (the card itself is already constrained
   // horizontally by the page layout), so only vertical clamping is needed.
-  const getCardAnchorPosition = (id: string): { top: number; left: number; width: number } | null => {
+  const getCardAnchorPosition = (
+    id: string,
+  ): { top: number; left: number; width: number } | null => {
     const el = document.querySelector(`[data-combatant-id="${id}"]`);
     if (!el) {
-      console.warn(`ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`);
+      console.warn(
+        `ActiveCombatView: no card element found for combatant ${id} while anchoring the initiative modal`,
+      );
       return null;
     }
     const rect = el.getBoundingClientRect();
     // Pinned to the card's own top-left corner (not rectToPosition's
     // bottom-edge convention used elsewhere) so the modal overlays the card
     // it belongs to instead of floating below it.
-    return { top: rect.top + window.scrollY, left: rect.left + window.scrollX, width: rect.width };
+    return {
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX + LEFT_PIXEL_MARGIN,
+      width: rect.width,
+    };
   };
 
   // Single place that updates the (id, position) pair together so the two
   // pieces of state never drift out of sync.
-  const openInitiativeModal = (id: string | null, position: { top: number; left: number; width: number } | null) => {
+  const openInitiativeModal = (
+    id: string | null,
+    position: { top: number; left: number; width: number } | null,
+  ) => {
     setInitiativeEditId(id);
     setInitiativeEditPosition(position);
   };
@@ -73,12 +100,16 @@ export function useInitiativeModal({
 
     // React state updates aren't visible until the next render, so simulate the
     // post-update list locally instead of reading combatState after the call above.
-    const updatedCombatants = combatState.combatants.map(c => c.id === id ? { ...c, initiative: roll.total, initiativeRoll: roll } : c);
+    const updatedCombatants = combatState.combatants.map((c) =>
+      c.id === id ? { ...c, initiative: roll.total, initiativeRoll: roll } : c,
+    );
     const sorted = sortCombatants(updatedCombatants);
 
     // Using the same list as getDisplayCombatants to find the next one
-    const nextUnrolled = sorted.find(c => !c.initiativeRoll);
-    const nextPosition = nextUnrolled ? getCardAnchorPosition(nextUnrolled.id) : null;
+    const nextUnrolled = sorted.find((c) => !c.initiativeRoll);
+    const nextPosition = nextUnrolled
+      ? getCardAnchorPosition(nextUnrolled.id)
+      : null;
 
     if (nextUnrolled && nextPosition) {
       openInitiativeModal(nextUnrolled.id, nextPosition);
@@ -98,14 +129,16 @@ export function useInitiativeModal({
   // or removed) or the modal closes, and opens the first eligible (unrolled,
   // non-dismissed) combatant found, provided no modal is currently open.
   const unrolledCombatantIds = (combatState?.combatants ?? [])
-    .filter(c => !c.initiativeRoll)
-    .map(c => c.id)
-    .join(',');
+    .filter((c) => !c.initiativeRoll)
+    .map((c) => c.id)
+    .join(",");
 
   useEffect(() => {
     if (!combatState || initiativeEditId !== null) return;
     const sorted = sortCombatants(combatState.combatants);
-    const target = sorted.find(c => !c.initiativeRoll && !dismissedInitiativeIds.current.has(c.id));
+    const target = sorted.find(
+      (c) => !c.initiativeRoll && !dismissedInitiativeIds.current.has(c.id),
+    );
     if (!target) return;
     const position = getCardAnchorPosition(target.id);
     if (!position) return;
@@ -124,7 +157,9 @@ export function useInitiativeModal({
   // block the auto-open effect above from ever firing again for anyone else.
   useEffect(() => {
     if (!initiativeEditId || !combatState) return;
-    const stillExists = combatState.combatants.some(c => c.id === initiativeEditId);
+    const stillExists = combatState.combatants.some(
+      (c) => c.id === initiativeEditId,
+    );
     if (!stillExists) openInitiativeModal(null, null);
   }, [initiativeEditId, combatState]);
 
@@ -133,7 +168,12 @@ export function useInitiativeModal({
   // shares its left edge, so it can only overflow vertically (below the
   // viewport) — the horizontal clamp is a defensive no-op for that shape.
   const clampModalToViewport = useCallback(() => {
-    if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
+    if (
+      !initiativeEditId ||
+      !initiativeEditPosition ||
+      !initiativeModalRef.current
+    )
+      return;
     const el = initiativeModalRef.current;
     el.style.width = `${initiativeEditPosition.width}px`;
 
@@ -142,9 +182,9 @@ export function useInitiativeModal({
     const maxTop = window.scrollY + window.innerHeight - MODAL_VIEWPORT_MARGIN;
 
     let { top, left } = initiativeEditPosition;
-    const overflowRight = (left + rect.width) - maxLeft;
+    const overflowRight = left + rect.width - maxLeft;
     if (overflowRight > 0) left -= overflowRight;
-    const overflowBottom = (top + rect.height) - maxTop;
+    const overflowBottom = top + rect.height - maxTop;
     if (overflowBottom > 0) top -= overflowBottom;
     // Positions are page coordinates (rect + scrollX/scrollY), so the minimum
     // clamp must also be scroll-aware — clamping to the bare margin would pin

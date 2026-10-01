@@ -8,6 +8,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ActiveCombatView } from '@/lib/components/ActiveCombatView';
+import { LEFT_PIXEL_MARGIN } from '@/lib/hooks/useInitiativeModal';
 import { makeUseCombat } from '@/tests/unit/fixtures/useCombat';
 import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelpers';
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
@@ -352,7 +353,7 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
       expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${cardRect.left}px`);
+      expect(modal.style.left).toBe(`${cardRect.left + LEFT_PIXEL_MARGIN}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
     }
@@ -464,12 +465,11 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
       if (this.getAttribute('data-combatant-id') === 'c1') return cardRect;
       return originalGBCR.call(this);
     });
-
     try {
       render(<ActiveCombatView combat={combat} user={null} />);
       const modal = screen.getByTestId('initiative-modal');
       expect(modal.style.top).toBe(`${cardRect.top}px`);
-      expect(modal.style.left).toBe(`${cardRect.left}px`);
+      expect(modal.style.left).toBe(`${cardRect.left + LEFT_PIXEL_MARGIN}px`);
     } finally {
       Element.prototype.getBoundingClientRect = originalGBCR;
     }
