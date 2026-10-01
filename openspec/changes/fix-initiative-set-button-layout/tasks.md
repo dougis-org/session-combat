@@ -2,35 +2,35 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git fetch origin` (worktree `.worktrees/fix-initiative-set-button-layout` already created off `origin/main`)
-- [ ] **Step 2 — Confirm working branch is published:** `git push -u origin fix-initiative-set-button-layout` (already pushed during propose)
+- [x] **Step 1 — Sync default branch:** `git fetch origin` (worktree `.worktrees/fix-initiative-set-button-layout` already created off `origin/main`)
+- [x] **Step 2 — Confirm working branch is published:** `git push -u origin fix-initiative-set-button-layout` (already pushed during propose)
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress:** run `gh issue edit 793 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update.
-- [ ] 1.1 Confirm work happens in `.worktrees/fix-initiative-set-button-layout`.
-- [ ] 2.1 (TDD, see tests.md T1) Write failing test: dice-mode input and Set share a parent with "Roll d20" and follow the button row. Then restructure `lib/components/InitiativeEntry.tsx` content container into `grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start`.
-- [ ] 2.2 Move mode buttons, Advantage/Flat bonus row, and the `flex items-start gap-2` entry div into a single controls-column wrapper (column 2). Keep the entry div markup unchanged.
-- [ ] 2.3 Verify total mode and the result readout render in the same column.
-- [ ] 2.4 Refactor; confirm no behavior or prop changes.
-- [ ] 2.5 Reuse existing tests/helpers in `tests/unit/components/InitiativeEntry.test.tsx`; do not duplicate setup.
+- [x] **Issue lifecycle: mark in-progress:** run `gh issue edit 793 --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner dougis-org --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update.
+- [x] 1.1 Confirm work happens in `.worktrees/fix-initiative-set-button-layout`.
+- [x] 2.1 (TDD, see tests.md T1) Write failing test: dice-mode input and Set share a parent with "Roll d20" and follow the button row. Then restructure `lib/components/InitiativeEntry.tsx` content container into `grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start`.
+- [x] 2.2 Move mode buttons, Advantage/Flat bonus row, and the `flex items-start gap-2` entry div into a single controls-column wrapper (column 2). Keep the entry div markup unchanged.
+- [x] 2.3 Verify total mode and the result readout render in the same column.
+- [x] 2.4 Refactor; confirm no behavior or prop changes.
+- [x] 2.5 Reuse existing tests/helpers in `tests/unit/components/InitiativeEntry.test.tsx`; do not duplicate setup.
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] 3.1 `npx jest tests/unit/components/InitiativeEntry.test.tsx tests/unit/combat/initiativeEntry.test.tsx` — all pass
-- [ ] 3.2 Visual check in browser at desktop and mobile widths (use a free port, not 3000): Set button visible, left-aligned under "Roll d20"
-- [ ] 3.3 Run type checks (`npx tsc --noEmit`)
-- [ ] 3.4 Run build (`npm run build`)
-- [ ] 3.5 Run security/code quality checks required by project standards
-- [ ] 3.6 All completed tasks marked complete
+- [x] 3.1 `npx jest tests/unit/components/InitiativeEntry.test.tsx tests/unit/combat/initiativeEntry.test.tsx` — all pass
+- [x] 3.2 Visual check in browser at desktop and mobile widths (use a free port, not 3000): Set button visible, left-aligned under "Roll d20"
+- [x] 3.3 Run type checks (`npx tsc --noEmit`)
+- [x] 3.4 Run build (`npm run build`)
+- [x] 3.5 Run security/code quality checks required by project standards
+- [x] 3.6 All completed tasks marked complete
 - [ ] 3.7 All steps in [Remote push validation]
 
 ## Remote push validation
@@ -53,7 +53,7 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `fix-initiative-set-button-layout` to `main`. The PR body MUST include `Closes #793`.
 - [ ] **Issue lifecycle: mark in-review:** run `gh issue edit 793 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the "In Review" column via `gh project item-edit` (same discovery as above; warn and skip if not found).

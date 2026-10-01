@@ -283,3 +283,73 @@ describe('InitiativeEntry', () => {
     });
   });
 });
+
+describe('layout structure', () => {
+  const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING;
+
+  // The controls column is the shared parent of the mode buttons, bonus row and entry div.
+  function getControlsColumn() {
+    return screen.getByRole('button', { name: 'Roll d20' }).parentElement!.parentElement!;
+  }
+
+  it('places dice input and Set below the mode buttons in the controls column', async () => {
+    renderEntry();
+    await userEvent.click(screen.getByRole('button', { name: 'Enter Dice Roll' }));
+
+    const column = getControlsColumn();
+    const buttonRow = screen.getByRole('button', { name: 'Roll d20' }).parentElement!;
+    const input = screen.getByPlaceholderText('1-20');
+    const setButton = screen.getByRole('button', { name: 'Set' });
+    const nameBlock = column.parentElement!.firstElementChild!;
+    expect(nameBlock.contains(screen.getByRole('heading', { name: 'Gandalf' }))).toBe(true);
+
+    expect(column.contains(input)).toBe(true);
+    expect(column.contains(setButton)).toBe(true);
+    expect(buttonRow.compareDocumentPosition(input) & FOLLOWING).toBeTruthy();
+    expect(buttonRow.compareDocumentPosition(setButton) & FOLLOWING).toBeTruthy();
+    expect(nameBlock.contains(input)).toBe(false);
+    expect(nameBlock.contains(setButton)).toBe(false);
+  });
+
+  it('keeps the bonus row and entry div in the same column as the mode buttons', () => {
+    renderEntry();
+
+    const column = getControlsColumn();
+    expect(column.contains(screen.getByLabelText('Advantage'))).toBe(true);
+    expect(column.contains(screen.getByLabelText('Flat initiative bonus'))).toBe(true);
+  });
+
+  it('places total input and Set in the controls column after the mode buttons', async () => {
+    renderEntry();
+    await userEvent.click(screen.getByRole('button', { name: 'Enter Total' }));
+
+    const column = getControlsColumn();
+    const buttonRow = screen.getByRole('button', { name: 'Roll d20' }).parentElement!;
+    const input = screen.getByPlaceholderText('Total initiative');
+    const setButton = screen.getByRole('button', { name: 'Set' });
+
+    expect(column.contains(input)).toBe(true);
+    expect(column.contains(setButton)).toBe(true);
+    expect(buttonRow.compareDocumentPosition(input) & FOLLOWING).toBeTruthy();
+  });
+
+  it('uses a single-column grid with the two-column template only at md+', () => {
+    renderEntry();
+
+    const grid = getControlsColumn().parentElement!;
+    expect(grid).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-[auto_1fr]');
+  });
+
+  it('renders the result readout in the controls column below the buttons', () => {
+    renderEntry({
+      initiativeRoll: { roll: 12, bonus: 2, total: 14, method: 'rolled' },
+    } as Partial<CombatantState>);
+
+    const column = getControlsColumn();
+    const buttonRow = screen.getByRole('button', { name: 'Roll d20' }).parentElement!;
+    const readout = screen.getByText('14');
+
+    expect(column.contains(readout)).toBe(true);
+    expect(buttonRow.compareDocumentPosition(readout) & FOLLOWING).toBeTruthy();
+  });
+});

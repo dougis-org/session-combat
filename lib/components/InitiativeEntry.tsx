@@ -108,27 +108,28 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
         Initiative
       </h2>
 
-      <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto pr-1 flex justify-between items-start mb-4">
-        <div className="flex flex-col md:flex-row items-start gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">{combatant.name}</h3>
-            </div>
-            <div className="flex justify-end mt-2">
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  combatant.type === "player"
-                    ? "bg-blue-600 text-blue-100"
-                    : "bg-red-600 text-red-100"
-                }`}
-              >
-                {combatant.type === "player" ? "Character" : "Monster"}
-              </span>
-            </div>
+      <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start mb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold">{combatant.name}</h3>
           </div>
+          <div className="flex justify-end mt-2">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                combatant.type === "player"
+                  ? "bg-blue-600 text-blue-100"
+                  : "bg-red-600 text-red-100"
+              }`}
+            >
+              {combatant.type === "player" ? "Character" : "Monster"}
+            </span>
+          </div>
+        </div>
 
+        {/* Controls column: mode buttons, bonus row, then entry/result — one shared left edge */}
+        <div className="flex flex-col gap-3 min-w-0">
           {/* Buttons: stacked on mobile (full width), horizontal on md+ */}
-          <div className="flex flex-col md:flex-row gap-2 md:pl-3 w-full md:w-auto">
+          <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             <button
               onClick={() => {
                 setEntryMode("roll");
@@ -163,149 +164,149 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
               Enter Total
             </button>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-4 mt-2">
-          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={advantage}
-              onChange={(e) => {
-                const next = e.target.checked;
-                setAdvantage(next);
-                onSettingsChange?.(next, flatBonus);
-              }}
-              className="w-4 h-4 accent-blue-500"
-            />
-            Advantage
-          </label>
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-gray-400">Flat bonus:</span>
-            <input
-              type="number"
-              step={1}
-              value={flatBonus}
-              onChange={(e) => {
-                const truncated = Math.trunc(e.target.valueAsNumber);
-                const next =
-                  e.target.value === "" ||
-                  !Number.isFinite(e.target.valueAsNumber) ||
-                  !Number.isSafeInteger(truncated)
-                    ? 0
-                    : truncated;
-                setFlatBonus(next);
-                onSettingsChange?.(advantage, next);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.currentTarget.blur();
-                }
-              }}
-              className="w-16 bg-gray-700 rounded px-2 py-1 text-sm text-white"
-              aria-label="Flat initiative bonus"
-            />
-            {flatBonus !== 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setFlatBonus(0);
-                  onSettingsChange?.(advantage, 0);
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={advantage}
+                onChange={(e) => {
+                  const next = e.target.checked;
+                  setAdvantage(next);
+                  onSettingsChange?.(next, flatBonus);
                 }}
-                className="text-gray-400 hover:text-gray-200 text-sm px-1"
-                aria-label="Clear flat bonus"
-              >
-                ✕
-              </button>
+                className="w-4 h-4 accent-blue-500"
+              />
+              Advantage
+            </label>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-400">Flat bonus:</span>
+              <input
+                type="number"
+                step={1}
+                value={flatBonus}
+                onChange={(e) => {
+                  const truncated = Math.trunc(e.target.valueAsNumber);
+                  const next =
+                    e.target.value === "" ||
+                    !Number.isFinite(e.target.valueAsNumber) ||
+                    !Number.isSafeInteger(truncated)
+                      ? 0
+                      : truncated;
+                  setFlatBonus(next);
+                  onSettingsChange?.(advantage, next);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="w-16 bg-gray-700 rounded px-2 py-1 text-sm text-white"
+                aria-label="Flat initiative bonus"
+              />
+              {flatBonus !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlatBonus(0);
+                    onSettingsChange?.(advantage, 0);
+                  }}
+                  className="text-gray-400 hover:text-gray-200 text-sm px-1"
+                  aria-label="Clear flat bonus"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2">
+            {entryMode === "dice" && (
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={diceRoll}
+                  onChange={(e) => setDiceRoll(e.target.value)}
+                  placeholder="1-20"
+                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+                />
+                <button
+                  onClick={handleDiceEntry}
+                  className="bg-purple-600 hover:bg-purple-700 w-20 px-2 py-2 rounded"
+                >
+                  Set
+                </button>
+              </div>
+            )}
+
+            {entryMode === "total" && (
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={totalValue}
+                  onChange={(e) => setTotalValue(e.target.value)}
+                  placeholder={
+                    flatBonus !== 0
+                      ? `Value (${flatBonus > 0 ? "+" : ""}${flatBonus} bonus applied)`
+                      : "Total initiative"
+                  }
+                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+                />
+                <button
+                  onClick={handleTotalEntry}
+                  className="bg-green-600 hover:bg-green-700 w-20 px-2 py-2 rounded"
+                >
+                  Set
+                </button>
+              </div>
+            )}
+
+            {combatant.initiativeRoll && (
+              <div className="bg-gray-700 rounded px-3 py-2 text-sm">
+                <p className="text-gray-400">
+                  Initiative:{" "}
+                  <span className="text-white font-bold">
+                    {combatant.initiativeRoll.total}
+                  </span>
+                </p>
+                {combatant.initiativeRoll.method === "rolled" && (
+                  <p className="text-gray-500 text-xs">
+                    {combatant.initiativeRoll.advantage ? (
+                      <>
+                        d20: {combatant.initiativeRoll.roll}↑
+                        {combatant.initiativeRoll.altRoll != null
+                          ? ` (dropped: ${combatant.initiativeRoll.altRoll})`
+                          : ""}
+                      </>
+                    ) : (
+                      <>d20: {combatant.initiativeRoll.roll}</>
+                    )}{" "}
+                    + {combatant.initiativeRoll.bonus}
+                    {combatant.initiativeRoll.flatBonus
+                      ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
+                      : ""}{" "}
+                    = {combatant.initiativeRoll.total}
+                  </p>
+                )}
+                {combatant.initiativeRoll.method === "manual" &&
+                (combatant.initiativeRoll.bonus !== 0 ||
+                  combatant.initiativeRoll.flatBonus) ? (
+                  <p className="text-gray-500 text-xs">
+                    {combatant.initiativeRoll.roll}
+                    {combatant.initiativeRoll.bonus !== 0 &&
+                      ` + ${combatant.initiativeRoll.bonus}`}
+                    {combatant.initiativeRoll.flatBonus
+                      ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
+                      : ""}{" "}
+                    = {combatant.initiativeRoll.total}
+                  </p>
+                ) : null}
+              </div>
             )}
           </div>
-        </div>
-
-        <div className="flex items-start gap-2">
-          {entryMode === "dice" && (
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={diceRoll}
-                onChange={(e) => setDiceRoll(e.target.value)}
-                placeholder="1-20"
-                className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
-              />
-              <button
-                onClick={handleDiceEntry}
-                className="bg-purple-600 hover:bg-purple-700 w-20 px-2 py-2 rounded"
-              >
-                Set
-              </button>
-            </div>
-          )}
-
-          {entryMode === "total" && (
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="0"
-                value={totalValue}
-                onChange={(e) => setTotalValue(e.target.value)}
-                placeholder={
-                  flatBonus !== 0
-                    ? `Value (${flatBonus > 0 ? "+" : ""}${flatBonus} bonus applied)`
-                    : "Total initiative"
-                }
-                className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
-              />
-              <button
-                onClick={handleTotalEntry}
-                className="bg-green-600 hover:bg-green-700 w-20 px-2 py-2 rounded"
-              >
-                Set
-              </button>
-            </div>
-          )}
-
-          {combatant.initiativeRoll && (
-            <div className="bg-gray-700 rounded px-3 py-2 text-sm">
-              <p className="text-gray-400">
-                Initiative:{" "}
-                <span className="text-white font-bold">
-                  {combatant.initiativeRoll.total}
-                </span>
-              </p>
-              {combatant.initiativeRoll.method === "rolled" && (
-                <p className="text-gray-500 text-xs">
-                  {combatant.initiativeRoll.advantage ? (
-                    <>
-                      d20: {combatant.initiativeRoll.roll}↑
-                      {combatant.initiativeRoll.altRoll != null
-                        ? ` (dropped: ${combatant.initiativeRoll.altRoll})`
-                        : ""}
-                    </>
-                  ) : (
-                    <>d20: {combatant.initiativeRoll.roll}</>
-                  )}{" "}
-                  + {combatant.initiativeRoll.bonus}
-                  {combatant.initiativeRoll.flatBonus
-                    ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
-                    : ""}{" "}
-                  = {combatant.initiativeRoll.total}
-                </p>
-              )}
-              {combatant.initiativeRoll.method === "manual" &&
-              (combatant.initiativeRoll.bonus !== 0 ||
-                combatant.initiativeRoll.flatBonus) ? (
-                <p className="text-gray-500 text-xs">
-                  {combatant.initiativeRoll.roll}
-                  {combatant.initiativeRoll.bonus !== 0 &&
-                    ` + ${combatant.initiativeRoll.bonus}`}
-                  {combatant.initiativeRoll.flatBonus
-                    ? ` ${combatant.initiativeRoll.flatBonus > 0 ? "+" : ""}${combatant.initiativeRoll.flatBonus}`
-                    : ""}{" "}
-                  = {combatant.initiativeRoll.total}
-                </p>
-              ) : null}
-            </div>
-          )}
         </div>
       </div>
     </div>
