@@ -750,25 +750,34 @@ describe('useCombat', () => {
     });
   });
 
-  test('rollInitiative sets initiativeRoll on non-lair combatants and sorts the list', async () => {
-    const fighter = makeCombatant('c1', 'Fighter', 'player');
+  test('rollUnrolledMonsters sets initiativeRoll on unrolled monsters only and sorts the list', async () => {
+    const player = makeCombatant('c1', 'Fighter', 'player');
+    const monster1 = makeCombatant('m1', 'Goblin', 'monster');
+    const monster2 = { ...makeCombatant('m2', 'Orc', 'monster'), initiativeRoll: { roll: 10, bonus: 0, total: 10, method: 'rolled' as const }, initiative: 10 };
     const lair = { ...makeCombatant('lair-1', 'Cave', 'lair'), initiative: 20 };
 
     await testHook(async (result, fetchMock) => {
       await act(async () => {
-        await result.current.saveCombatState(makeCombatState([fighter, lair]));
+        await result.current.saveCombatState(makeCombatState([player, monster1, monster2, lair]));
       });
 
       await act(async () => {
-        result.current.rollInitiative();
+        result.current.rollUnrolledMonsters(true, 5);
         await Promise.resolve();
       });
 
       const lastBody = getLastPutBody(fetchMock);
 
-      const updatedFighter = lastBody.combatants.find((c: CombatantState) => c.id === 'c1');
-      expect(updatedFighter.initiativeRoll).toBeDefined();
-      expect(updatedFighter.initiative).toBe(12);
+      const updatedPlayer = lastBody.combatants.find((c: CombatantState) => c.id === 'c1');
+      expect(updatedPlayer.initiativeRoll).toBeUndefined(); // Should not roll for players
+
+      const updatedMonster1 = lastBody.combatants.find((c: CombatantState) => c.id === 'm1');
+      expect(updatedMonster1.initiativeRoll).toBeDefined(); // Should roll for unrolled monster
+      expect(updatedMonster1.initiativeAdvantage).toBe(true);
+      expect(updatedMonster1.initiativeFlatBonus).toBe(5);
+
+      const updatedMonster2 = lastBody.combatants.find((c: CombatantState) => c.id === 'm2');
+      expect(updatedMonster2.initiative).toBe(10); // Should not re-roll for already rolled monster
 
       const updatedLair = lastBody.combatants.find((c: CombatantState) => c.id === 'lair-1');
       expect(updatedLair.initiativeRoll).toBeUndefined();

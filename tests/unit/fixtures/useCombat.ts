@@ -53,7 +53,7 @@ export function makeUseCombat(overrides?: Partial<UseCombatReturn>): UseCombatRe
     startCombat: jest.fn(),
     endCombat: jest.fn(),
     restartRound: jest.fn(),
-    rollInitiative: jest.fn(),
+    rollUnrolledMonsters: jest.fn(),
     nextTurn: jest.fn(),
     updateCombatant: jest.fn(),
     updateCombatantInitiativeSettings: jest.fn(),
