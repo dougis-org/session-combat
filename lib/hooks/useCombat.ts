@@ -301,7 +301,6 @@ export function useCombat(options: UseCombatOptions = {}) {
   };
 
   const endCombat = async () => {
-    if (!confirm('Are you sure you want to end combat?')) return;
     if (!combatState || !serverCombatIdRef.current) return;
     try {
       setError(null);

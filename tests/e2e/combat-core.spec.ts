@@ -86,9 +86,9 @@ test.describe("Combat flows - core screen and HP", () => {
     await expect(page.locator('[data-testid="temp-hp-bar"]')).toHaveCount(0);
     await expect(page.getByText(/Current:.*24/).first()).toBeVisible();
 
-    // End combat — accept the confirm dialog, then assert setup screen returns
-    page.on("dialog", (dialog) => dialog.accept());
+    // End combat — confirm in the in-app dialog, then assert setup screen returns
     await page.getByRole("button", { name: "End Combat" }).click();
+    await page.getByTestId("confirm-dialog-confirm").click();
     await expect(page.getByRole("heading", { name: "Start New Combat" })).toBeVisible({ timeout: 10000 });
   });
 });

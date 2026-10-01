@@ -8,10 +8,10 @@ interface ModalProps {
   children: ReactNode;
   onClose: () => void;
   size?: 'small' | 'medium' | 'large';
+  titleId?: string;
 }
 
-export function Modal({ isOpen, title, children, onClose, size = 'medium' }: ModalProps) {
-  const titleId = 'modal-title';
+export function Modal({ isOpen, title, children, onClose, size = 'medium', titleId = 'modal-title' }: ModalProps) {
 
   useEffect(() => {
     if (!isOpen) return;

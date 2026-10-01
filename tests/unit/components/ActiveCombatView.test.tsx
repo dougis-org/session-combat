@@ -626,4 +626,40 @@ describe('ActiveCombatView — CON save notification', () => {
     );
     expect(directMessageCall).toBeUndefined();
   });
+
+  describe('End Combat confirmation', () => {
+    function setup() {
+      const endCombat = jest.fn();
+      const combat = makeCombat({ combatState: makeCombatState(), endCombat });
+      render(<ActiveCombatView combat={combat} user={null} />);
+      return { endCombat };
+    }
+    const openDialog = () => userEvent.click(screen.getByRole('button', { name: 'End Combat' }));
+
+    it('opens the dialog without ending combat', async () => {
+      const { endCombat } = setup();
+      await openDialog();
+      expect(screen.getByRole('dialog', { name: 'End Combat?' })).toHaveAttribute('aria-labelledby', 'end-combat-confirm-title');
+      expect(endCombat).not.toHaveBeenCalled();
+    });
+
+    it('confirm closes the dialog and calls endCombat exactly once, even on double-click', async () => {
+      const { endCombat } = setup();
+      await openDialog();
+      await userEvent.dblClick(screen.getByTestId('confirm-dialog-confirm'));
+      expect(endCombat).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
+    });
+
+    it('Return to Combat and × close the dialog without ending combat', async () => {
+      const { endCombat } = setup();
+      await openDialog();
+      await userEvent.click(screen.getByRole('button', { name: 'Return to Combat' }));
+      expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
+      await openDialog();
+      await userEvent.click(within(screen.getByRole('dialog', { name: 'End Combat?' })).getByRole('button', { name: /close modal/i }));
+      expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
+      expect(endCombat).not.toHaveBeenCalled();
+    });
+  });
 });

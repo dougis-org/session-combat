@@ -55,4 +55,24 @@ describe('Modal', () => {
     );
     expect(screen.queryByText('Hidden content')).not.toBeInTheDocument();
   });
+
+  it('defaults title id and aria-labelledby to modal-title', () => {
+    render(
+      <Modal isOpen={true} title="Test" onClose={jest.fn()}>
+        <p>content</p>
+      </Modal>
+    );
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'modal-title');
+    expect(screen.getByText('Test')).toHaveAttribute('id', 'modal-title');
+  });
+
+  it('applies a custom titleId to the title and aria-labelledby', () => {
+    render(
+      <Modal isOpen={true} title="Test" titleId="custom-title" onClose={jest.fn()}>
+        <p>content</p>
+      </Modal>
+    );
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'custom-title');
+    expect(screen.getByText('Test')).toHaveAttribute('id', 'custom-title');
+  });
 });

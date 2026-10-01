@@ -7,20 +7,20 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If missing, halt, tell the user the plugin is required, and wait for confirmation of installation.
-- [ ] Confirm `ActiveCombatView` is the only caller of `endCombat` (`tokensave_callers` / grep) before removing the native prompt
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If missing, halt, tell the user the plugin is required, and wait for confirmation of installation.
+- [x] Confirm `ActiveCombatView` is the only caller of `endCombat` (`tokensave_callers` / grep) before removing the native prompt
 
 ## Execution
 
 - [ ] **Issue lifecycle: mark in-progress** (issue #811): `gh issue edit 811 --add-label "in-progress"`. Discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), move the item via `gh project item-edit`. Warn and skip if no project item is found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update.
-- [ ] Work only inside `.worktrees/issue-811-confirm-dialog`
-- [ ] **T1 — Modal `titleId` (TDD):** add optional `titleId` prop (default `'modal-title'`) to `lib/components/Modal.tsx`, used for the `<h2 id>` and `aria-labelledby`. Existing callers unchanged.
-- [ ] **T2 — ConfirmDialog (TDD):** create `lib/components/ConfirmDialog.tsx` on top of `Modal` (`size="small"`) with required props `isOpen`, `title`, `titleId`, `confirmLabel`, `cancelLabel`, `onConfirm`, `onCancel`, plus `children`/`message`. Green confirm (`bg-green-600 hover:bg-green-700`), red cancel (`bg-red-600 hover:bg-red-700`), `data-testid` `confirm-dialog-confirm` / `confirm-dialog-cancel`. `Modal.onClose` → `onCancel` (covers "×", Escape, overlay).
-- [ ] **T3 — useCombat (TDD):** remove `confirm()` from `endCombat` in `lib/hooks/useCombat.ts`; keep guard, PUT, reset, and error handling unchanged. Update `tests/unit/hooks/useCombat.test.ts` (drop `global.confirm` mock at ~line 235; assert `confirm` not called).
-- [ ] **T4 — ActiveCombatView (TDD):** add `showEndCombatConfirm` state in `lib/components/ActiveCombatView.tsx`; End Combat button opens the dialog (`titleId="end-combat-confirm-title"`, title "End Combat?", labels "End Combat" / "Return to Combat"); confirm closes the dialog synchronously then calls `endCombat()`; cancel just closes.
-- [ ] **T5 — E2E:** update `tests/e2e/combat-core.spec.ts` (~line 89) to click the in-app "End Combat" confirm button instead of accepting a native dialog; scope the locator to the dialog since the page also has an "End Combat" button.
-- [ ] Reuse existing test helpers/fixtures (`tests/unit/fixtures/useCombat.ts`) rather than adding new ones
-- [ ] Confirm all acceptance scenarios in `specs/confirm-dialog/spec.md` are covered by `tests.md`
+- [x] Work only inside `.worktrees/issue-811-confirm-dialog`
+- [x] **T1 — Modal `titleId` (TDD):** add optional `titleId` prop (default `'modal-title'`) to `lib/components/Modal.tsx`, used for the `<h2 id>` and `aria-labelledby`. Existing callers unchanged.
+- [x] **T2 — ConfirmDialog (TDD):** create `lib/components/ConfirmDialog.tsx` on top of `Modal` (`size="small"`) with required props `isOpen`, `title`, `titleId`, `confirmLabel`, `cancelLabel`, `onConfirm`, `onCancel`, plus `children`/`message`. Green confirm (`bg-green-600 hover:bg-green-700`), red cancel (`bg-red-600 hover:bg-red-700`), `data-testid` `confirm-dialog-confirm` / `confirm-dialog-cancel`. `Modal.onClose` → `onCancel` (covers "×", Escape, overlay).
+- [x] **T3 — useCombat (TDD):** remove `confirm()` from `endCombat` in `lib/hooks/useCombat.ts`; keep guard, PUT, reset, and error handling unchanged. Update `tests/unit/hooks/useCombat.test.ts` (drop `global.confirm` mock at ~line 235; assert `confirm` not called).
+- [x] **T4 — ActiveCombatView (TDD):** add `showEndCombatConfirm` state in `lib/components/ActiveCombatView.tsx`; End Combat button opens the dialog (`titleId="end-combat-confirm-title"`, title "End Combat?", labels "End Combat" / "Return to Combat"); confirm closes the dialog synchronously then calls `endCombat()`; cancel just closes.
+- [x] **T5 — E2E:** update `tests/e2e/combat-core.spec.ts` (~line 89) to click the in-app "End Combat" confirm button instead of accepting a native dialog; scope the locator to the dialog since the page also has an "End Combat" button.
+- [x] Reuse existing test helpers/fixtures (`tests/unit/fixtures/useCombat.ts`) rather than adding new ones
+- [x] Confirm all acceptance scenarios in `specs/confirm-dialog/spec.md` are covered by `tests.md`
 
 ## Pre-Commit Code Review
 
@@ -28,12 +28,12 @@
 
 ## Validation
 
-- [ ] `npm run test:unit` (use a free port, not 3000, for any server-backed run)
+- [x] `npm run test:unit` (use a free port, not 3000, for any server-backed run)
 - [ ] `npm run test:ci` (integration)
-- [ ] `npm run test:regression` (E2E; run on a clear port, not 3000)
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run build`
+- [x] `npm run test:regression` (E2E; run on a clear port, not 3000)
+- [x] `npm run typecheck`
+- [x] `npm run lint`
+- [x] `npm run build`
 - [ ] Run security/code quality checks required by project standards (Verity gate, Codacy)
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
