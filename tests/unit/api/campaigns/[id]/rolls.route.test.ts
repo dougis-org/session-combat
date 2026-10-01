@@ -3,7 +3,7 @@
  */
 import { NextRequest } from "next/server";
 import { POST, GET, ROLL_BODY_MAX_BYTES } from "@/app/api/campaigns/[id]/rolls/route";
-import { storage } from "@/lib/storage";
+import * as rollRepo from "@/lib/storage/rollRepo";
 import { getMember, getUserById, listMembersForCampaign } from "@/lib/storage/membershipRepo";
 import { emitFiltered } from "@/lib/server/transport";
 import { MAX_DICE_IN_ROLL, MAX_FORMULA_LENGTH, MAX_LABEL_LENGTH, MAX_TOTAL_MAGNITUDE } from "@/lib/validation/rollSubmission";
@@ -18,11 +18,9 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    listCampaignRolls: jest.fn(),
-    saveCampaignRoll: jest.fn(),
-  },
+jest.mock("@/lib/storage/rollRepo", () => ({
+  listCampaignRolls: jest.fn(),
+  saveCampaignRoll: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/membershipRepo", () => ({
@@ -42,8 +40,8 @@ jest.mock("@/lib/utils/campaign", () => ({
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 
 const mockedStorage = {
-  listCampaignRolls: jest.mocked(storage).listCampaignRolls,
-  saveCampaignRoll: jest.mocked(storage).saveCampaignRoll,
+  listCampaignRolls: jest.mocked(rollRepo.listCampaignRolls),
+  saveCampaignRoll: jest.mocked(rollRepo.saveCampaignRoll),
   getMember: jest.mocked(getMember),
   getUserById: jest.mocked(getUserById),
   listMembersForCampaign: jest.mocked(listMembersForCampaign),

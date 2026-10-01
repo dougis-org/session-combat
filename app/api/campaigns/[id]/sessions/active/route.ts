@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as sessionLogRepo from '@/lib/storage/sessionLogRepo';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { SessionLog } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
@@ -22,7 +22,7 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
 
     let sessionNumber: number;
     try {
-      sessionNumber = await storage.getNextSessionNumber(campaign.userId, campaignId);
+      sessionNumber = await sessionLogRepo.getNextSessionNumber(campaign.userId, campaignId);
     } catch (error) {
       console.error('Error determining next session number:', error);
       return NextResponse.json(
@@ -53,7 +53,7 @@ export const POST = withAuthAndParams<Params>(async (_request, _auth, { id: camp
     };
 
     try {
-      await storage.saveSessionLog(log);
+      await sessionLogRepo.saveSessionLog(log);
     } catch (error) {
       console.error('Error saving session log:', error);
       await campaignRepo.setActiveCampaignSession(campaignId, campaign.userId, null);
@@ -96,3 +96,4 @@ export const DELETE = withAuthAndParams<Params>(async (request, _auth, { id: cam
     return NextResponse.json({ error: 'Failed to close active session' }, { status: 500 });
   }
 });
+

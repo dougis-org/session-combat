@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { storage } from "@/lib/storage";
+import * as sessionLogRepo from "@/lib/storage/sessionLogRepo";
 import { getDatabase } from "@/lib/db";
 import type { SessionLog } from "@/lib/types";
 import { StorageError } from "@/lib/storage/errors";
@@ -48,13 +48,13 @@ describe("getNextSessionNumber", () => {
 
   test("returns 1 when no sessions exist for the campaign", async () => {
     mockFindOne.mockResolvedValue(null as never);
-    const result = await storage.getNextSessionNumber("user-1", "campaign-1");
+    const result = await sessionLogRepo.getNextSessionNumber("user-1", "campaign-1");
     expect(result).toBe(1);
   });
 
   test("returns MAX + 1 when sessions exist", async () => {
     mockFindOne.mockResolvedValue({ ...baseLog, sessionNumber: 5 } as never);
-    const result = await storage.getNextSessionNumber("user-1", "campaign-1");
+    const result = await sessionLogRepo.getNextSessionNumber("user-1", "campaign-1");
     expect(result).toBe(6);
   });
 
@@ -62,7 +62,7 @@ describe("getNextSessionNumber", () => {
     mockFindOne.mockRejectedValue(new Error("DB error") as never);
 
     await expect(
-      storage.getNextSessionNumber("user-1", "campaign-1")
+      sessionLogRepo.getNextSessionNumber("user-1", "campaign-1")
     ).rejects.toBeInstanceOf(StorageError);
   });
 
@@ -71,7 +71,7 @@ describe("getNextSessionNumber", () => {
 
     let caught: unknown;
     try {
-      await storage.getNextSessionNumber("user-1", "campaign-1");
+      await sessionLogRepo.getNextSessionNumber("user-1", "campaign-1");
     } catch (error) {
       caught = error;
     }
@@ -92,24 +92,24 @@ describe("getNextSessionNumber", () => {
 
   test("no-collision: DB failure after an existing session #1 throws instead of resolving to 1 again", async () => {
     mockFindOne.mockResolvedValueOnce({ ...baseLog, sessionNumber: 1 } as never);
-    const first = await storage.getNextSessionNumber("user-1", "campaign-1");
+    const first = await sessionLogRepo.getNextSessionNumber("user-1", "campaign-1");
     expect(first).toBe(2);
 
     mockFindOne.mockRejectedValueOnce(new Error("DB error") as never);
     await expect(
-      storage.getNextSessionNumber("user-1", "campaign-1")
+      sessionLogRepo.getNextSessionNumber("user-1", "campaign-1")
     ).rejects.toBeInstanceOf(StorageError);
   });
 });
 
-describe("storage.loadSessionLogs", () => {
+describe("sessionLogRepo.loadSessionLogs", () => {
   test("queries sessionLogs by userId and campaignId sorted descending", async () => {
     const toArray = jest.fn<Promise<SessionLog[]>, []>().mockResolvedValue([baseLog]);
     const sort = jest.fn(() => ({ toArray }));
     const find = jest.fn(() => ({ sort }));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ find }) as never);
 
-    const result = await storage.loadSessionLogs("user-1", "campaign-1");
+    const result = await sessionLogRepo.loadSessionLogs("user-1", "campaign-1");
 
     expect(find).toHaveBeenCalledWith({ userId: "user-1", campaignId: "campaign-1" });
     expect(sort).toHaveBeenCalledWith({ sessionNumber: -1 });
@@ -120,17 +120,17 @@ describe("storage.loadSessionLogs", () => {
   // #504: previously swallowed to []; a DB failure now rejects with StorageError.
   test("rejects with StorageError on error", async () => {
     mockedGetDatabase.mockRejectedValue(new Error("connection failed") as never);
-    await expect(storage.loadSessionLogs("user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError);
+    await expect(sessionLogRepo.loadSessionLogs("user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError);
   });
 });
 
-describe("storage.saveSessionLog", () => {
+describe("sessionLogRepo.saveSessionLog", () => {
   test("inserts log without _id field", async () => {
     const insertOne = jest.fn<Promise<unknown>, []>().mockResolvedValue({});
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ insertOne }) as never);
 
     const logWithId = { ...baseLog, _id: "mongo-id" };
-    await storage.saveSessionLog(logWithId as any);
+    await sessionLogRepo.saveSessionLog(logWithId as any);
 
     expect(insertOne).toHaveBeenCalledTimes(1);
     const saved = (insertOne as jest.Mock).mock.calls[0][0] as Record<string, unknown>;
@@ -142,16 +142,16 @@ describe("storage.saveSessionLog", () => {
     const insertOne = jest.fn<Promise<unknown>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ insertOne }) as never);
 
-    await expect(storage.saveSessionLog(baseLog)).rejects.toBeInstanceOf(StorageError); // #504: wrapped
+    await expect(sessionLogRepo.saveSessionLog(baseLog)).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });
 
-describe("storage.updateSessionLog", () => {
+describe("sessionLogRepo.updateSessionLog", () => {
   test("updates whitelisted fields and converts datePlayed to Date", async () => {
     const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
-    await storage.updateSessionLog("log-1", "user-1", "campaign-1", {
+    await sessionLogRepo.updateSessionLog("log-1", "user-1", "campaign-1", {
       title: "New Title",
       datePlayed: "2026-06-01",
     } as any);
@@ -166,7 +166,7 @@ describe("storage.updateSessionLog", () => {
     const findOneAndUpdate = jest.fn<Promise<SessionLog>, []>().mockResolvedValue(baseLog);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
-    await storage.updateSessionLog("log-1", "user-1", "campaign-1", { title: "Only Title" });
+    await sessionLogRepo.updateSessionLog("log-1", "user-1", "campaign-1", { title: "Only Title" });
 
     const setArg = ((findOneAndUpdate as jest.Mock).mock.calls[0][1] as any).$set;
     expect(setArg.datePlayed).toBeUndefined();
@@ -176,7 +176,7 @@ describe("storage.updateSessionLog", () => {
     const findOneAndUpdate = jest.fn<Promise<null>, []>().mockResolvedValue(null);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
-    const result = await storage.updateSessionLog("missing", "user-1", "campaign-1", {});
+    const result = await sessionLogRepo.updateSessionLog("missing", "user-1", "campaign-1", {});
     expect(result).toBeNull();
   });
 
@@ -184,17 +184,17 @@ describe("storage.updateSessionLog", () => {
     const findOneAndUpdate = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error"));
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ findOneAndUpdate }) as never);
 
-    await expect(storage.updateSessionLog("log-1", "user-1", "campaign-1", {})).rejects.toBeInstanceOf(StorageError); // #504: wrapped
+    await expect(sessionLogRepo.updateSessionLog("log-1", "user-1", "campaign-1", {})).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });
 
-describe("storage.deleteSessionLog", () => {
+describe("sessionLogRepo.deleteSessionLog", () => {
   test("returns true when log is deleted", async () => {
     const deleteOne = jest.fn<Promise<{ deletedCount: number }>, []>()
       .mockResolvedValue({ deletedCount: 1 } as never);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ deleteOne }) as never);
 
-    const result = await storage.deleteSessionLog("log-1", "user-1", "campaign-1");
+    const result = await sessionLogRepo.deleteSessionLog("log-1", "user-1", "campaign-1");
 
     expect(deleteOne).toHaveBeenCalledWith({ id: "log-1", userId: "user-1", campaignId: "campaign-1" });
     expect(result).toBe(true);
@@ -205,7 +205,7 @@ describe("storage.deleteSessionLog", () => {
       .mockResolvedValue({ deletedCount: 0 } as never);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ deleteOne }) as never);
 
-    const result = await storage.deleteSessionLog("missing", "user-1", "campaign-1");
+    const result = await sessionLogRepo.deleteSessionLog("missing", "user-1", "campaign-1");
     expect(result).toBe(false);
   });
 
@@ -213,6 +213,6 @@ describe("storage.deleteSessionLog", () => {
     const deleteOne = jest.fn<Promise<never>, []>().mockRejectedValue(new Error("DB error") as never);
     mockedGetDatabase.mockResolvedValue(makeCollectionMock({ deleteOne }) as never);
 
-    await expect(storage.deleteSessionLog("log-1", "user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError); // #504: wrapped
+    await expect(sessionLogRepo.deleteSessionLog("log-1", "user-1", "campaign-1")).rejects.toBeInstanceOf(StorageError); // #504: wrapped
   });
 });

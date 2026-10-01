@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as sessionLogRepo from '@/lib/storage/sessionLogRepo';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 
 type Params = { id: string; sessionId: string };
@@ -16,7 +16,7 @@ export const PATCH = withAuthAndParams<Params>(async (request, auth, { id: campa
     const body = await request.json();
     const { title, datePlayed, summary, events, milestone, newLevel } = body;
     const patch = { title, datePlayed, summary, events, milestone, newLevel };
-    const updated = await storage.updateSessionLog(sessionId, campaign.userId, campaignId, patch);
+    const updated = await sessionLogRepo.updateSessionLog(sessionId, campaign.userId, campaignId, patch);
     if (!updated) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });
     }
@@ -35,7 +35,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    const deleted = await storage.deleteSessionLog(sessionId, campaign.userId, campaignId);
+    const deleted = await sessionLogRepo.deleteSessionLog(sessionId, campaign.userId, campaignId);
     if (!deleted) {
       return NextResponse.json({ error: 'Session log not found' }, { status: 404 });
     }
@@ -45,3 +45,4 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
     return NextResponse.json({ error: 'Failed to delete session log' }, { status: 500 });
   }
 });
+

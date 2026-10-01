@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as rollRepo from '@/lib/storage/rollRepo';
 import { getMember, getUserById, listMembersForCampaign } from '@/lib/storage/membershipRepo';
 import { emitFiltered } from '@/lib/server/transport';
 import { canSeeRoll } from '@/lib/utils/campaignRolls';
@@ -60,7 +60,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       createdAt: new Date(),
     };
 
-    await storage.saveCampaignRoll(roll);
+    await rollRepo.saveCampaignRoll(roll);
 
     const activeMembers = await listMembersForCampaign(campaignId);
     const activeMembersFiltered = activeMembers.filter((m) => m.status === 'active');
@@ -101,7 +101,7 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const result = await storage.listCampaignRolls(
+    const result = await rollRepo.listCampaignRolls(
       campaignId,
       sessionId,
       auth.userId,
@@ -115,3 +115,4 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 });
+

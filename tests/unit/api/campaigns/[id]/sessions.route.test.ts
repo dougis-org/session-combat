@@ -3,7 +3,7 @@
  */
 import { NextRequest } from "next/server";
 import { POST, SESSION_BODY_MAX_BYTES } from "@/app/api/campaigns/[id]/sessions/route";
-import { storage } from "@/lib/storage";
+import * as sessionLogRepo from "@/lib/storage/sessionLogRepo";
 import type { Campaign } from "@/lib/types";
 import {
   MOCK_AUTH,
@@ -15,11 +15,9 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    getNextSessionNumber: jest.fn(),
-    saveSessionLog: jest.fn(),
-  },
+jest.mock("@/lib/storage/sessionLogRepo", () => ({
+  getNextSessionNumber: jest.fn(),
+  saveSessionLog: jest.fn(),
 }));
 
 jest.mock("@/lib/utils/campaign", () => ({
@@ -28,7 +26,7 @@ jest.mock("@/lib/utils/campaign", () => ({
 
 import { assertCampaignAccess } from "@/lib/utils/campaign";
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = jest.mocked(sessionLogRepo);
 const mockedAssertCampaignAccess = jest.mocked(assertCampaignAccess);
 
 const CAMPAIGN_ID = "campaign-1";

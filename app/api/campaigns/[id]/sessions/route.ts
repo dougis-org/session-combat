@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as sessionLogRepo from '@/lib/storage/sessionLogRepo';
 import { SessionLog } from '@/lib/types';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { readBoundedJson, boundedJsonErrorResponse } from '@/lib/server/readBoundedJson';
@@ -19,7 +19,7 @@ async function resolveSessionNumber(
 ): Promise<number | NextResponse> {
   if (sessionNumber !== undefined) return sessionNumber;
   try {
-    return await storage.getNextSessionNumber(campaignUserId, campaignId);
+    return await sessionLogRepo.getNextSessionNumber(campaignUserId, campaignId);
   } catch (error) {
     console.error('Error determining next session number:', error);
     return NextResponse.json(
@@ -35,7 +35,7 @@ export const GET = withAuthAndParams<Params>(async (request, auth, { id: campaig
     if (result instanceof NextResponse) return result;
     const { campaign } = result;
 
-    const logs = await storage.loadSessionLogs(campaign.userId, campaignId);
+    const logs = await sessionLogRepo.loadSessionLogs(campaign.userId, campaignId);
     const limitParam = new URL(request.url).searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
     return NextResponse.json(limit && limit > 0 ? logs.slice(0, limit) : logs);
@@ -83,7 +83,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
       updatedAt: now,
     };
 
-    await storage.saveSessionLog(log);
+    await sessionLogRepo.saveSessionLog(log);
 
     return NextResponse.json(log, { status: 201 });
   } catch (error) {
@@ -91,3 +91,4 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     return NextResponse.json({ error: 'Failed to create session log' }, { status: 500 });
   }
 });
+
