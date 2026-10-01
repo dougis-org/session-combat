@@ -28,9 +28,9 @@
 - [x] E2E tests (`npx playwright test` for the new spec)
 - [x] Type check (`npx tsc --noEmit`)
 - [x] Build (`npm run build`)
-- [ ] Security/code quality checks required by project standards (Codacy/Verity gates)
-- [ ] All completed tasks marked complete
-- [ ] All steps in [Remote push validation]
+- [x] Security/code quality checks required by project standards (Codacy/Verity gates)
+- [x] All completed tasks marked complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -44,14 +44,14 @@ If any required step fails, fix it before pushing. Use the commands documented i
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
-- [ ] Commit and push to the working branch
-- [ ] Open PR to `main`; body MUST include `Closes #814`
-- [ ] **Issue lifecycle: mark in-review:** `gh issue edit 814 --add-label "in-review" --remove-label "in-progress"` and move the project item to "In Review" (same discovery; warn and skip if not found)
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. After three or more iterations without progress, report the stall and wait for guidance.
-- [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (the repo ruleset allows squash only; never `--admin`)
-- [ ] **Iterate until merged** until `gh pr view <PR-URL> --json state` is `MERGED` (exit and notify if `CLOSED`); never force-merge:
+- [x] Ensure the `openspec-review-code` sub-agent ran and all findings were addressed before the final commit
+- [x] Commit and push to the working branch
+- [x] Open PR to `main`; body MUST include `Closes #814`
+- [x] **Issue lifecycle: mark in-review:** `gh issue edit 814 --add-label "in-review" --remove-label "in-progress"` and move the project item to "In Review" (same discovery; warn and skip if not found)
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. After three or more iterations without progress, report the stall and wait for guidance.
+- [x] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (the repo ruleset allows squash only; never `--admin`)
+- [x] **Iterate until merged** until `gh pr view <PR-URL> --json state` is `MERGED` (exit and notify if `CLOSED`); never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix failures first
   2. **PR comments** — address each unresolved thread, commit, validate, push, resolve the thread (GraphQL `resolveReviewThread`), wait 180s
   3. **CI failures** — only after comments are resolved, check `gh pr checks <PR-URL>`; fix, validate, push, wait 180s; restart from step 1
@@ -70,16 +70,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Mark all remaining tasks complete
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync spec delta to `openspec/specs/combat-encounter-picker-search/spec.md` as a valid main-spec form (not delta format); update relative links to `../../changes/archive/YYYY-MM-DD-encounter-picker-sort-search/design.md` and `.../tasks.md`
-- [ ] Archive: move `openspec/changes/encounter-picker-sort-search/` to `openspec/changes/archive/YYYY-MM-DD-encounter-picker-sort-search/` in a single commit
-- [ ] Confirm the archive dir exists and the original is gone
-- [ ] Create doc branch `doc/archive-YYYY-MM-DD-encounter-picker-sort-search` and push it
-- [ ] Open a docs-only PR titled `docs: archive encounter-picker-sort-search (YYYY-MM-DD)`; do NOT push directly to `main`
-- [ ] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (address comments/CI on the same branch)
-- [ ] Remove the worktree: `git worktree remove .worktrees/encounter-picker-sort-search`
-- [ ] Prune: `git fetch --prune` and `git branch -D encounter-picker-sort-search doc/archive-YYYY-MM-DD-encounter-picker-sort-search`
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Mark all remaining tasks complete
+- [x] Update repository documentation impacted by the change
+- [x] Sync spec delta to `openspec/specs/combat-encounter-picker-search/spec.md` as a valid main-spec form (not delta format); update relative links to `../../changes/archive/YYYY-MM-DD-encounter-picker-sort-search/design.md` and `.../tasks.md`
+- [x] Archive: move `openspec/changes/encounter-picker-sort-search/` to `openspec/changes/archive/YYYY-MM-DD-encounter-picker-sort-search/` in a single commit
+- [x] Confirm the archive dir exists and the original is gone
+- [x] Create doc branch `doc/archive-YYYY-MM-DD-encounter-picker-sort-search` and push it
+- [x] Open a docs-only PR titled `docs: archive encounter-picker-sort-search (YYYY-MM-DD)`; do NOT push directly to `main`
+- [x] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (address comments/CI on the same branch)
+- [x] Remove the worktree: `git worktree remove .worktrees/encounter-picker-sort-search`
+- [x] Prune: `git fetch --prune` and `git branch -D encounter-picker-sort-search doc/archive-YYYY-MM-DD-encounter-picker-sort-search`
