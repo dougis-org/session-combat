@@ -377,9 +377,9 @@ describe('layout — clipping and width (#802)', () => {
     const inner = input.parentElement as HTMLElement;
     const row = inner.parentElement as HTMLElement;
 
-    expect(row.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'w-full', 'min-w-0']));
+    expect(row.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'w-64', 'min-w-0']));
     expect(row.className).not.toContain('flex-col');
-    expect(inner.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'w-full', 'min-w-0']));
+    expect(inner.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'gap-2', 'min-w-0']));
     expect(input.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'flex-1']));
   });
 });

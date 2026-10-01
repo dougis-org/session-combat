@@ -241,9 +241,9 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, o
             </div>
           </div>
 
-          <div className="flex items-start gap-2 w-full min-w-0">
+          <div className="flex items-start gap-2 w-64 min-w-0">
             {entryMode === "dice" && (
-              <div className="flex gap-2 w-full min-w-0">
+              <div className="flex gap-2 min-w-0">
                 <input
                   type="number"
                   min="1"
@@ -263,7 +263,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, o
             )}
 
             {entryMode === "total" && (
-              <div className="flex gap-2 w-full min-w-0">
+              <div className="flex gap-2 w-64 min-w-0">
                 <input
                   type="number"
                   min="0"
