@@ -4,15 +4,19 @@ import { useState, useEffect, useRef } from 'react';
 import { CombatantState, InitiativeRoll } from '@/lib/types';
 import { buildInitiativeRoll, getDexInitiativeBonus } from '@/lib/utils/combat';
 
+type EntryMode = 'roll' | 'dice' | 'total';
+
 interface InitiativeEntryProps {
   combatant: CombatantState;
   onSet: (initiativeRoll: InitiativeRoll) => void;
   onClose?: () => void; // optional: close the edit form
   onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
+  // Fired when the entry mode changes, so the host can re-clamp the modal after it resizes
+  onModeChange?: (mode: EntryMode) => void;
 }
 
-export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }: InitiativeEntryProps) {
-  const [entryMode, setEntryMode] = useState<'roll' | 'dice' | 'total'>('roll');
+export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, onModeChange }: InitiativeEntryProps) {
+  const [entryMode, setEntryMode] = useState<EntryMode>('roll');
   const [diceRoll, setDiceRoll] = useState('');
   const [totalValue, setTotalValue] = useState('');
   const [advantage, setAdvantage] = useState(combatant.initiativeAdvantage ?? false);
@@ -37,6 +41,16 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
       document.removeEventListener('mousedown', handlePointerDown);
     };
   }, [onClose]);
+
+  // Notify after the commit (not in the click handler) so the host measures the
+  // modal with the new mode's entry row already in the DOM. Tracking the previous
+  // mode (rather than a first-render flag) keeps this idempotent under StrictMode.
+  const notifiedMode = useRef<EntryMode>('roll');
+  useEffect(() => {
+    if (notifiedMode.current === entryMode) return;
+    notifiedMode.current = entryMode;
+    onModeChange?.(entryMode);
+  }, [entryMode, onModeChange]);
 
   const handleRoll = () => {
     onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
@@ -74,12 +88,19 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
       return;
     }
 
+    // The flat bonus can push an in-range entry past the safe-integer range.
+    const bonusedTotal = total + (flatBonus ?? 0);
+    if (!Number.isSafeInteger(bonusedTotal)) {
+      alert('Initiative must be a whole number 0 or greater');
+      return;
+    }
+
     const effectiveFlatBonus = flatBonus !== 0 ? flatBonus : undefined;
 
     onSet({
       roll: total,
       bonus: 0,
-      total: total + (flatBonus ?? 0),
+      total: bonusedTotal,
       method: 'manual',
       ...(effectiveFlatBonus !== undefined && { flatBonus: effectiveFlatBonus }),
     });
@@ -108,7 +129,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
         Initiative
       </h2>
 
-      <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start mb-4">
+      <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto p-1 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start mb-4">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold">{combatant.name}</h3>
@@ -220,9 +241,9 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
             </div>
           </div>
 
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 w-full min-w-0">
             {entryMode === "dice" && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full min-w-0">
                 <input
                   type="number"
                   min="1"
@@ -230,7 +251,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                   value={diceRoll}
                   onChange={(e) => setDiceRoll(e.target.value)}
                   placeholder="1-20"
-                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+                  className="min-w-0 flex-1 bg-gray-700 rounded px-3 py-2 text-white"
                 />
                 <button
                   onClick={handleDiceEntry}
@@ -242,7 +263,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
             )}
 
             {entryMode === "total" && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full min-w-0">
                 <input
                   type="number"
                   min="0"
@@ -253,7 +274,7 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange }:
                       ? `Value (${flatBonus > 0 ? "+" : ""}${flatBonus} bonus applied)`
                       : "Total initiative"
                   }
-                  className="flex-1 bg-gray-700 rounded px-3 py-2 text-white"
+                  className="min-w-0 flex-1 bg-gray-700 rounded px-3 py-2 text-white"
                 />
                 <button
                   onClick={handleTotalEntry}

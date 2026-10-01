@@ -351,3 +351,76 @@ describe('initiative display — flat bonus', () => {
     expect(text).not.toContain('+0');
   });
 });
+
+describe('layout — clipping and width (#802)', () => {
+  function scrollContainer(): HTMLElement {
+    return container.querySelector('.overflow-y-auto') as HTMLElement;
+  }
+
+  test('scroll container pads all sides and keeps the scroll safeguard', () => {
+    render({ ...BASE }, jest.fn());
+    const cls = scrollContainer().className.split(/\s+/);
+    expect(cls).toContain('p-1');
+    expect(cls).not.toContain('pr-1');
+    expect(cls).toContain('max-h-[70vh]');
+    expect(cls).toContain('overflow-y-auto');
+  });
+
+  test.each([
+    ['Enter Dice Roll', '1-20'],
+    ['Enter Total', 'Total initiative'],
+  ])('%s mode: entry row and input fill the width without flex-col', (button, placeholder) => {
+    render({ ...BASE }, jest.fn());
+    act(() => { findButton(button).click(); });
+
+    const input = container.querySelector(`input[placeholder="${placeholder}"]`) as HTMLInputElement;
+    const inner = input.parentElement as HTMLElement;
+    const row = inner.parentElement as HTMLElement;
+
+    expect(row.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'w-full', 'min-w-0']));
+    expect(row.className).not.toContain('flex-col');
+    expect(inner.className.split(/\s+/)).toEqual(expect.arrayContaining(['flex', 'w-full', 'min-w-0']));
+    expect(input.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'flex-1']));
+  });
+});
+
+describe('onModeChange (#802)', () => {
+  function renderWithModeChange(onModeChange?: (m: 'roll' | 'dice' | 'total') => void) {
+    act(() => {
+      root = createRoot(container);
+      root.render(<InitiativeEntry combatant={BASE} onSet={jest.fn() as any} onModeChange={onModeChange} />);
+    });
+  }
+
+  test('is called with the new mode when Enter Dice Roll / Enter Total are clicked', () => {
+    const onModeChange = jest.fn();
+    renderWithModeChange(onModeChange);
+
+    act(() => { findButton('Enter Dice Roll').click(); });
+    expect(onModeChange).toHaveBeenLastCalledWith('dice');
+    act(() => { findButton('Enter Total').click(); });
+    expect(onModeChange).toHaveBeenLastCalledWith('total');
+  });
+
+  test('does not throw when the prop is omitted', () => {
+    renderWithModeChange(undefined);
+    expect(() => act(() => { findButton('Enter Dice Roll').click(); })).not.toThrow();
+  });
+});
+
+describe('handleTotalEntry — unsafe total after flat bonus', () => {
+  test('rejects a total that overflows the safe-integer range once the flat bonus is added', () => {
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const onSet = jest.fn();
+    render({ ...BASE, initiativeFlatBonus: 5 }, onSet);
+
+    act(() => { findButton('Enter Total').click(); });
+    const input = container.querySelector('input[type="number"][min="0"]') as HTMLInputElement;
+    act(() => { setInputValue(input, String(Number.MAX_SAFE_INTEGER)); });
+    act(() => { findButton('Set').click(); });
+
+    expect(onSet).not.toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+});
