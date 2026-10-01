@@ -232,7 +232,7 @@ async function testHook(
 describe('useCombat', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.confirm = jest.fn(() => true);
+    global.confirm = jest.fn();
     global.alert = jest.fn();
     global.crypto = { randomUUID: () => 'uuid-1' } as Crypto;
   });
@@ -381,7 +381,7 @@ describe('useCombat', () => {
     }, { campaignId: 'campaign-1' });
   });
 
-  test('endCombat clears active combat and resets setup state when confirmed', async () => {
+  test('endCombat clears active combat and resets setup state without a native confirm', async () => {
     await testHook(async (result) => {
       await act(async () => {
         await result.current.saveCombatState(makeCombatState([makeCombatant('c1', 'Paladin', 'player')]));
@@ -395,6 +395,7 @@ describe('useCombat', () => {
         await result.current.endCombat();
       });
 
+      expect(global.confirm).not.toHaveBeenCalled();
       expect(result.current.combatState).toBeNull();
       expect(result.current.setupCombatants).toEqual([]);
       expect(clearCombatHistoryMock).toHaveBeenCalledWith('combat-1');

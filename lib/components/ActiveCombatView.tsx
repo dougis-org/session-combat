@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useId, useMemo, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { AuthUser } from '@/lib/hooks/useAuth';
 import { CombatInfoIcon } from '@/lib/components/CombatInfoIcon';
+import { ConfirmDialog } from '@/lib/components/ConfirmDialog';
 import { CombatantCard } from '@/lib/components/CombatantCard';
 import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
@@ -84,6 +85,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   const initiativeCombatant = initiativeEditId
     ? combatState?.combatants.find(c => c.id === initiativeEditId)
     : undefined;
+  const [showEndCombatConfirm, setShowEndCombatConfirm] = useState(false);
   const initiativeDialogRef = useRef<HTMLDivElement>(null);
   const initiativeTitleId = useId();
   const initiativeNameId = useId();
@@ -253,7 +255,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
             >
               Restart Round
             </button>
-            <button onClick={endCombat} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+            <button onClick={() => setShowEndCombatConfirm(true)} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
               End Combat
             </button>
             <Link href="/" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
@@ -347,6 +349,21 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
         )}
 
         {removeConfirmPopup}
+
+        <ConfirmDialog
+          isOpen={showEndCombatConfirm}
+          title="End Combat?"
+          titleId="end-combat-confirm-title"
+          confirmLabel="End Combat"
+          cancelLabel="Return to Combat"
+          onConfirm={() => {
+            setShowEndCombatConfirm(false);
+            void endCombat();
+          }}
+          onCancel={() => setShowEndCombatConfirm(false)}
+        >
+          Are you sure you want to end combat?
+        </ConfirmDialog>
       </div>
 
       <Toast toast={toast} />

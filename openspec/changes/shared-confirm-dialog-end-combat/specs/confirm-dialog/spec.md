@@ -1,0 +1,119 @@
+## ADDED Requirements
+
+This document details *changes* to requirements and is additive to the [`design.md`](../../design.md) document, not a replacement.
+
+### Requirement: ADDED ConfirmDialog component
+
+The system SHALL provide a shared `ConfirmDialog` component, built on `Modal`, that renders a title, a message, a green confirm button, and a red cancel button, using caller-supplied `confirmLabel` and `cancelLabel` text. The header "×" control, the Escape key, and an overlay click SHALL all invoke `onCancel`. The dialog SHALL render nothing when `isOpen` is false.
+
+#### Scenario: Custom labels and colours
+
+- **Given** a `ConfirmDialog` is open with `confirmLabel="End Combat"` and `cancelLabel="Return to Combat"`
+- **When** it renders
+- **Then** a button labelled "End Combat" with green styling (`bg-green-600`) and a button labelled "Return to Combat" with red styling (`bg-red-600`) are present
+
+#### Scenario: Confirm invokes onConfirm only
+
+- **Given** an open `ConfirmDialog`
+- **When** the user clicks the confirm button
+- **Then** `onConfirm` is called once and `onCancel` is not called
+
+#### Scenario: Cancel button, "×", Escape, and overlay all cancel
+
+- **Given** an open `ConfirmDialog`
+- **When** the user clicks the cancel button, or the header "×", or presses Escape, or clicks the overlay
+- **Then** `onCancel` is called once per action and `onConfirm` is never called
+
+#### Scenario: Closed dialog renders nothing
+
+- **Given** `isOpen` is false
+- **When** the component renders
+- **Then** no element with `role="dialog"` is in the document
+
+### Requirement: ADDED Caller-supplied title id
+
+`ConfirmDialog` SHALL require a `titleId` prop, and the dialog title element id and the dialog's `aria-labelledby` SHALL both use it, so multiple dialogs can be mounted without id collisions.
+
+#### Scenario: Two dialogs coexist
+
+- **Given** two open `ConfirmDialog`s with `titleId="a-title"` and `titleId="b-title"`
+- **When** both render
+- **Then** the document contains exactly one element with id `a-title` and one with id `b-title`, and each dialog's `aria-labelledby` resolves to its own title
+
+### Requirement: ADDED End Combat uses ConfirmDialog
+
+The active combat view SHALL open a `ConfirmDialog` with confirm label "End Combat" and cancel label "Return to Combat" when the End Combat button is clicked, and SHALL call `endCombat` only when the dialog is confirmed.
+
+#### Scenario: Open dialog without ending combat
+
+- **Given** an active combat is displayed
+- **When** the user clicks the End Combat button
+- **Then** the confirmation dialog is shown and `endCombat` has not been called
+
+#### Scenario: Confirm ends combat once
+
+- **Given** the End Combat confirmation dialog is open
+- **When** the user clicks "End Combat" in the dialog (including a rapid double-click)
+- **Then** the dialog closes and `endCombat` is called exactly once
+
+#### Scenario: Return to Combat keeps combat running
+
+- **Given** the End Combat confirmation dialog is open
+- **When** the user clicks "Return to Combat" or "×"
+- **Then** the dialog closes, `endCombat` is not called, and the combat remains active
+
+### Requirement: ADDED Modal title id
+
+`Modal` SHALL accept an optional `titleId` prop used for the title element id and `aria-labelledby`, defaulting to `modal-title` when omitted.
+
+#### Scenario: Default id preserved
+
+- **Given** a `Modal` rendered without `titleId`
+- **When** it renders
+- **Then** the title element id and `aria-labelledby` are `modal-title`
+
+#### Scenario: Custom id applied
+
+- **Given** a `Modal` rendered with `titleId="custom-title"`
+- **When** it renders
+- **Then** the title element id and `aria-labelledby` are `custom-title`
+
+### Requirement: ADDED endCombat no longer prompts
+
+`useCombat.endCombat` SHALL NOT call `window.confirm`; confirmation is the responsibility of the calling UI. When invoked it SHALL perform the end-combat request and state reset as before.
+
+#### Scenario: endCombat runs without native confirm
+
+- **Given** an active combat with a server combat id
+- **When** `endCombat()` is called
+- **Then** `window.confirm` is not called, the PUT `{ isActive: false }` is sent, and local combat state is cleared on success
+
+#### Scenario: endCombat failure preserved
+
+- **Given** the PUT request fails
+- **When** `endCombat()` is called
+- **Then** local combat state is preserved and `error` is set
+
+## Traceability
+
+- Replaced behavior: the native browser `confirm()` previously used by End Combat (#811) is superseded by `ConfirmDialog`; no existing spec requirement is modified or removed.
+
+- Proposal element -> Requirement: Shared ConfirmDialog -> "ConfirmDialog component"; required titleId -> "Caller-supplied title id"; End Combat adoption -> "End Combat uses ConfirmDialog"; hook change -> "endCombat no longer prompts"; Modal id -> "Modal title id".
+- Design decision -> Requirement: D1/D3/D4 -> "ConfirmDialog component"; D2 -> "Caller-supplied title id", "Modal title id"; D5 -> "End Combat uses ConfirmDialog", "endCombat no longer prompts".
+- Requirement -> Task(s): see `tasks.md` (Modal, ConfirmDialog, ActiveCombatView, useCombat, tests).
+
+## Non-Functional Acceptance Criteria
+
+### Requirement: Accessibility
+
+#### Scenario: Dialog semantics
+
+- **Given** an open `ConfirmDialog`
+- **When** queried by role `dialog`
+- **Then** it has `aria-modal="true"` and an accessible name equal to the dialog title
+
+### Requirement: Reliability
+
+#### Scenario: Single submission
+
+- See functional scenario: "Confirm ends combat once".
