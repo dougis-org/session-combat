@@ -268,7 +268,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
         {initiativeCombatant && (
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4 bg-black/40"
+            className="fixed inset-0 z-[60] flex overflow-y-auto p-4 bg-black/40"
             data-testid="initiative-modal-backdrop"
           >
             <div
@@ -276,7 +276,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
               role="dialog"
               aria-modal="true"
               aria-labelledby={`${initiativeTitleId} ${initiativeNameId}`}
-              className="w-max max-w-full p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
+              className="m-auto w-max max-w-full p-4 bg-gray-800 rounded-lg shadow-2xl border border-gray-600"
               data-testid="initiative-modal"
             >
               <InitiativeEntry
