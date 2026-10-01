@@ -7,19 +7,19 @@
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] `cd .worktrees/fix-initiative-entry-clipping`; confirm the branch is pushed to remote
-- [ ] **Issue lifecycle: mark in-progress** (#802): run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
-- [ ] 1. (TDD) Add failing tests in `tests/unit/combat/initiativeEntry.test.tsx` per `tests.md`; then in `lib/components/InitiativeEntry.tsx` change the scroll container `pr-1` to `p-1` (keep `max-h-[70vh] overflow-y-auto mb-4`)
-- [ ] 2. (TDD) Add `w-full min-w-0` to the entry row and each mode's inner `div.flex`, and `min-w-0 flex-1` to the inputs in `lib/components/InitiativeEntry.tsx`; keep the row `flex` (not `flex-col`)
-- [ ] 3. (TDD) Add optional `onModeChange` prop to `InitiativeEntry` called when `entryMode` changes
-- [ ] 4. (TDD) In `lib/hooks/useInitiativeModal.ts` extract the clamp into a reusable function and expose a re-measure; wire `onModeChange` -> re-measure in `lib/components/ActiveCombatView.tsx`; add hook test in `tests/unit/`
-- [ ] 5. Look for existing helpers to reuse before adding new logic
-- [ ] 6. Verify in browser (Playwright, free port, not 3000): focus the entry input at narrow card width and near viewport bottom; confirm no clipping and no blank space
-- [ ] 7. Confirm acceptance criteria in `specs/modal-initiative-entry/spec.md` are covered
+- [x] `cd .worktrees/fix-initiative-entry-clipping`; confirm the branch is pushed to remote
+- [x] **Issue lifecycle: mark in-progress** (#802): run `gh issue edit #N --add-label "in-progress"`. Then discover the GitHub Project linked to the repo (`gh project list --owner <owner> --format json`), resolve the status field option semantically matching "In Progress" (`gh project field-list <project-number> --owner <owner> --format json`), and move the project item via `gh project item-edit`. If no project item is found, log a warning and continue. If the `gh` token lacks the `project` scope, surface a message instructing the user to run `gh auth refresh -s project` and skip the project-item update (issue label update still proceeds).
+- [x] 1. (TDD) Add failing tests in `tests/unit/combat/initiativeEntry.test.tsx` per `tests.md`; then in `lib/components/InitiativeEntry.tsx` change the scroll container `pr-1` to `p-1` (keep `max-h-[70vh] overflow-y-auto mb-4`)
+- [x] 2. (TDD) Add `w-full min-w-0` to the entry row and each mode's inner `div.flex`, and `min-w-0 flex-1` to the inputs in `lib/components/InitiativeEntry.tsx`; keep the row `flex` (not `flex-col`)
+- [x] 3. (TDD) Add optional `onModeChange` prop to `InitiativeEntry` called when `entryMode` changes
+- [x] 4. (TDD) In `lib/hooks/useInitiativeModal.ts` extract the clamp into a reusable function and expose a re-measure; wire `onModeChange` -> re-measure in `lib/components/ActiveCombatView.tsx`; add hook test in `tests/unit/`
+- [x] 5. Look for existing helpers to reuse before adding new logic
+- [x] 6. Verify in browser (Playwright, free port, not 3000): focus the entry input at narrow card width and near viewport bottom; confirm no clipping and no blank space
+- [x] 7. Confirm acceptance criteria in `specs/modal-initiative-entry/spec.md` are covered
 
 ## Pre-Commit Code Review
 

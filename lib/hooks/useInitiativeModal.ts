@@ -17,6 +17,7 @@ export interface UseInitiativeModalResult {
   openInitiativeModal: (id: string | null, position: { top: number; left: number; width: number } | null) => void;
   handleSetInitiative: (id: string, roll: InitiativeRoll) => void;
   closeInitiativeModal: (dismissed: boolean) => void;
+  remeasureInitiativeModal: () => void;
   getCardAnchorPosition: (id: string) => { top: number; left: number; width: number } | null;
 }
 
@@ -131,7 +132,7 @@ export function useInitiativeModal({
   // viewport. The modal is always exactly as wide as its target card and
   // shares its left edge, so it can only overflow vertically (below the
   // viewport) — the horizontal clamp is a defensive no-op for that shape.
-  useLayoutEffect(() => {
+  const clampModalToViewport = () => {
     if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
     const el = initiativeModalRef.current;
     el.style.width = `${initiativeEditPosition.width}px`;
@@ -154,7 +155,13 @@ export function useInitiativeModal({
 
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
-  }, [initiativeEditId, initiativeEditPosition]);
+  };
+
+  useLayoutEffect(clampModalToViewport, [initiativeEditId, initiativeEditPosition]);
+
+  // Content added after open (e.g. the entry row when switching modes) changes the
+  // modal's height, so the host calls this to re-run the clamp.
+  const remeasureInitiativeModal = clampModalToViewport;
 
   return {
     initiativeEditId,
@@ -163,6 +170,7 @@ export function useInitiativeModal({
     openInitiativeModal,
     handleSetInitiative,
     closeInitiativeModal,
+    remeasureInitiativeModal,
     getCardAnchorPosition,
   };
 }

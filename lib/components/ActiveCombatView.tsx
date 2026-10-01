@@ -79,6 +79,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     openInitiativeModal,
     handleSetInitiative,
     closeInitiativeModal,
+    remeasureInitiativeModal,
     getCardAnchorPosition,
   } = useInitiativeModal({ combatState, setInitiativeRoll });
 
@@ -257,6 +258,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
                 onSet={(initiativeRoll) => handleSetInitiative(initiativeEditId, initiativeRoll)}
                 onClose={() => closeInitiativeModal(!combatant.initiativeRoll)}
                 onSettingsChange={(adv, fb) => updateCombatantInitiativeSettings(initiativeEditId, adv, fb)}
+                onModeChange={remeasureInitiativeModal}
               />
             </div>
           ) : null;
