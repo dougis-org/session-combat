@@ -318,10 +318,26 @@ export async function verifyCombatScreenElements(page: Page): Promise<void> {
  */
 export async function dismissInitiativeModal(page: Page) {
   const backdrop = page.locator('[data-testid="initiative-modal-backdrop"]');
+  const name = page.locator('[data-testid="initiative-modal"] h3').first();
   await backdrop.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
-  for (let i = 0; i < 50 && (await backdrop.count()) > 0; i++) {
+  // The backdrop can be momentarily absent between a dismissal and the
+  // auto-advance reopening for the next combatant, so only stop once it has
+  // stayed gone across a short settle window.
+  const settledClosed = async () => {
+    if ((await backdrop.count()) > 0) return false;
+    await page.waitForTimeout(250);
+    return (await backdrop.count()) === 0;
+  };
+  for (let i = 0; i < 50 && !(await settledClosed()); i++) {
+    const current = await name.textContent().catch(() => null);
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(100);
+    // Dismissing auto-advances to the next unrolled combatant (a different
+    // name) or removes the backdrop; wait for either instead of sleeping.
+    await expect
+      .poll(async () => (await backdrop.count()) === 0 || (await name.textContent().catch(() => null)) !== current, {
+        timeout: 5000,
+      })
+      .toBe(true);
   }
   await expect(backdrop).toHaveCount(0);
 }
