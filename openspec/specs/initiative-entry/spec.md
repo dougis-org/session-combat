@@ -82,9 +82,39 @@ The system SHALL display the dex initiative bonus from the combatant's ability s
 - **When** `InitiativeEntry` renders
 - **Then** "-1" (or equivalent) is visible in the UI
 
+### Requirement: ADDED Entry controls sit below mode buttons, left-aligned
+
+The system SHALL render the initiative entry controls (value input, Set button, and result readout) in the same column as the mode buttons, below them, so their left edge aligns with the left edge of the "Roll d20" button and they never overflow to the right of the panel. Design: [design.md](../../changes/archive/2026-10-01-fix-initiative-set-button-layout/design.md); tasks: [tasks.md](../../changes/archive/2026-10-01-fix-initiative-set-button-layout/tasks.md).
+
+#### Scenario: Entry controls sit below mode buttons
+
+- **Given** `InitiativeEntry` is rendered in "Enter Dice Roll" mode
+- **When** the component mounts
+- **Then** the dice input and Set button share a parent container with the "Roll d20" button, appear after the mode-button row in document order, and are not siblings of the identity (name) block
+
+#### Scenario: Total mode uses the same placement
+
+- **Given** `InitiativeEntry` is rendered and the user clicks "Enter Total"
+- **When** the total input and Set button appear
+- **Then** they are in the same controls column, after the mode-button row
+
+#### Scenario: Mobile stacks left-aligned
+
+- **Given** a viewport below the `md` breakpoint
+- **When** the component renders
+- **Then** the content container uses a single-column grid (`grid-cols-1`) and the two-column layout is applied only via the `md:` variant
+
 ## MODIFIED Requirements
 
-None.
+### Requirement: MODIFIED Existing initiative entry behavior is preserved
+
+The system SHALL keep all existing mode, validation, advantage, flat-bonus, close, and Escape behavior unchanged by layout changes.
+
+#### Scenario: Existing behavior preserved
+
+- **Given** the existing `InitiativeEntry` unit tests
+- **When** they run against the restructured component
+- **Then** all pass without modification
 
 ## REMOVED Requirements
 
