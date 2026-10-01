@@ -661,5 +661,13 @@ describe('ActiveCombatView — CON save notification', () => {
       expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
       expect(endCombat).not.toHaveBeenCalled();
     });
+
+    it('Escape closes the dialog without ending combat', async () => {
+      const { endCombat } = setup();
+      await openDialog();
+      await userEvent.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
+      expect(endCombat).not.toHaveBeenCalled();
+    });
   });
 });
