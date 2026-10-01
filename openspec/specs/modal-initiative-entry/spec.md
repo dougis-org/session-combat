@@ -195,7 +195,7 @@ The system SHALL center the initiative dialog in the viewport (horizontally and 
 
 - **Given** the modal is open
 - **When** the dialog renders
-- **Then** the backdrop centers it with flex (`items-center justify-center`) and has `p-4` padding
+- **Then** the backdrop is a flex container with `p-4` padding and the dialog centers itself with `m-auto` (not `items-center`/`justify-center`, which would clip the top of a dialog taller than the viewport)
 - **And** the dialog has `w-max max-w-full`
 - **And** the dialog has no inline `top`, `left`, `width`, or `transform` style.
 
