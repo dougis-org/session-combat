@@ -1,9 +1,11 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { ActiveCampaignBanner } from '@/lib/components/ActiveCampaignBanner';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
+import { filterAndSortEncounters } from '@/lib/utils/encounterFilter';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { AuthUser } from '@/lib/hooks/useAuth';
 
@@ -40,6 +42,16 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
     confirmAddLair,
     cancelLairForm
   } = combat;
+
+  const [encounterQuery, setEncounterQuery] = useState('');
+  const encounterOptions = useMemo(
+    () => filterAndSortEncounters(encounters, encounterQuery, selectedEncounterId),
+    [encounters, encounterQuery, selectedEncounterId],
+  );
+  const hasEncounterMatch = useMemo(
+    () => filterAndSortEncounters(encounters, encounterQuery, '').length > 0,
+    [encounters, encounterQuery],
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -80,18 +92,31 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                     </Link>
                   </div>
                 ) : (
-                  <select
-                    value={selectedEncounterId}
-                    onChange={(e) => setSelectedEncounterId(e.target.value)}
-                    className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
-                  >
-                    <option value="">No encounter</option>
-                    {encounters.map(encounter => (
-                      <option key={encounter.id} value={encounter.id}>
-                        {encounter.name}
-                      </option>
-                    ))}
-                  </select>
+                  <>
+                    <input
+                      type="text"
+                      value={encounterQuery}
+                      onChange={(e) => setEncounterQuery(e.target.value)}
+                      placeholder="Search encounters..."
+                      aria-label="Search encounters"
+                      className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm mb-2"
+                    />
+                    <select
+                      value={selectedEncounterId}
+                      onChange={(e) => setSelectedEncounterId(e.target.value)}
+                      className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                    >
+                      <option value="">No encounter</option>
+                      {encounterOptions.map(encounter => (
+                        <option key={encounter.id} value={encounter.id}>
+                          {encounter.name}
+                        </option>
+                      ))}
+                    </select>
+                    {encounterQuery.trim() !== '' && !hasEncounterMatch && (
+                      <p className="text-gray-400 text-xs mt-1">No encounters match</p>
+                    )}
+                  </>
                 )}
               </div>
 

@@ -138,4 +138,86 @@ describe('CombatSetupView', () => {
     const link = screen.getByRole('link', { name: 'Manage Campaign Encounters' });
     expect(link).toHaveAttribute('href', '/campaigns/a%2Fb%3Fc/encounters');
   });
+
+  describe('encounter picker sort and search', () => {
+    const encounters = [
+      makeEncounter({ id: 'e1', name: 'Owlbear Den' }),
+      makeEncounter({ id: 'e2', name: 'goblin Ambush' }),
+      makeEncounter({ id: 'e3', name: 'Dragon Lair' }),
+    ];
+
+    const encounterOptionNames = () =>
+      screen
+        .getByDisplayValue('No encounter')
+        .querySelectorAll('option');
+
+    it('renders options alphabetically after "No encounter"', () => {
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      const labels = Array.from(encounterOptionNames()).map(o => o.textContent);
+      expect(labels).toEqual(['No encounter', 'Dragon Lair', 'goblin Ambush', 'Owlbear Den']);
+    });
+
+    it('exposes the search input by accessible name', () => {
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      expect(screen.getAllByRole('textbox', { name: 'Search encounters' })).toHaveLength(1);
+    });
+
+    it('filters options when typing in the search input', async () => {
+      const user = userEvent.setup();
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      await user.type(screen.getByRole('textbox', { name: 'Search encounters' }), 'gob');
+      const labels = Array.from(encounterOptionNames()).map(o => o.textContent);
+      expect(labels).toEqual(['No encounter', 'goblin Ambush']);
+    });
+
+    it('restores all options for cleared or whitespace-only input', async () => {
+      const user = userEvent.setup();
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      const input = screen.getByRole('textbox', { name: 'Search encounters' });
+      await user.type(input, 'gob');
+      await user.clear(input);
+      expect(encounterOptionNames()).toHaveLength(4);
+      await user.type(input, '   ');
+      expect(encounterOptionNames()).toHaveLength(4);
+    });
+
+    it('keeps the selected encounter selected and offered after a non-matching search', async () => {
+      const user = userEvent.setup();
+      const combat = makeUseCombat({ encounters, selectedEncounterId: 'e1' });
+      render(<CombatSetupView combat={combat} user={null} />);
+      await user.type(screen.getByRole('textbox', { name: 'Search encounters' }), 'gob');
+      const labels = Array.from(screen.getByDisplayValue('Owlbear Den').querySelectorAll('option')).map(o => o.textContent);
+      expect(labels).toEqual(['No encounter', 'goblin Ambush', 'Owlbear Den']);
+      expect(screen.queryByText('No encounters match')).not.toBeInTheDocument();
+    });
+
+    it('shows "No encounters match" when nothing matches', async () => {
+      const user = userEvent.setup();
+      render(<CombatSetupView combat={makeUseCombat({ encounters })} user={null} />);
+      expect(screen.queryByText('No encounters match')).not.toBeInTheDocument();
+      await user.type(screen.getByRole('textbox', { name: 'Search encounters' }), 'zzz');
+      expect(screen.getByText('No encounters match')).toBeInTheDocument();
+      expect(encounterOptionNames()).toHaveLength(1);
+    });
+
+    it('shows "No encounters match" when only the retained selection remains', async () => {
+      const user = userEvent.setup();
+      const combat = makeUseCombat({ encounters, selectedEncounterId: 'e1' });
+      render(<CombatSetupView combat={combat} user={null} />);
+      await user.type(screen.getByRole('textbox', { name: 'Search encounters' }), 'zzz');
+      expect(screen.getByText('No encounters match')).toBeInTheDocument();
+    });
+
+    it('renders no search input in the campaign empty state', () => {
+      const combat = makeUseCombat({ campaignId: 'campaign-1', encounters: [] });
+      render(<CombatSetupView combat={combat} user={null} />);
+      expect(screen.queryByRole('textbox', { name: 'Search encounters' })).not.toBeInTheDocument();
+    });
+
+    it('shows the search input for campaign-scoped setup with encounters', () => {
+      const combat = makeUseCombat({ campaignId: 'campaign-1', encounters });
+      render(<CombatSetupView combat={combat} user={null} />);
+      expect(screen.getByRole('textbox', { name: 'Search encounters' })).toBeInTheDocument();
+    });
+  });
 });

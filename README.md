@@ -83,7 +83,7 @@ Navigate to the Encounters page to create encounters:
 
 Navigate to the Combat Tracker:
 
-1. Select an encounter (optional - you can start combat with just characters)
+1. Select an encounter (optional - you can start combat with just characters). Encounters are listed alphabetically; use the "Search encounters" box to filter by name (your current selection always stays in the list)
 2. Click "Start Combat" to initialize the combat session
 3. Click "Roll Initiative" to roll for all combatants and sort by initiative order
 4. Use "Next Turn" to advance through combat
