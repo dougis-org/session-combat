@@ -407,3 +407,20 @@ describe('onModeChange (#802)', () => {
     expect(() => act(() => { findButton('Enter Dice Roll').click(); })).not.toThrow();
   });
 });
+
+describe('handleTotalEntry — unsafe total after flat bonus', () => {
+  test('rejects a total that overflows the safe-integer range once the flat bonus is added', () => {
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const onSet = jest.fn();
+    render({ ...BASE, initiativeFlatBonus: 5 }, onSet);
+
+    act(() => { findButton('Enter Total').click(); });
+    const input = container.querySelector('input[type="number"][min="0"]') as HTMLInputElement;
+    act(() => { setInputValue(input, String(Number.MAX_SAFE_INTEGER)); });
+    act(() => { findButton('Set').click(); });
+
+    expect(onSet).not.toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+});

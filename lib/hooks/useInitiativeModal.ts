@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { InitiativeRoll } from '@/lib/types';
 import type { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { sortCombatants } from '@/lib/utils/combat';
@@ -132,7 +132,7 @@ export function useInitiativeModal({
   // viewport. The modal is always exactly as wide as its target card and
   // shares its left edge, so it can only overflow vertically (below the
   // viewport) — the horizontal clamp is a defensive no-op for that shape.
-  const clampModalToViewport = () => {
+  const clampModalToViewport = useCallback(() => {
     if (!initiativeEditId || !initiativeEditPosition || !initiativeModalRef.current) return;
     const el = initiativeModalRef.current;
     el.style.width = `${initiativeEditPosition.width}px`;
@@ -155,14 +155,12 @@ export function useInitiativeModal({
 
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
-  };
+  }, [initiativeEditId, initiativeEditPosition]);
 
-  useLayoutEffect(clampModalToViewport, [initiativeEditId, initiativeEditPosition]);
+  useLayoutEffect(clampModalToViewport, [clampModalToViewport]);
 
-  // Content added after open (e.g. the entry row when switching modes) changes the
-  // modal's height, so the host calls this to re-run the clamp.
-  const remeasureInitiativeModal = clampModalToViewport;
-
+  // Also exposed as `remeasureInitiativeModal`: content added after open (e.g. the
+  // entry row when switching modes) changes the modal's height, so the host re-runs it.
   return {
     initiativeEditId,
     initiativeEditPosition,
@@ -170,7 +168,7 @@ export function useInitiativeModal({
     openInitiativeModal,
     handleSetInitiative,
     closeInitiativeModal,
-    remeasureInitiativeModal,
+    remeasureInitiativeModal: clampModalToViewport,
     getCardAnchorPosition,
   };
 }

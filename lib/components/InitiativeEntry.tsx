@@ -43,17 +43,14 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, o
   }, [onClose]);
 
   // Notify after the commit (not in the click handler) so the host measures the
-  // modal with the new mode's entry row already in the DOM. Skips the initial mount.
-  const isFirstRender = useRef(true);
+  // modal with the new mode's entry row already in the DOM. Tracking the previous
+  // mode (rather than a first-render flag) keeps this idempotent under StrictMode.
+  const notifiedMode = useRef<EntryMode>('roll');
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+    if (notifiedMode.current === entryMode) return;
+    notifiedMode.current = entryMode;
     onModeChange?.(entryMode);
-    // Intentionally keyed on entryMode only: a new callback identity must not re-fire.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryMode]);
+  }, [entryMode, onModeChange]);
 
   const handleRoll = () => {
     onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
@@ -91,12 +88,19 @@ export function InitiativeEntry({ combatant, onSet, onClose, onSettingsChange, o
       return;
     }
 
+    // The flat bonus can push an in-range entry past the safe-integer range.
+    const bonusedTotal = total + (flatBonus ?? 0);
+    if (!Number.isSafeInteger(bonusedTotal)) {
+      alert('Initiative must be a whole number 0 or greater');
+      return;
+    }
+
     const effectiveFlatBonus = flatBonus !== 0 ? flatBonus : undefined;
 
     onSet({
       roll: total,
       bonus: 0,
-      total: total + (flatBonus ?? 0),
+      total: bonusedTotal,
       method: 'manual',
       ...(effectiveFlatBonus !== undefined && { flatBonus: effectiveFlatBonus }),
     });
