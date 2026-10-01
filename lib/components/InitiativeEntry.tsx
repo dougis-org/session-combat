@@ -191,7 +191,7 @@ export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRoll
           {combatant.type === 'monster' && unrolledMonsterCount !== undefined && unrolledMonsterCount > 1 && (
             <button
               onClick={() => onRollAllMonsters?.(advantage, flatBonus)}
-              className="w-full bg-blue-700 hover:bg-blue-600 px-2 py-2 rounded text-sm flex-none font-semibold text-blue-100"
+              className="w-64 bg-blue-700 hover:bg-blue-600 px-2 py-2 rounded text-sm flex-none font-semibold text-blue-100"
             >
               Roll d20 for all {unrolledMonsterCount} unrolled Monsters
             </button>
