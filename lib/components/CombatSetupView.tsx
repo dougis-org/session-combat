@@ -101,18 +101,30 @@ export function CombatSetupView({ combat, user }: CombatSetupViewProps) {
                       aria-label="Search encounters"
                       className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm mb-2"
                     />
-                    <select
-                      value={selectedEncounterId}
-                      onChange={(e) => setSelectedEncounterId(e.target.value)}
-                      className="w-full bg-gray-700 rounded px-3 py-2 text-white text-sm"
+                    <ul
+                      role="listbox"
+                      aria-label="Encounters"
+                      className="max-h-48 overflow-y-auto bg-gray-700 rounded divide-y divide-gray-600"
                     >
-                      <option value="">No encounter</option>
-                      {encounterOptions.map(encounter => (
-                        <option key={encounter.id} value={encounter.id}>
-                          {encounter.name}
-                        </option>
-                      ))}
-                    </select>
+                      {[{ id: '', name: 'No encounter' }, ...encounterOptions].map(encounter => {
+                        const selected = encounter.id === selectedEncounterId;
+                        return (
+                          <li key={encounter.id || 'none'} role="presentation">
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={selected}
+                              onClick={() => setSelectedEncounterId(encounter.id)}
+                              className={`w-full text-left px-3 py-2 text-sm ${
+                                selected ? 'bg-blue-600 text-white' : 'text-gray-200 hover:bg-gray-600'
+                              }`}
+                            >
+                              {encounter.name}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
                     {encounterQuery.trim() !== '' && !hasEncounterMatch && (
                       <p role="status" className="text-gray-400 text-xs mt-1">No encounters match</p>
                     )}

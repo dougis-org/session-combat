@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Combat setup — encounter picker sort and search", () => {
-  test("search narrows the encounter select and the filtered encounter can be chosen", async ({
+  test("search narrows the encounter list live and the filtered encounter can be chosen", async ({
     page,
   }, testInfo) => {
     const identity = createTestIdentity(testInfo);
@@ -22,14 +22,15 @@ test.describe("Combat setup — encounter picker sort and search", () => {
     const search = page.getByRole("textbox", { name: "Search encounters" });
     await expect(search).toBeVisible({ timeout: 15000 });
 
-    const select = page.locator("select").filter({ has: page.locator("option", { hasText: "No encounter" }) }).first();
-    await expect(select.locator("option", { hasText: goblin })).toHaveCount(1);
-    await expect(select.locator("option", { hasText: owlbear })).toHaveCount(1);
+    const list = page.getByRole("listbox", { name: "Encounters" });
+    await expect(list.getByRole("option", { name: goblin })).toBeVisible();
+    await expect(list.getByRole("option", { name: owlbear })).toBeVisible();
 
-    await search.fill("goblin ambush");
-    await expect(select.locator("option", { hasText: owlbear })).toHaveCount(0);
-    await select.selectOption({ label: goblin });
-    await expect(select).toHaveValue(/.+/);
+    // List narrows live while typing, without opening anything.
+    await search.pressSequentially("goblin");
+    await expect(list.getByRole("option", { name: owlbear })).toHaveCount(0);
+    await list.getByRole("option", { name: goblin }).click();
+    await expect(list.getByRole("option", { name: goblin })).toHaveAttribute("aria-selected", "true");
 
     await page.getByRole("button", { name: "Start Combat" }).first().click();
     await expect(page.getByTestId("initiative-order")).toBeVisible({ timeout: 15000 });

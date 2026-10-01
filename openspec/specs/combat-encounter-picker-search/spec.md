@@ -4,7 +4,7 @@ Define the sorted, searchable encounter picker on combat setup (`/combat` and `/
 ## Requirements
 
 ### Requirement: Encounter options sorted alphabetically
-The system SHALL list encounter options in the combat setup "Select Encounter" control sorted alphabetically by name, case-insensitively, after the "No encounter" option.
+The system SHALL list encounter options in the combat setup "Select Encounter" control sorted alphabetically by name, case-insensitively, after the "No encounter" option. The options SHALL be rendered as an always-visible, scrollable listbox (role `listbox`, labelled "Encounters") of selectable `option` rows below the search input, not a native `<select>`.
 
 #### Scenario: Options sorted alphabetically
 - **GIVEN** encounters named "Owlbear Den", "goblin Ambush", and "Dragon Lair" in that load order
@@ -12,7 +12,7 @@ The system SHALL list encounter options in the combat setup "Select Encounter" c
 - **THEN** the options after "No encounter" appear as "Dragon Lair", "goblin Ambush", "Owlbear Den"
 
 ### Requirement: Encounter search filters options by name
-The system SHALL provide a search input labelled "Search encounters" above the encounter select that filters options by case-insensitive substring match on the trimmed query. The input SHALL be keyboard focusable and be the only element with that accessible name.
+The system SHALL provide a search input labelled "Search encounters" above the encounter list that filters the visible option list in real time, on every keystroke, by case-insensitive substring match on the trimmed query. Clicking an option SHALL select it, the selected option SHALL be marked `aria-selected` and visually highlighted, and "No encounter" SHALL clear the selection. The input SHALL be keyboard focusable and be the only element with that accessible name.
 
 #### Scenario: Search filters options by name
 - **GIVEN** encounters "Goblin Ambush" and "Owlbear Den"
@@ -45,7 +45,7 @@ The system SHALL apply the sorted, searchable encounter picker on both `/combat`
 #### Scenario: Both routes show the search
 - **GIVEN** the DM has at least one encounter
 - **WHEN** they open `/combat` or `/campaigns/[id]/combat`
-- **THEN** the "Search encounters" input is visible above the encounter select
+- **THEN** the "Search encounters" input is visible above the encounter list
 
 ### Requirement: Filtering is synchronous and client-side
 The system SHALL filter and sort encounters synchronously in memory with no network request, including for 500 encounters.
