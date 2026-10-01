@@ -13,11 +13,12 @@ interface InitiativeEntryProps {
   onRollAllMonsters?: (advantage?: boolean, flatBonus?: number) => void;
   onClose?: () => void; // optional: close the edit form
   onSettingsChange?: (advantage: boolean, flatBonus: number) => void;
-  // Fired when the entry mode changes, so the host can re-clamp the modal after it resizes
-  onModeChange?: (mode: EntryMode) => void;
+  // Heading ids so the host dialog can name itself via aria-labelledby
+  titleId?: string;
+  nameId?: string;
 }
 
-export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRollAllMonsters, onClose, onSettingsChange, onModeChange }: InitiativeEntryProps) {
+export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRollAllMonsters, onClose, onSettingsChange, titleId, nameId }: InitiativeEntryProps) {
   const [entryMode, setEntryMode] = useState<EntryMode>('roll');
   const [diceRoll, setDiceRoll] = useState('');
   const [totalValue, setTotalValue] = useState('');
@@ -43,16 +44,6 @@ export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRoll
       document.removeEventListener('mousedown', handlePointerDown);
     };
   }, [onClose]);
-
-  // Notify after the commit (not in the click handler) so the host measures the
-  // modal with the new mode's entry row already in the DOM. Tracking the previous
-  // mode (rather than a first-render flag) keeps this idempotent under StrictMode.
-  const notifiedMode = useRef<EntryMode>('roll');
-  useEffect(() => {
-    if (notifiedMode.current === entryMode) return;
-    notifiedMode.current = entryMode;
-    onModeChange?.(entryMode);
-  }, [entryMode, onModeChange]);
 
   const handleRoll = () => {
     onSet(buildInitiativeRoll({ ...combatant, initiativeAdvantage: advantage, initiativeFlatBonus: flatBonus }));
@@ -125,16 +116,16 @@ export function InitiativeEntry({ combatant, unrolledMonsterCount, onSet, onRoll
         </button>
       )}
 
-      <h2 className="shrink-0 w-24 self-stretch flex flex-col justify-center text-lg font-semibold text-red-400">
+      <h2 id={titleId} className="shrink-0 w-24 self-stretch flex flex-col justify-center text-lg font-semibold text-red-400">
         Set
         <br />
         Initiative
       </h2>
 
-      <div className="min-w-0 flex-1 max-h-[70vh] overflow-y-auto p-1 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start mb-4">
+      <div className="min-w-0 flex-1 p-1 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">{combatant.name}</h3>
+            <h3 id={nameId} className="text-lg font-semibold break-words">{combatant.name}</h3>
           </div>
           <div className="flex justify-end mt-2">
             <span

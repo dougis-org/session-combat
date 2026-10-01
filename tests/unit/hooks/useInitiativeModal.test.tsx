@@ -1,59 +1,80 @@
-import React, { useLayoutEffect } from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import { act } from 'react';
-import {
-  useInitiativeModal,
-  type UseInitiativeModalResult,
-} from '@/lib/hooks/useInitiativeModal';
+import { renderHook, act } from '@testing-library/react';
+import { useInitiativeModal } from '@/lib/hooks/useInitiativeModal';
+import { makeCombatant, makeCombatState } from '@/tests/unit/fixtures/combatHelpers';
 
-let container: HTMLDivElement;
-let root: Root;
-let result: UseInitiativeModalResult;
+const ROLLED = { method: 'manual' as const, roll: 10, bonus: 0, total: 10 };
 
-function Harness({ onResult }: { onResult: (r: UseInitiativeModalResult) => void }) {
-  const hook = useInitiativeModal({ combatState: null, setInitiativeRoll: jest.fn() });
-  useLayoutEffect(() => { onResult(hook); });
-  // eslint-disable-next-line react-hooks/refs -- test harness attaches the hook-owned ref to a real node
-  return <div ref={hook.initiativeModalRef} data-testid="modal" />;
+function setup(combatants = [makeCombatant({ id: 'c1', name: 'Goblin', initiativeRoll: ROLLED })]) {
+  const setInitiativeRoll = jest.fn();
+  const hook = renderHook(
+    ({ state }) => useInitiativeModal({ combatState: state, setInitiativeRoll }),
+    { initialProps: { state: makeCombatState({ combatants }) } },
+  );
+  return { ...hook, setInitiativeRoll };
 }
 
-const renderHarness = () =>
-  act(() => { root = createRoot(container); root.render(<Harness onResult={(r) => { result = r; }} />); });
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });
-  Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
-});
-
-afterEach(() => {
-  act(() => { root?.unmount(); });
-  container.remove();
-});
-
-function mockModalHeight(el: HTMLElement, height: { current: number }) {
-  el.getBoundingClientRect = () =>
-    ({ width: 400, height: height.current, top: 0, left: 0, right: 400, bottom: height.current }) as DOMRect;
-}
-
-describe('useInitiativeModal — remeasureInitiativeModal (#802)', () => {
-  test('moves the modal up when it grows past the viewport bottom', () => {
-    renderHarness();
-    const el = container.querySelector('[data-testid="modal"]') as HTMLElement;
-    const height = { current: 200 };
-    mockModalHeight(el, height);
-
-    act(() => { result.openInitiativeModal('c1', { top: 500, left: 100, width: 400 }); });
-    expect(el.style.top).toBe('500px'); // 500 + 200 <= 800 - 16
-
-    height.current = 400; // taller mode: bottom would be 900
-    act(() => { result.remeasureInitiativeModal(); });
-    expect(el.style.top).toBe('384px'); // 800 - 16 - 400
+describe('useInitiativeModal', () => {
+  test('openInitiativeModal(id) opens with no card element in the DOM', () => {
+    const { result } = setup();
+    expect(document.querySelector('[data-combatant-id]')).toBeNull();
+    act(() => { result.current.openInitiativeModal('c1'); });
+    expect(result.current.initiativeEditId).toBe('c1');
   });
 
-  test('is a no-op with no modal mounted', () => {
-    renderHarness();
-    expect(() => act(() => { result.remeasureInitiativeModal(); })).not.toThrow();
+  test('auto-opens for the first unrolled combatant without a card lookup or warning', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const { result } = setup([makeCombatant({ id: 'c1', name: 'Goblin' })]);
+    expect(result.current.initiativeEditId).toBe('c1');
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  test('a dismissed combatant does not auto-reopen, but others still do', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const { result, rerender } = setup([goblin]);
+    act(() => { result.current.closeInitiativeModal(true); });
+    expect(result.current.initiativeEditId).toBeNull();
+
+    const orc = makeCombatant({ id: 'c2', name: 'Orc' });
+    rerender({ state: makeCombatState({ combatants: [goblin, orc] }) });
+    expect(result.current.initiativeEditId).toBe('c2');
+  });
+
+  test('removing the open combatant clears initiativeEditId', () => {
+    const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
+    const orc = makeCombatant({ id: 'c2', name: 'Orc', initiativeRoll: ROLLED });
+    const { result, rerender } = setup([goblin, orc]);
+    expect(result.current.initiativeEditId).toBe('c1');
+    rerender({ state: makeCombatState({ combatants: [orc] }) });
+    expect(result.current.initiativeEditId).toBeNull();
+  });
+
+  test('registers no resize/scroll listener or ResizeObserver while open', () => {
+    const addSpy = jest.spyOn(window, 'addEventListener');
+    const ro = jest.fn();
+    const original = (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
+    (globalThis as { ResizeObserver?: unknown }).ResizeObserver = ro;
+
+    const { result } = setup();
+    act(() => { result.current.openInitiativeModal('c1'); });
+
+    const layoutEvents = addSpy.mock.calls.filter(([type]) => type === 'resize' || type === 'scroll');
+    expect(layoutEvents).toHaveLength(0);
+    expect(ro).not.toHaveBeenCalled();
+
+    addSpy.mockRestore();
+    (globalThis as { ResizeObserver?: unknown }).ResizeObserver = original;
+  });
+
+  test('no longer exposes positioning plumbing', () => {
+    const { result } = setup();
+    for (const key of [
+      'initiativeEditPosition',
+      'initiativeModalRef',
+      'getCardAnchorPosition',
+      'remeasureInitiativeModal',
+    ]) {
+      expect(result.current).not.toHaveProperty(key);
+    }
   });
 });

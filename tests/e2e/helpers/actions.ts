@@ -2,12 +2,13 @@ import { randomUUID } from "node:crypto";
 import { expect, Page, TestInfo } from "@playwright/test";
 import { createTestIdentity } from "./isolation";
 
-export const STRONG_PASSWORD = "TestPassword123!";
+// Random per test-process (no credential committed to source). Shared by specs
+// that register a user and later log in again within the same run.
+export const STRONG_PASSWORD = randomStrongPassword();
 
 /**
- * Generate a fresh randomized strong password. Distinct from `STRONG_PASSWORD`
- * (a static value other specs depend on) — used by `registerTestUser`, which
- * needs a unique password per registered test user.
+ * Generate a fresh randomized strong password. `STRONG_PASSWORD` is one such value shared
+ * per process; `registerTestUser` needs a unique password per registered user.
  */
 export function randomStrongPassword(): string {
   return `TestPw${randomUUID().replace(/-/g, "")}!1`;
@@ -308,4 +309,35 @@ export async function verifyCombatScreenElements(page: Page): Promise<void> {
   await initiativeOrder
     .or(combatantsList)
     .waitFor({ state: "visible", timeout: 10000 });
+}
+
+/**
+ * The initiative modal auto-opens for every unrolled combatant and, being a
+ * dimmed modal dialog, blocks the page behind it. Dismiss each prompt with
+ * Escape so a test can interact with the combat screen underneath.
+ */
+export async function dismissInitiativeModal(page: Page) {
+  const backdrop = page.locator('[data-testid="initiative-modal-backdrop"]');
+  const name = page.locator('[data-testid="initiative-modal"] h3').first();
+  await backdrop.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+  // The backdrop can be momentarily absent between a dismissal and the
+  // auto-advance reopening for the next combatant, so only stop once it has
+  // stayed gone across a short settle window.
+  const settledClosed = async () => {
+    if ((await backdrop.count()) > 0) return false;
+    await page.waitForTimeout(250);
+    return (await backdrop.count()) === 0;
+  };
+  for (let i = 0; i < 50 && !(await settledClosed()); i++) {
+    const current = await name.textContent().catch(() => null);
+    await page.keyboard.press("Escape");
+    // Dismissing auto-advances to the next unrolled combatant (a different
+    // name) or removes the backdrop; wait for either instead of sleeping.
+    await expect
+      .poll(async () => (await backdrop.count()) === 0 || (await name.textContent().catch(() => null)) !== current, {
+        timeout: 5000,
+      })
+      .toBe(true);
+  }
+  await expect(backdrop).toHaveCount(0);
 }
