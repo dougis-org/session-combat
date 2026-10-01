@@ -297,6 +297,10 @@ export function sortCombatants(combatants: CombatantState[]): CombatantState[] {
   return [...combatants].sort((a, b) => {
     const aUnrolled = !a.initiativeRoll;
     const bUnrolled = !b.initiativeRoll;
+    if (aUnrolled && bUnrolled) {
+      if (a.type === 'monster' && b.type === 'player') return -1;
+      if (a.type === 'player' && b.type === 'monster') return 1;
+    }
     if (aUnrolled !== bUnrolled) return aUnrolled ? -1 : 1;
     if (a.initiative !== b.initiative) return b.initiative - a.initiative;
     if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];

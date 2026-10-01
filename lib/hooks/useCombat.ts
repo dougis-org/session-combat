@@ -324,22 +324,30 @@ export function useCombat(options: UseCombatOptions = {}) {
     });
   };
 
-  const rollInitiative = () => {
+  const rollUnrolledMonsters = (advantage?: boolean, flatBonus?: number) => {
     if (!combatState) return;
 
-    // Roll initiative for all non-lair combatants (lair slots are always initiative 20)
     const updatedCombatants = combatState.combatants.map(c => {
-      if (c.type === 'lair') return c;
-      const initiativeRoll = buildInitiativeRoll(c);
-      return { ...c, initiative: initiativeRoll.total, initiativeRoll };
+      if (c.type === 'monster' && !c.initiativeRoll) {
+        const cWithSettings = {
+          ...c,
+          initiativeAdvantage: advantage ?? c.initiativeAdvantage,
+          initiativeFlatBonus: flatBonus ?? c.initiativeFlatBonus,
+        };
+        const initiativeRoll = buildInitiativeRoll(cWithSettings);
+        return {
+          ...cWithSettings,
+          initiative: initiativeRoll.total,
+          initiativeRoll,
+        };
+      }
+      return c;
     });
 
     saveCombatState({
       ...combatState,
       combatants: sortCombatants(updatedCombatants),
-      currentTurnIndex: 0,
     });
-    setInitiativeMode(false);
   };
 
   const nextTurn = () => {
@@ -512,7 +520,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     startCombat,
     endCombat,
     restartRound,
-    rollInitiative,
+    rollUnrolledMonsters,
     nextTurn,
     updateCombatant,
     updateCombatantInitiativeSettings,
@@ -575,7 +583,7 @@ export interface UseCombatReturn {
   startCombat: () => void;
   endCombat: () => Promise<void>;
   restartRound: () => void;
-  rollInitiative: () => void;
+  rollUnrolledMonsters: (advantage?: boolean, flatBonus?: number) => void;
   nextTurn: () => void;
   updateCombatant: (id: string, updates: Partial<CombatantState>) => void;
   updateCombatantInitiativeSettings: (id: string, adv: boolean, fb: number) => void;
