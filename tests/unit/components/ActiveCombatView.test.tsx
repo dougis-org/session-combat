@@ -340,20 +340,30 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and anchoring', ()
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin', type: 'monster' });
     const orc = makeCombatant({ id: 'c2', name: 'Orc', type: 'monster' });
     const player = makeCombatant({ id: 'p1', name: 'Aria', type: 'player' });
-    const combatState = makeCombatState({ combatants: [goblin, orc, player] });
-    const rollUnrolledMonsters = jest.fn(() => {
-      combatState.combatants = combatState.combatants.map((combatant) =>
-        combatant.type === 'monster'
-          ? { ...combatant, initiative: ROLLED.total, initiativeRoll: ROLLED }
-          : combatant,
-      );
-    });
-    const combat = makeCombat(
-      { combatState, rollUnrolledMonsters },
-      [goblin, orc, player],
-    );
+    const rollUnrolledMonsters = jest.fn();
 
-    render(<ActiveCombatView combat={combat} user={null} />);
+    // Holds combatants in real React state and updates them immutably, so the
+    // batch roll only becomes visible on the next render, like the real hook.
+    function Harness() {
+      const [combatants, setCombatants] = React.useState([goblin, orc, player]);
+      const combat = makeCombat(
+        {
+          combatState: makeCombatState({ combatants }),
+          rollUnrolledMonsters: (...args: [boolean?, number?]) => {
+            rollUnrolledMonsters(...args);
+            setCombatants((prev) =>
+              prev.map((c) =>
+                c.type === 'monster' ? { ...c, initiative: ROLLED.total, initiativeRoll: ROLLED } : c,
+              ),
+            );
+          },
+        },
+        combatants,
+      );
+      return <ActiveCombatView combat={combat} user={null} />;
+    }
+
+    render(<Harness />);
 
     await user.click(
       within(screen.getByTestId('initiative-modal')).getByRole('button', {
