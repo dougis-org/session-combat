@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as shareRepo from '@/lib/storage/shareRepo';
 import { getMember } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
@@ -41,7 +41,7 @@ export const POST = withAuthAndParams<Params>(async (request, auth, { id: campai
     }
 
     const id = crypto.randomUUID();
-    await storage.addShare({
+    await shareRepo.addShare({
       id,
       campaignId,
       characterId,
@@ -71,7 +71,7 @@ export const GET = withAuthAndParams<Params>(async (_request, auth, { id: campai
       return NextResponse.json(entries);
     }
 
-    const shares = await storage.listSharesForCampaign(campaignId, auth.userId);
+    const shares = await shareRepo.listSharesForCampaign(campaignId, auth.userId);
     return NextResponse.json(shares);
   } catch (error) {
     console.error('Error listing character shares:', error);

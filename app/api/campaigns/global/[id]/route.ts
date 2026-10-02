@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '@/lib/storage';
+import * as campaignTemplateRepo from '@/lib/storage/campaignTemplateRepo';
 import { requireAdmin } from '@/lib/api-helpers';
 
 export async function DELETE(
@@ -14,7 +14,7 @@ export async function DELETE(
   }
 
   try {
-    const deleted = await storage.deleteCampaignTemplate(id);
+    const deleted = await campaignTemplateRepo.deleteCampaignTemplate(id);
 
     if (!deleted) {
       return NextResponse.json({ error: 'Campaign template not found' }, { status: 404 });

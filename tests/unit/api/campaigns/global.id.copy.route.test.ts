@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { POST } from "@/app/api/campaigns/global/[id]/copy/route";
-import { storage } from "@/lib/storage";
+import * as campaignTemplateRepo from "@/lib/storage/campaignTemplateRepo";
 import { addMember } from "@/lib/storage/membershipRepo";
 import {
   MOCK_AUTH,
@@ -11,10 +11,8 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadGlobalCampaignTemplateById: jest.fn(),
-  },
+jest.mock("@/lib/storage/campaignTemplateRepo", () => ({
+  loadGlobalCampaignTemplateById: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/membershipRepo", () => ({
@@ -34,7 +32,7 @@ jest.mock("crypto", () => ({
 }));
 
 const mockedStorage = {
-  loadGlobalCampaignTemplateById: jest.mocked(storage).loadGlobalCampaignTemplateById,
+  loadGlobalCampaignTemplateById: jest.mocked(campaignTemplateRepo).loadGlobalCampaignTemplateById,
   addMember: jest.mocked(addMember),
 };
 const mockedCampaignRepo = jest.mocked(campaignRepo);

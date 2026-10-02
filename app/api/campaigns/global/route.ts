@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '@/lib/storage';
+import * as campaignTemplateRepo from '@/lib/storage/campaignTemplateRepo';
 import { CampaignTemplate } from '@/lib/types';
 import { GLOBAL_USER_ID } from '@/lib/constants';
 import { randomUUID } from 'crypto';
@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/api-helpers';
 
 export async function GET(_request: NextRequest) {
   try {
-    const templates = await storage.loadGlobalCampaignTemplates();
+    const templates = await campaignTemplateRepo.loadGlobalCampaignTemplates();
     return NextResponse.json(templates);
   } catch (error) {
     console.error('Error fetching global campaign templates:', error);
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     };
 
-    await storage.saveCampaignTemplate(template);
+    await campaignTemplateRepo.saveCampaignTemplate(template);
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
