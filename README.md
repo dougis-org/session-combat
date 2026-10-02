@@ -89,7 +89,7 @@ Navigate to the Combat Tracker:
 4. Use "Next Turn" to advance through combat
 5. Adjust HP with the +5/-5 buttons or directly edit stats
 6. Add status conditions to combatants (with optional duration in rounds)
-7. Click "End Combat" when the encounter is complete
+7. Click "End Combat" when the encounter is complete (you are also prompted automatically once all monsters are defeated or every player is dead)
 
 ## Data Persistence
 

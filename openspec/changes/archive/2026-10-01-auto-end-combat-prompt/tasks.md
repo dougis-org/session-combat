@@ -22,19 +22,19 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
 - [x] Run unit tests: `npm run test:unit`
 - [x] Run integration tests: `npm run test:integration` (if affected)
-- [ ] Run E2E tests (if applicable): `npm run test:e2e`
+- [x] Run E2E tests (if applicable): `npm run test:e2e`
 - [x] Run type checks: `npx tsc --noEmit`
 - [x] Run lint: `npm run lint`
 - [x] Run build: `npm run build`
 - [x] Run security/code quality checks required by project standards
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -56,13 +56,13 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `auto-end-combat-prompt` to `main`. PR body MUST include `Closes #812`.
-- [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 812 --add-label "in-review" --remove-label "in-progress"`, then move the project item to "In Review" via `gh project item-edit` (same discovery as above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (repo ruleset allows squash only; NEVER use `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify if `CLOSED`); never wait for a human to report the merge:
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `auto-end-combat-prompt` to `main`. PR body MUST include `Closes #812`.
+- [x] **Issue lifecycle: mark in-review**: run `gh issue edit 812 --add-label "in-review" --remove-label "in-progress"`, then move the project item to "In Review" via `gh project item-edit` (same discovery as above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (repo ruleset allows squash only; NEVER use `--admin`)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify if `CLOSED`); never wait for a human to report the merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix failures, commit, push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, commit, validate, push, resolve the thread via the `resolveReviewThread` GraphQL mutation, wait 180 seconds
   3. **CI check failures** — only after comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, validate, push, wait 180 seconds; restart from step 1
@@ -83,16 +83,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/combat-end-prompt/spec.md`; update relative links to `../../changes/archive/YYYY-MM-DD-auto-end-combat-prompt/design.md` and `.../tasks.md`
-- [ ] Archive: move `openspec/changes/auto-end-combat-prompt/` to `openspec/changes/archive/YYYY-MM-DD-auto-end-combat-prompt/` and stage copy + deletion in a single commit
-- [ ] Confirm the archive dir exists and `openspec/changes/auto-end-combat-prompt/` is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-auto-end-combat-prompt` then `git push -u origin doc/archive-YYYY-MM-DD-auto-end-combat-prompt`
-- [ ] Open PR to `main` titled `docs: archive auto-end-combat-prompt (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until merged (address comments and CI failures on the same branch)
-- [ ] Remove the worktree: `git worktree remove .worktrees/auto-end-combat-prompt`
-- [ ] Prune: `git fetch --prune` and `git branch -D auto-end-combat-prompt doc/archive-YYYY-MM-DD-auto-end-combat-prompt`
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/combat-end-prompt/spec.md`; update relative links to `../../changes/archive/YYYY-MM-DD-auto-end-combat-prompt/design.md` and `.../tasks.md`
+- [x] Archive: move `openspec/changes/auto-end-combat-prompt/` to `openspec/changes/archive/YYYY-MM-DD-auto-end-combat-prompt/` and stage copy + deletion in a single commit
+- [x] Confirm the archive dir exists and `openspec/changes/auto-end-combat-prompt/` is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-auto-end-combat-prompt` then `git push -u origin doc/archive-YYYY-MM-DD-auto-end-combat-prompt`
+- [x] Open PR to `main` titled `docs: archive auto-end-combat-prompt (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
+- [x] Monitor the doc PR until merged (address comments and CI failures on the same branch)
+- [x] Remove the worktree: `git worktree remove .worktrees/auto-end-combat-prompt`
+- [x] Prune: `git fetch --prune` and `git branch -D auto-end-combat-prompt doc/archive-YYYY-MM-DD-auto-end-combat-prompt`
