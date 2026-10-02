@@ -27,7 +27,7 @@
   - Skip logic must remain a bounded single lap (decision: bound initiative advancement to one complete lap).
   - Banished state must not rely on condition-name matching, so a hand-typed custom "Banished" does not silently change turn order.
 - Assumptions:
-  - "Flag set when the condition is added / removed when it is removed" is satisfied by deriving `isRemovedFromPlay(combatant)` from `combatant.conditions` rather than storing a second combatant-level boolean that could drift (e.g. on duration expiry). See Open Questions.
+  - "Flag set when the condition is added / removed when it is removed" is satisfied by deriving `isRemovedFromPlay(combatant)` from `combatant.conditions` rather than storing a second combatant-level boolean that could drift (e.g. on duration expiry). Approved by the requester.
   - Players can be banished too; the skip applies to any combatant type.
   - Damage applied directly on a banished combatant's own card is not blocked.
 - Edge cases considered:
@@ -98,9 +98,7 @@
 
 ## Open Questions
 
-- Question: Is deriving "removed from play" from the condition's `removedFromPlay` flag (no separate combatant-level boolean) acceptable for "flag set on add, cleared on removal"?
-  - Needed from: Requester
-  - Blocker for apply: no (design proceeds with derivation; a stored combatant flag would only add drift risk)
+- Resolved: deriving "removed from play" from the condition's `removedFromPlay` flag (no stored combatant-level boolean) was approved by the requester.
 - Resolved: the target-add path is in scope (requester decision); it reuses `ConditionFormModal` so there is one condition-entry UI. Side effect: conditions added to targets now also get catalog descriptions.
 
 ## Non-Goals

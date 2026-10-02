@@ -181,5 +181,5 @@
 
 ## Open Questions
 
-- Is deriving state from the condition flag acceptable in place of a stored combatant flag (Decision 2)? Non-blocking; design proceeds with derivation.
+- Decision 2 (derived state, no stored combatant flag) was approved by the requester.
 - None remaining; the target-add path is in scope (Decision 5b).
