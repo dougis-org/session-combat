@@ -1,11 +1,18 @@
 import { StatusConditionCatalogEntry } from "@/lib/types";
 
 /**
- * The 15 standard D&D 5e conditions plus Slowed, Confused, and Turned —
- * commonly-needed spell/feature-inflicted status effects — with their
- * SRD-style rules-text descriptions.
+ * The 15 standard D&D 5e conditions plus Slowed, Confused, Turned, and
+ * Banished — commonly-needed spell/feature-inflicted status effects — with
+ * their SRD-style rules-text descriptions. Banished carries `removedFromPlay`,
+ * which takes the combatant out of turn order and targeting.
  */
 export const CONDITION_CATALOG: StatusConditionCatalogEntry[] = [
+  {
+    name: "Banished",
+    description:
+      "A banished creature is transported to another plane of existence for the duration of the effect. It is incapacitated and cannot take actions, reactions, or turns, and it cannot be targeted. If the effect ends or its duration expires, the creature returns to the space it left or the nearest unoccupied space.",
+    removedFromPlay: true,
+  },
   {
     name: "Blinded",
     description:

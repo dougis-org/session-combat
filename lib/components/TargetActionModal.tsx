@@ -8,43 +8,30 @@ interface TargetActionModalProps {
   target: CombatantState;
   onClose: () => void;
   onApplyDamage: (damage: number, damageType: DamageType | '') => void;
-  onAddCondition: (name: string, duration?: number) => void;
+  /** Asks the host to open the shared catalog-backed condition modal for this target. */
+  onRequestCondition: () => void;
 }
 
 export function TargetActionModal({
   target,
   onClose,
   onApplyDamage,
-  onAddCondition,
+  onRequestCondition,
 }: TargetActionModalProps) {
-  const [targetActionMode, setTargetActionMode] = useState<'damage' | 'condition' | null>(null);
+  const [targetActionMode, setTargetActionMode] = useState<'damage' | null>(null);
   const [damageInput, setDamageInput] = useState('');
   const [targetDamageType, setTargetDamageType] = useState<DamageType | ''>('');
-  const [newCondition, setNewCondition] = useState('');
-  const [conditionDuration, setConditionDuration] = useState('');
 
   const handleApplyDamage = () => {
-    const damage = parseInt(damageInput);
-    if (isNaN(damage) || damage <= 0) {
+    const trimmed = damageInput.trim();
+    const damage = /^\d+$/.test(trimmed) ? Number(trimmed) : NaN;
+    if (!Number.isSafeInteger(damage) || damage <= 0) {
       alert('Please enter a valid damage amount');
       return;
     }
     onApplyDamage(damage, targetDamageType);
     setDamageInput('');
     setTargetDamageType('');
-    setTargetActionMode(null);
-  };
-
-  const handleAddCondition = () => {
-    if (!newCondition.trim()) {
-      alert('Please enter a condition name');
-      return;
-    }
-    const parsedDuration = parseInt(conditionDuration);
-    const duration = conditionDuration && !isNaN(parsedDuration) ? parsedDuration : undefined;
-    onAddCondition(newCondition.trim(), duration);
-    setNewCondition('');
-    setConditionDuration('');
     setTargetActionMode(null);
   };
 
@@ -67,7 +54,7 @@ export function TargetActionModal({
               Apply Damage
             </button>
             <button
-              onClick={() => setTargetActionMode('condition')}
+              onClick={onRequestCondition}
               className="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white font-semibold transition-colors"
             >
               Add Condition
@@ -79,7 +66,7 @@ export function TargetActionModal({
               Cancel
             </button>
           </div>
-        ) : targetActionMode === 'damage' ? (
+        ) : (
           <div className="space-y-3">
             <input
               type="number"
@@ -117,42 +104,6 @@ export function TargetActionModal({
                 }`}
               >
                 Apply{targetDamageType ? ` (${targetDamageType})` : ''}
-              </button>
-              <button
-                onClick={() => setTargetActionMode(null)}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-white font-semibold transition-colors"
-              >
-                Back
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <input
-              type="text"
-              value={newCondition}
-              onChange={(e) => setNewCondition(e.target.value)}
-              placeholder="Condition name"
-              className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddCondition();
-              }}
-            />
-            <input
-              type="number"
-              min="0"
-              value={conditionDuration}
-              onChange={(e) => setConditionDuration(e.target.value)}
-              placeholder="Duration in rounds (optional)"
-              className="w-full bg-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddCondition}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white font-semibold transition-colors"
-              >
-                Add
               </button>
               <button
                 onClick={() => setTargetActionMode(null)}

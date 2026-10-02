@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { CombatantState } from '@/lib/types';
+import { isRemovedFromPlay } from '@/lib/combat/removedFromPlay';
 import { usesDeathSaves, applyDeathSaveRoll, toggleDeathSaveSlot, lifeStateDisplay } from '@/lib/combat/deathSaves';
 import type { DeathSaveKind, DeathSaveSlotIndex } from '@/lib/combat/deathSaves';
 import { DeathSaveTracker } from '@/lib/components/DeathSaveTracker';
@@ -98,10 +99,11 @@ export function CombatantCard(props: CombatantCardProps) {
     : { backgroundImage: 'linear-gradient(to right, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.02))' };
 
   const life = lifeStateDisplay(combatant);
+  const greyed = life.greyed || isRemovedFromPlay(combatant);
   const isMonster = combatant.type === 'monster';
 
   return (
-    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${life.greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined} data-combatant-id={combatant.id}>
+    <div style={bgStyle} className={`rounded-lg px-4 py-4 ${isActive ? 'border-2 border-yellow-500' : 'border border-gray-700'} ${greyed ? 'opacity-50' : ''}`} data-testid="combatant-card" data-life-state={combatant.lifeState ?? 'active'} aria-current={isActive ? 'step' : undefined} data-combatant-id={combatant.id}>
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-4 mb-2">

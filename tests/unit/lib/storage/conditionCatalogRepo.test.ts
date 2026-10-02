@@ -33,7 +33,7 @@ describe("conditionCatalogRepo", () => {
       expectLoggedOutcome(getLogSpy(), "not_found");
     });
 
-    it("strips extra/unexpected fields, returning only { name, description }", async () => {
+    it("strips extra/unexpected fields, returning only the public fields", async () => {
       mockCollection({
         findResult: [
           { _id: "507f1f77bcf86cd799439011", name: "Prone", description: "Prone description", extra: "should not leak" },
@@ -41,6 +41,23 @@ describe("conditionCatalogRepo", () => {
       });
       const res = await repo.loadConditionCatalog();
       expect(res).toEqual([{ name: "Prone", description: "Prone description" }]);
+    });
+
+    it("returns removedFromPlay only when true", async () => {
+      mockCollection({
+        findResult: [
+          { name: "Banished", description: "gone", removedFromPlay: true },
+          { name: "Prone", description: "down", removedFromPlay: false },
+          { name: "Poisoned", description: "sick" },
+        ],
+      });
+      const res = await repo.loadConditionCatalog();
+      expect(res).toEqual([
+        { name: "Banished", description: "gone", removedFromPlay: true },
+        { name: "Prone", description: "down" },
+        { name: "Poisoned", description: "sick" },
+      ]);
+      expect(res[1]).not.toHaveProperty("removedFromPlay");
     });
 
     it("DB failure rejects with StorageError and logs error", async () => {

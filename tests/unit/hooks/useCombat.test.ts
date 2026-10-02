@@ -619,6 +619,140 @@ describe('useCombat', () => {
     });
   });
 
+  describe('removed-from-play (Banished) skipping', () => {
+    const banishedCondition = { id: 'ban', name: 'Banished', description: 'gone', removedFromPlay: true };
+    const withBanished = (c: CombatantState): CombatantState => ({ ...c, conditions: [banishedCondition] });
+
+    test('skips a banished combatant', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState(makeCombatState([
+            makeCombatant('a', 'Fighter', 'player'),
+            withBanished(makeCombatant('b', 'Orc', 'monster')),
+            makeCombatant('c', 'Cleric', 'player'),
+          ]));
+        });
+
+        await act(async () => {
+          result.current.nextTurn();
+          await Promise.resolve();
+        });
+
+        expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(2);
+      });
+    });
+
+    test('skips a banished player the same as a monster', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState(makeCombatState([
+            makeCombatant('a', 'Orc', 'monster'),
+            withBanished(makeCombatant('b', 'Fighter', 'player')),
+            makeCombatant('c', 'Cleric', 'player'),
+          ]));
+        });
+
+        await act(async () => {
+          result.current.nextTurn();
+          await Promise.resolve();
+        });
+
+        expect(getLastPutBody(fetchMock).currentTurnIndex).toBe(2);
+      });
+    });
+
+    test('wraps the round past a banished first combatant', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState({
+            ...makeCombatState([
+              withBanished(makeCombatant('a', 'Fighter', 'player')),
+              makeCombatant('b', 'Cleric', 'player'),
+              makeCombatant('c', 'Rogue', 'player'),
+            ]),
+            currentTurnIndex: 2,
+          });
+        });
+
+        await act(async () => {
+          result.current.nextTurn();
+          await Promise.resolve();
+        });
+
+        const lastBody = getLastPutBody(fetchMock);
+        expect(lastBody.currentTurnIndex).toBe(1);
+        expect(lastBody.currentRound).toBe(2);
+      });
+    });
+
+    test('is a no-op with an alert when everyone is banished or a downed monster', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState(makeCombatState([
+            withBanished(makeCombatant('a', 'Fighter', 'player')),
+            { ...makeCombatant('b', 'Orc', 'monster'), hp: 0 },
+            withBanished(makeCombatant('c', 'Goblin', 'monster')),
+          ]));
+        });
+
+        const putCallsBefore = getPutCallCount(fetchMock);
+
+        await act(async () => {
+          result.current.nextTurn();
+          await Promise.resolve();
+        });
+
+        expect(getPutCallCount(fetchMock)).toBe(putCallsBefore);
+        expect(global.alert).toHaveBeenCalledWith(expect.stringMatching(/no combatant/i));
+      });
+    });
+
+    test('does not reset the legendary pool of a skipped banished combatant', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState(makeCombatState([
+            makeCombatant('a', 'Fighter', 'player'),
+            withBanished({
+              ...makeCombatant('b', 'Banished Dragon', 'monster'),
+              legendaryActionCount: 2,
+              legendaryActionsRemaining: 0,
+            }),
+            makeCombatant('c', 'Cleric', 'player'),
+          ]));
+        });
+
+        await act(async () => {
+          result.current.nextTurn();
+          await Promise.resolve();
+        });
+
+        const lastBody = getLastPutBody(fetchMock);
+        expect(lastBody.currentTurnIndex).toBe(2);
+        expect(lastBody.combatants.find((c: CombatantState) => c.id === 'b').legendaryActionsRemaining).toBe(0);
+      });
+    });
+
+    test('rollUnrolledMonsters leaves a banished unrolled monster unrolled', async () => {
+      await testHook(async (result, fetchMock) => {
+        await act(async () => {
+          await result.current.saveCombatState(makeCombatState([
+            makeCombatant('a', 'Orc', 'monster'),
+            withBanished(makeCombatant('b', 'Goblin', 'monster')),
+          ]));
+        });
+
+        await act(async () => {
+          result.current.rollUnrolledMonsters();
+          await Promise.resolve();
+        });
+
+        const combatants = getLastPutBody(fetchMock).combatants as CombatantState[];
+        expect(combatants.find((c) => c.id === 'a')?.initiativeRoll).toBeDefined();
+        expect(combatants.find((c) => c.id === 'b')?.initiativeRoll).toBeUndefined();
+      });
+    });
+  });
+
   test('nextTurn lands on a monster that was healed above 0 HP (TC8)', async () => {
     await testHook(async (result, fetchMock) => {
       await act(async () => {

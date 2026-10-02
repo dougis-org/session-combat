@@ -524,11 +524,14 @@ export interface StatusCondition {
   name: string;
   description: string;
   duration?: number; // in rounds
+  /** Copied from the catalog entry; the combatant is out of play while any condition has it. */
+  removedFromPlay?: boolean;
 }
 
 export interface StatusConditionCatalogEntry {
   name: string;
   description: string;
+  removedFromPlay?: boolean;
 }
 
 export interface CombatantStatus {

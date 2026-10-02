@@ -77,6 +77,7 @@ export function ConditionFormModal({ combatantName, onSubmit, onClose }: Conditi
       name: parsed.name,
       description: selectedEntry ? selectedEntry.description : '',
       duration: parsed.duration,
+      ...(selectedEntry?.removedFromPlay === true && { removedFromPlay: true }),
     });
     onClose();
   };

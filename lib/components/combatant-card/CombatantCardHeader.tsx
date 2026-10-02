@@ -2,6 +2,7 @@
 
 import type { CombatantState } from '@/lib/types';
 import { lifeStateDisplay } from '@/lib/combat/deathSaves';
+import { isRemovedFromPlay } from '@/lib/combat/removedFromPlay';
 import { healthBarColor } from '@/lib/components/combatant-card/healthBarColor';
 import { formatInitiativeRoll } from '@/lib/components/combatant-card/formatInitiativeRoll';
 
@@ -69,6 +70,11 @@ export function CombatantCardHeader({
             ) : (
               <span className="ml-1"> {life.badge}</span>
             )
+          )}
+          {isRemovedFromPlay(combatant) && (
+            <span className="ml-2 align-middle text-xs px-2 py-0.5 rounded-full font-semibold bg-purple-900 text-purple-200" data-testid="removed-from-play-badge">
+              Banished
+            </span>
           )}
         </h3>
         <button
