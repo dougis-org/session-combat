@@ -40,18 +40,18 @@ Branch / worktree: `issue-689-migrate-storage-callers-minor-domains` at `.worktr
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings — without stopping, presenting the list, or asking for confirmation. Re-run tests, then commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. Automatically apply all clearly-correct findings — without stopping, presenting the list, or asking for confirmation. Re-run tests, then commit.
 
 ## Validation
 
 - [x] Run unit tests: `npm run test:unit`
 - [x] Run integration tests: `npm run test:integration` (confirm script name in `package.json`)
-- [ ] Run E2E tests (if applicable per `package.json`)
+- [x] Run E2E tests (if applicable per `package.json`)
 - [x] Run type checks: `npx tsc --noEmit`
 - [x] Run build: `npm run build`
 - [x] Run security/code quality checks required by project standards (Codacy / lint)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -65,14 +65,14 @@ If **ANY** required step fails, iterate and fix before pushing. Use the commands
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and its findings addressed before the final commit
-- [ ] Commit all changes to the working branch and push
-- [ ] Open PR to `main`; the body MUST include `Closes #689`
-- [ ] **Issue lifecycle: mark in-review:** `gh issue edit 689 --add-label "in-review" --remove-label "in-progress"`, then move the project item to "In Review" (warn and skip if not found)
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after three iterations with no progress, report the stall and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (the repo ruleset only allows squash; NEVER use `--admin`)
-- [ ] **Iterate until merged** until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never force-merge:
+- [x] Ensure the `openspec-review-code` sub-agent was run and its findings addressed before the final commit
+- [x] Commit all changes to the working branch and push
+- [x] Open PR to `main`; the body MUST include `Closes #689`
+- [x] **Issue lifecycle: mark in-review:** `gh issue edit 689 --add-label "in-review" --remove-label "in-progress"`, then move the project item to "In Review" (warn and skip if not found)
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after three iterations with no progress, report the stall and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (the repo ruleset only allows squash; NEVER use `--admin`)
+- [x] **Iterate until merged** until `gh pr view <PR-URL> --json state` returns `MERGED` (if `CLOSED`, exit and notify the user); never force-merge:
   1. **Build and tests** — run [Remote push validation]; fix, commit, push first
   2. **PR comments** — for every unresolved thread, address, commit, validate, push, reply and resolve the thread (GraphQL `resolveReviewThread`), wait 180 seconds
   3. **CI check failures** — after comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, commit, validate, push, wait 180 seconds; restart from step 1
@@ -93,15 +93,15 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change (none expected)
-- [ ] Sync approved spec deltas into `openspec/specs/storage-callers-narrow-imports-minor-domains/spec.md`; rewrite relative links to `../../changes/archive/YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains/design.md` and `.../tasks.md`; use valid main-spec form (not delta headings) so `openspec archive` is not blocked
-- [ ] Archive: move `openspec/changes/issue-689-migrate-storage-callers-minor-domains/` to `openspec/changes/archive/YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains/` in a **single** commit (copy + deletion together)
-- [ ] Confirm the archive directory exists and the original is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains` and `git push -u origin` it
-- [ ] Open a docs-only PR titled `docs: archive issue-689-migrate-storage-callers-minor-domains (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (address comments and CI)
-- [ ] Remove the worktree and prune: `git worktree remove .worktrees/issue-689-migrate-storage-callers-minor-domains`, `git fetch --prune`, `git branch -D issue-689-migrate-storage-callers-minor-domains doc/archive-YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains`
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update repository documentation impacted by the change (none expected)
+- [x] Sync approved spec deltas into `openspec/specs/storage-callers-narrow-imports-minor-domains/spec.md`; rewrite relative links to `../../changes/archive/YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains/design.md` and `.../tasks.md`; use valid main-spec form (not delta headings) so `openspec archive` is not blocked
+- [x] Archive: move `openspec/changes/issue-689-migrate-storage-callers-minor-domains/` to `openspec/changes/archive/YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains/` in a **single** commit (copy + deletion together)
+- [x] Confirm the archive directory exists and the original is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains` and `git push -u origin` it
+- [x] Open a docs-only PR titled `docs: archive issue-689-migrate-storage-callers-minor-domains (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (address comments and CI)
+- [x] Remove the worktree and prune: `git worktree remove .worktrees/issue-689-migrate-storage-callers-minor-domains`, `git fetch --prune`, `git branch -D issue-689-migrate-storage-callers-minor-domains doc/archive-YYYY-MM-DD-issue-689-migrate-storage-callers-minor-domains`
