@@ -16,7 +16,7 @@
   - The initiative modal (`lib/hooks/useInitiativeModal.ts`), `rollUnrolledMonsters`, and `unrolledMonsterCount` (`ActiveCombatView.tsx`) treat any combatant without `initiativeRoll` as unrolled.
   - `TargetingPanel` builds party/enemy target lists from `allCombatants.filter(...)` with no condition awareness; `combatant.targetIds` may retain ids of combatants later removed from play.
   - `lifeStateDisplay` (`lib/combat/deathSaves.ts`) is the single source of the card's `greyed` decision.
-  - Conditions are added in `ConditionFormModal` (catalog pick copies `description`) and removed in `ConditionControls`; timed conditions are also removed by `processRoundEnd` (`lib/combat/conditionExpiry.ts`).
+  - Conditions are added in `ConditionFormModal` (catalog pick copies `description`) and removed in `ConditionControls`. A second add path exists: `TargetActionModal` "Add Condition" collects a freeform name/duration and `TargetingPanel.addConditionToTarget` builds a `StatusCondition` with an empty description and no catalog lookup; timed conditions are also removed by `processRoundEnd` (`lib/combat/conditionExpiry.ts`).
 - Desired behavior:
   - A **Banished** catalog entry carrying a `removedFromPlay: true` flag.
   - Adding it from the catalog puts that flag on the resulting `StatusCondition`; removing the condition (manually or by duration expiry) clears it, because the combatant's removed-from-play state is derived from its current conditions.
@@ -49,13 +49,13 @@
 - `nextTurn` skips removed-from-play combatants (any type), alongside the existing downed-monster skip.
 - Exclude removed-from-play combatants from unrolled-initiative detection: `useInitiativeModal`, `rollUnrolledMonsters`, `unrolledMonsterCount`.
 - Hide removed-from-play combatants from `TargetingPanel` party/enemy lists and handle stale `targetIds`.
+- Route the target-add path through the catalog: `TargetActionModal`'s "Add Condition" opens the existing `ConditionFormModal` for the target (catalog dropdown + custom + duration), replacing the freeform name input and `addConditionToTarget`, so Banished applied to a target gets its flag and description.
 - Grey the combatant card and show a "Banished" indicator (extend `lifeStateDisplay` or a sibling helper so greying stays in one place).
 - Re-run `seedConditionCatalog` in each environment after merge (ops step).
 
 ### Out of Scope
 
 - Any other mechanical automation of conditions (advantage/disadvantage, speed, etc.).
-- Conditions added through `TargetActionModal` / `TargetingPanel.addConditionToTarget`, which takes a freeform name with no catalog lookup (a DM adds Banished from the target's own card or catalog dropdown). Tracked as an open question.
 - Blocking direct HP edits on a banished combatant's card.
 - Other removed-from-play effects (e.g. Plane Shift variants) beyond adding the one catalog entry; the flag makes them trivial to add later.
 - Adding the Polymorphed condition (still excluded per #742).
@@ -69,7 +69,8 @@
 - New `lib/combat/removedFromPlay.ts`: `isRemovedFromPlay` helper.
 - `lib/hooks/useCombat.ts`: `nextTurn` skip, `rollUnrolledMonsters` exclusion.
 - `lib/hooks/useInitiativeModal.ts`, `lib/components/ActiveCombatView.tsx`: unrolled detection/count exclusion.
-- `lib/components/combatant-card/TargetingPanel.tsx`: target-list filter and stale-target handling.
+- `lib/components/combatant-card/TargetingPanel.tsx`: target-list filter and stale-target handling; render `ConditionFormModal` for the selected target and drop `addConditionToTarget`.
+- `lib/components/TargetActionModal.tsx`: "Add Condition" requests the shared condition modal instead of collecting a freeform name (remove its condition mode).
 - `lib/combat/deathSaves.ts` / card header: greying and Banished badge.
 - Tests: catalog/seed count, repo projection, modal flag copy, helper, `nextTurn`, unrolled exclusion, targeting filter, card greying.
 - Deployed DBs: re-run `seedConditionCatalog` post-merge (idempotent upsert by name).
@@ -88,6 +89,9 @@
 - Risk: Skipping unrolled banished combatants then un-banishing leaves them unrolled.
   - Impact: Initiative modal prompts for them once they return, which is the desired behavior.
   - Mitigation: Documented in specs.
+- Risk: Replacing the target modal's freeform condition input changes an existing flow.
+  - Impact: Tests and muscle memory for the old inline form break; the shared modal needs the target's name as heading.
+  - Mitigation: Reuse `ConditionFormModal` unchanged (it already takes `combatantName`); update `TargetActionModal` tests.
 - Risk: Reversing the #742 Non-Goal reopens the scope debate.
   - Impact: Review friction.
   - Mitigation: Scope above is explicit; Polymorphed remains excluded.
@@ -97,15 +101,14 @@
 - Question: Is deriving "removed from play" from the condition's `removedFromPlay` flag (no separate combatant-level boolean) acceptable for "flag set on add, cleared on removal"?
   - Needed from: Requester
   - Blocker for apply: no (design proceeds with derivation; a stored combatant flag would only add drift risk)
-- Question: Should the freeform `TargetActionModal` add-condition path also resolve catalog entries so Banished applied to a target gets the flag?
-  - Needed from: Requester
-  - Blocker for apply: no (deferred as out of scope)
+- Resolved: the target-add path is in scope (requester decision); it reuses `ConditionFormModal` so there is one condition-entry UI. Side effect: conditions added to targets now also get catalog descriptions.
 
 ## Non-Goals
 
 - Mechanical automation beyond the removed-from-play behavior described above.
 - Blocking HP edits, healing, or death saves on a banished combatant.
 - Name-based matching of custom conditions.
+- Redesigning `ConditionFormModal` itself; it is reused as-is.
 
 ## Change Control
 
