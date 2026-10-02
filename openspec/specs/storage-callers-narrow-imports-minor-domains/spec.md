@@ -1,10 +1,7 @@
-## ADDED Requirements
+## Requirements
 
-This document details *changes* to requirements and is additive to the [`design.md`](../../changes/archive/2026-10-02-issue-689-migrate-storage-callers-minor-domains/design.md) document, not a replacement.
 
-*(No new user-facing features. This is a technical-debt change; the requirement below is ADDED because this capability spec does not yet exist.)*
-
-### Requirement: ADDED Share, Campaign Template and Preferences Caller Imports
+### Requirement: Share, Campaign Template and Preferences Caller Imports
 
 The system SHALL use direct narrow-repo imports (`shareRepo`, `campaignTemplateRepo`, `userPreferencesRepo`) instead of the `storage` facade in the 7 identified route handlers.
 
@@ -18,14 +15,14 @@ The system SHALL use direct narrow-repo imports (`shareRepo`, `campaignTemplateR
 
 #### Scenario: Unit tests mock narrow repos
 
-- **Given** the 6 route unit tests for these handlers
+- **Given** the 6 route unit tests for these handlers (the `me/preferences` route has no unit test importing the facade, hence 6 tests for 7 handlers)
 - **When** `npm run test:unit` runs
 - **Then** each test mocks the relevant `@/lib/storage/<repo>` module rather than `@/lib/storage`
 - **And** all pre-existing assertions pass unchanged
 
 ## Traceability
 
-- Proposal element -> Requirement: Migrate share/template/preferences routes -> ADDED Share, Campaign Template and Preferences Caller Imports
+- Proposal element -> Requirement: Migrate share/template/preferences routes -> Share, Campaign Template and Preferences Caller Imports
 - Proposal element -> Requirement: Retarget 6 unit tests -> scenario "Unit tests mock narrow repos"
 - Design decision -> Requirement: Decision 1 (namespace imports) -> "Route handlers directly call narrow repos"
 - Design decision -> Requirement: Decision 2 (mock narrow repos) -> "Unit tests mock narrow repos"
