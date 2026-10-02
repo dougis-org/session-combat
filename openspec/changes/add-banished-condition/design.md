@@ -16,7 +16,7 @@
 
 ### Non-Goals
 
-- Name-based detection, blocking HP edits, other condition automation, `TargetActionModal` catalog resolution.
+- Name-based detection, blocking HP edits, other condition automation, redesigning `ConditionFormModal`.
 
 ## Decisions
 
@@ -55,6 +55,13 @@
 - Rationale: Non-destructive, no new write path.
 - Trade-offs: `targetIds` can hold ids that are temporarily invisible.
 
+### Decision 5b: Target-add path reuses `ConditionFormModal`
+
+- Chosen: `TargetActionModal`'s "Add Condition" button calls a new `onRequestCondition()` prop; `TargetingPanel` then renders `ConditionFormModal` (heading = target name) and appends the submitted `StatusCondition` to the target via `onUpdateCombatant`. The freeform condition mode of `TargetActionModal` and `addConditionToTarget` are removed. The shared modal's catalog pick yields the flag and description; validation stays in `parseConditionForm`.
+- Alternatives considered: duplicating a catalog dropdown inside `TargetActionModal`; having `addConditionToTarget` look up the catalog by name (re-introduces name matching and a second fetch).
+- Rationale: One condition-entry UI and one place that builds a `StatusCondition`, so flags cannot be missed on a second path.
+- Trade-offs: Behavior change for the target flow (catalog dropdown and descriptions now appear); one extra modal transition.
+
 ### Decision 6: Greying and badge
 
 - Chosen: Card header composes `greyed = life.greyed || isRemovedFromPlay(c)` and shows a "Banished" badge when removed from play (condition name is already visible in the conditions list). `lifeStateDisplay` signature is unchanged so its other callers are unaffected.
@@ -83,6 +90,9 @@
 - Proposal element: Excluded from unrolled prompts
   - Design decision: 4
   - Validation approach: `useInitiativeModal` / `ActiveCombatView` tests
+- Proposal element: Target-add path applies Banished
+  - Design decision: 5b
+  - Validation approach: `TargetActionModal` and `TargetingPanel` component tests
 - Proposal element: Hidden from targeting, stale `targetIds`
   - Design decision: 5
   - Validation approach: `TargetingPanel` component tests
@@ -119,6 +129,10 @@
   - Design element: Decision 5
   - Acceptance criteria reference: specs "Targeting excludes removed-from-play combatants"
   - Testability notes: RTL tests on `TargetingPanel`.
+- Requirement: Conditions added to a target use the catalog and carry the flag
+  - Design element: Decision 5b
+  - Acceptance criteria reference: specs "Target-add path uses the shared condition modal"
+  - Testability notes: RTL: open target modal, choose Add Condition, assert shared modal and resulting target conditions.
 - Requirement: Card presentation
   - Design element: Decision 6
   - Acceptance criteria reference: specs "Removed-from-play cards are greyed"
@@ -168,4 +182,4 @@
 ## Open Questions
 
 - Is deriving state from the condition flag acceptable in place of a stored combatant flag (Decision 2)? Non-blocking; design proceeds with derivation.
-- Should the freeform target-add path resolve catalog entries? Deferred; out of scope.
+- None remaining; the target-add path is in scope (Decision 5b).

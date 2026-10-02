@@ -68,6 +68,14 @@ Spec scenario names refer to `specs/removed-from-play-conditions/spec.md`.
 - [ ] Existing target that becomes banished: chip hidden, `targetIds` unchanged; chip returns after removal (spec: "Existing target hidden then restored")
 - [ ] Non-banished lists unchanged
 
+### T8b Target-add path — `tests/unit/components/TargetActionModal.test.tsx`, `TargetingPanel.test.tsx`
+
+- [ ] "Add Condition" calls `onRequestCondition` and no longer shows a freeform name input (replaces the old freeform-condition tests)
+- [ ] Selecting Banished in the shared modal adds a flagged condition with description to the target only (spec: "Banished applied to a target")
+- [ ] Custom name + duration 3 adds an unflagged condition with `duration: 3` (spec: "Custom and timed conditions still work")
+- [ ] Empty name / out-of-range duration adds nothing (spec: "Invalid input rejected")
+- [ ] Damage flow in `TargetActionModal` unchanged
+
 ### T9 Card presentation — `tests/unit/components/CombatantCard.*.test.tsx`
 
 - [ ] Flagged condition: card has `opacity-50` and shows "Banished" badge (spec: "Greyed card")

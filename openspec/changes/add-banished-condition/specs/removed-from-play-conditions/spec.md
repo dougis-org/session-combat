@@ -104,6 +104,28 @@ The system SHALL omit removed-from-play combatants from the party and enemy targ
 - **When** B becomes banished, and later the condition is removed
 - **Then** B's chip is hidden while banished, `A.targetIds` still contains B throughout, and the chip reappears after removal
 
+### Requirement: ADDED Target-add path uses the shared condition modal
+
+The system SHALL let a DM add a condition to a targeted combatant through the same catalog-backed `ConditionFormModal` used on a combatant's own card, so catalog flags and descriptions apply.
+
+#### Scenario: Banished applied to a target
+
+- **Given** combatant A has combatant B as a target and the target action modal is open for B
+- **When** the DM clicks "Add Condition", selects Banished in the shared modal, and adds it
+- **Then** B has a condition named Banished with its catalog description and `removedFromPlay: true`, and B is removed from play
+
+#### Scenario: Custom and timed conditions still work
+
+- **Given** the shared modal opened from the target action modal
+- **When** the DM enters a custom name with duration 3 and adds it
+- **Then** B gains that condition with `duration: 3`, no `removedFromPlay` flag, and no other combatant changes
+
+#### Scenario: Invalid input rejected
+
+- **Given** the shared modal opened from the target action modal
+- **When** the DM submits an empty name or an out-of-range duration
+- **Then** no condition is added (same validation as the card path)
+
 ### Requirement: ADDED Removed-from-play cards are greyed
 
 The system SHALL render a removed-from-play combatant's card greyed with a "Banished" indicator.
@@ -126,7 +148,7 @@ The system SHALL ship 19 default conditions (the previous 18 plus Banished); cat
 
 ## Traceability
 
-- Proposal element -> Requirement: Banished entry + flag -> Catalog exposes / Applied conditions carry the flag; derived state -> Derived requirement; skip -> Initiative skips; unrolled -> Unrolled exclusion; targeting -> Targeting excludes; greying -> Cards greyed; re-seed -> Default catalog ships 19 conditions.
+- Proposal element -> Requirement: Banished entry + flag -> Catalog exposes / Applied conditions carry the flag; derived state -> Derived requirement; skip -> Initiative skips; unrolled -> Unrolled exclusion; targeting -> Targeting excludes; target-add path -> Target-add path uses the shared condition modal; greying -> Cards greyed; re-seed -> Default catalog ships 19 conditions.
 - Design decision -> Requirement: D1 -> catalog + carry-flag; D2 -> derived; D3 -> initiative skip; D4 -> unrolled; D5 -> targeting; D6 -> greyed; D7 -> catalog/19-entry requirement.
 - Requirement -> Task(s): see `tasks.md` Execution items 1-8 and `tests.md`.
 
