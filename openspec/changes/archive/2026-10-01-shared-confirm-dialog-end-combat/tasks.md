@@ -12,7 +12,7 @@
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** (issue #811): `gh issue edit 811 --add-label "in-progress"`. Discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), move the item via `gh project item-edit`. Warn and skip if no project item is found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update.
+- [x] **Issue lifecycle: mark in-progress** (issue #811): `gh issue edit 811 --add-label "in-progress"`. Discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), move the item via `gh project item-edit`. Warn and skip if no project item is found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project-item update.
 - [x] Work only inside `.worktrees/issue-811-confirm-dialog`
 - [x] **T1 — Modal `titleId` (TDD):** add optional `titleId` prop (default `'modal-title'`) to `lib/components/Modal.tsx`, used for the `<h2 id>` and `aria-labelledby`. Existing callers unchanged.
 - [x] **T2 — ConfirmDialog (TDD):** create `lib/components/ConfirmDialog.tsx` on top of `Modal` (`size="small"`) with required props `isOpen`, `title`, `titleId`, `confirmLabel`, `cancelLabel`, `onConfirm`, `onCancel`, plus `children`/`message`. Green confirm (`bg-green-600 hover:bg-green-700`), red cancel (`bg-red-600 hover:bg-red-700`), `data-testid` `confirm-dialog-confirm` / `confirm-dialog-cancel`. `Modal.onClose` → `onCancel` (covers "×", Escape, overlay).
@@ -24,19 +24,19 @@
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
 - [x] `npm run test:unit` (use a free port, not 3000, for any server-backed run)
-- [ ] `npm run test:ci` (integration)
+- [x] `npm run test:ci` (integration)
 - [x] `npm run test:regression` (E2E; run on a clear port, not 3000)
 - [x] `npm run typecheck`
 - [x] `npm run lint`
 - [x] `npm run build`
-- [ ] Run security/code quality checks required by project standards (Verity gate, Codacy)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run security/code quality checks required by project standards (Verity gate, Codacy)
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -58,14 +58,14 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `issue-811-confirm-dialog` to `main`. The PR body MUST include `Closes #811`.
-- [ ] **Issue lifecycle: mark in-review:** `gh issue edit 811 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the "In Review" column via `gh project item-edit` (same discovery as above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (`main` is squash-only per repo ruleset; NEVER use `--admin`)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED`, exit and notify the user — **never wait for a human to report the merge; never force-merge**:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `issue-811-confirm-dialog` to `main`. The PR body MUST include `Closes #811`.
+- [x] **Issue lifecycle: mark in-review:** `gh issue edit 811 --add-label "in-review" --remove-label "in-progress"`. Then move the project item to the "In Review" column via `gh project item-edit` (same discovery as above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes (zero findings):** `gh pr merge <PR-URL> --auto --squash` (`main` is squash-only per repo ruleset; NEVER use `--admin`)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED`; if `CLOSED`, exit and notify the user — **never wait for a human to report the merge; never force-merge**:
   1. **Build and tests** — run all steps in [Remote push validation]; fix failures, commit, push before anything else
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, run [Remote push validation], push, wait 180 seconds; continue until all resolved
   3. **CI check failures** — only after all comments are resolved, poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks (`ci-gate`, Codacy), commit, run [Remote push validation], push, wait 180 seconds; restart from step 1
@@ -86,16 +86,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] `git checkout main` and `git pull --ff-only` (from the primary checkout)
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/confirm-dialog/spec.md`; update relative links (`../../design.md` → `../../changes/archive/YYYY-MM-DD-shared-confirm-dialog-end-combat/design.md`, likewise `tasks.md`)
-- [ ] Archive the change: move `openspec/changes/shared-confirm-dialog-end-combat/` to `openspec/changes/archive/YYYY-MM-DD-shared-confirm-dialog-end-combat/`, staging the new location and the deletion in a single commit
-- [ ] Confirm the archive directory exists and the original is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat` then `git push -u origin doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat`
-- [ ] Open a PR to `main` titled `docs: archive shared-confirm-dialog-end-combat (YYYY-MM-DD)` — do NOT push directly to `main`
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
-- [ ] Monitor the doc PR until it merges (address comments and CI failures on the same branch)
-- [ ] Prune: `git fetch --prune`, `git branch -D issue-811-confirm-dialog doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat`, and `git worktree remove --force .worktrees/issue-811-confirm-dialog` (`--force` needed because of the `openspec-shared` submodule)
-- [ ] File a follow-up issue to migrate the remaining native `confirm()` call sites to `ConfirmDialog` (if the requester agrees; see proposal Open Questions)
+- [x] `git checkout main` and `git pull --ff-only` (from the primary checkout)
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/confirm-dialog/spec.md`; update relative links (`../../design.md` → `../../changes/archive/YYYY-MM-DD-shared-confirm-dialog-end-combat/design.md`, likewise `tasks.md`)
+- [x] Archive the change: move `openspec/changes/shared-confirm-dialog-end-combat/` to `openspec/changes/archive/YYYY-MM-DD-shared-confirm-dialog-end-combat/`, staging the new location and the deletion in a single commit
+- [x] Confirm the archive directory exists and the original is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat` then `git push -u origin doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat`
+- [x] Open a PR to `main` titled `docs: archive shared-confirm-dialog-end-combat (YYYY-MM-DD)` — do NOT push directly to `main`
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER `--admin`)
+- [x] Monitor the doc PR until it merges (address comments and CI failures on the same branch)
+- [x] Prune: `git fetch --prune`, `git branch -D issue-811-confirm-dialog doc/archive-YYYY-MM-DD-shared-confirm-dialog-end-combat`, and `git worktree remove --force .worktrees/issue-811-confirm-dialog` (`--force` needed because of the `openspec-shared` submodule)
+- [x] File a follow-up issue to migrate the remaining native `confirm()` call sites to `ConfirmDialog` (if the requester agrees; see proposal Open Questions)
