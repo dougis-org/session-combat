@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '@/lib/storage';
+import * as campaignTemplateRepo from '@/lib/storage/campaignTemplateRepo';
 import { addMember } from '@/lib/storage/membershipRepo';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { saveEncounter } from '@/lib/storage/encounterRepo';
@@ -16,7 +16,7 @@ export const POST = withAuthAndParams<{ id: string }>(async (request, auth, { id
       return NextResponse.json({ error: idResult.error.message }, { status: 400 });
     }
 
-    const template = await storage.loadGlobalCampaignTemplateById(idResult.value);
+    const template = await campaignTemplateRepo.loadGlobalCampaignTemplateById(idResult.value);
 
     if (!template) {
       return NextResponse.json({ error: 'Campaign template not found' }, { status: 404 });

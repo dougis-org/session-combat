@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/middleware";
-import { storage } from "@/lib/storage";
+import * as userPreferencesRepo from "@/lib/storage/userPreferencesRepo";
 import { validatePreferencePatch } from "@/lib/preferences/schema";
 
 const noStore = (res: NextResponse): NextResponse => {
@@ -10,7 +10,7 @@ const noStore = (res: NextResponse): NextResponse => {
 
 /** Resolved preferences (defaults deep-merged with the user's stored deltas). */
 export const GET = withAuth(async (_request: NextRequest, auth) => {
-  const resolved = await storage.getUserPreferences(auth.userId);
+  const resolved = await userPreferencesRepo.getUserPreferences(auth.userId);
   return noStore(NextResponse.json(resolved, { status: 200 }));
 });
 
@@ -28,6 +28,6 @@ export const PATCH = withAuth(async (request: NextRequest, auth) => {
     return noStore(NextResponse.json({ error: parsed.error }, { status: 400 }));
   }
 
-  const resolved = await storage.updateUserPreferences(auth.userId, parsed.values);
+  const resolved = await userPreferencesRepo.updateUserPreferences(auth.userId, parsed.values);
   return noStore(NextResponse.json(resolved, { status: 200 }));
 });

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as shareRepo from '@/lib/storage/shareRepo';
 import { getMember, updateMemberStatus } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 
@@ -26,7 +26,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
 
     void (async () => {
       try {
-        const shares = await storage.listAllSharesForCampaign(campaignId);
+        const shares = await shareRepo.listAllSharesForCampaign(campaignId);
         const targetShares = shares.filter(s => s.userId === targetUserId);
         const now = new Date();
         await Promise.all(

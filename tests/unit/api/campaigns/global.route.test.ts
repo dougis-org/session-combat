@@ -3,23 +3,21 @@
  */
 import { GET, POST, PUT } from "@/app/api/campaigns/global/route";
 import { requireAdmin } from "@/lib/api-helpers";
-import { storage } from "@/lib/storage";
+import * as campaignTemplateRepo from "@/lib/storage/campaignTemplateRepo";
 import {
   makeRouteRequest,
   mockAdminDenied,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    loadGlobalCampaignTemplates: jest.fn(),
-    saveCampaignTemplate: jest.fn(),
-  },
+jest.mock("@/lib/storage/campaignTemplateRepo", () => ({
+  loadGlobalCampaignTemplates: jest.fn(),
+  saveCampaignTemplate: jest.fn(),
 }));
 jest.mock("crypto", () => ({ randomUUID: jest.fn(() => "test-uuid") }));
 
 const mockedRequireAdmin = jest.mocked(requireAdmin);
-const mockedStorage = jest.mocked(storage);
+const mockedTemplateRepo = jest.mocked(campaignTemplateRepo);
 
 const BASE_URL = "http://localhost/api/campaigns/global";
 
@@ -43,7 +41,7 @@ beforeEach(() => {
 
 describe("GET /api/campaigns/global", () => {
   it("returns 200 with templates array", async () => {
-    mockedStorage.loadGlobalCampaignTemplates.mockResolvedValue([MOCK_TEMPLATE] as any);
+    mockedTemplateRepo.loadGlobalCampaignTemplates.mockResolvedValue([MOCK_TEMPLATE] as any);
     const res = await GET(makeRouteRequest(BASE_URL, "GET"));
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -52,14 +50,14 @@ describe("GET /api/campaigns/global", () => {
   });
 
   it("returns empty array when no templates exist", async () => {
-    mockedStorage.loadGlobalCampaignTemplates.mockResolvedValue([]);
+    mockedTemplateRepo.loadGlobalCampaignTemplates.mockResolvedValue([]);
     const res = await GET(makeRouteRequest(BASE_URL, "GET"));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
   });
 
   it("returns 500 when storage throws", async () => {
-    mockedStorage.loadGlobalCampaignTemplates.mockRejectedValue(new Error("DB error"));
+    mockedTemplateRepo.loadGlobalCampaignTemplates.mockRejectedValue(new Error("DB error"));
     const res = await GET(makeRouteRequest(BASE_URL, "GET"));
     expect(res.status).toBe(500);
     expect((await res.json()).error).toMatch(/failed/i);
@@ -101,7 +99,7 @@ describe("POST /api/campaigns/global — validation", () => {
 
 describe("POST /api/campaigns/global — success", () => {
   beforeEach(() => {
-    mockedStorage.saveCampaignTemplate.mockResolvedValue(undefined as any);
+    mockedTemplateRepo.saveCampaignTemplate.mockResolvedValue(undefined as any);
   });
 
   it("returns 201 with created template", async () => {
@@ -168,7 +166,7 @@ describe("POST /api/campaigns/global — success", () => {
   });
 
   it("returns 500 when saveCampaignTemplate throws", async () => {
-    mockedStorage.saveCampaignTemplate.mockRejectedValue(new Error("write failed"));
+    mockedTemplateRepo.saveCampaignTemplate.mockRejectedValue(new Error("write failed"));
     const res = await POST(makeRouteRequest(BASE_URL, "POST", { name: "Test" }));
     expect(res.status).toBe(500);
   });

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as shareRepo from '@/lib/storage/shareRepo';
 import { getMember } from '@/lib/storage/membershipRepo';
 import * as partyRepo from '@/lib/storage/partyRepo';
 import { loadCharacterById } from '@/lib/storage/characterRepo';
@@ -23,7 +23,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id: cam
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const deleted = await storage.removeShare(campaignId, characterId, auth.userId);
+    const deleted = await shareRepo.removeShare(campaignId, characterId, auth.userId);
     if (!deleted) {
       return NextResponse.json({ error: 'Share not found' }, { status: 404 });
     }

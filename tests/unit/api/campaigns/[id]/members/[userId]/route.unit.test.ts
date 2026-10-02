@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { DELETE } from "@/app/api/campaigns/[id]/members/[userId]/route";
-import { storage } from "@/lib/storage";
+import * as shareRepo from "@/lib/storage/shareRepo";
 import { getMember, updateMemberStatus } from "@/lib/storage/membershipRepo";
 import * as partyRepo from "@/lib/storage/partyRepo";
 import {
@@ -17,10 +17,8 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    listAllSharesForCampaign: jest.fn(),
-  },
+jest.mock("@/lib/storage/shareRepo", () => ({
+  listAllSharesForCampaign: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/membershipRepo", () => ({
@@ -33,7 +31,7 @@ jest.mock("@/lib/storage/partyRepo", () => ({
 }));
 
 const mockedStorage = {
-  listAllSharesForCampaign: jest.mocked(storage).listAllSharesForCampaign,
+  listAllSharesForCampaign: jest.mocked(shareRepo).listAllSharesForCampaign,
   getMember: jest.mocked(getMember),
   updateMemberStatus: jest.mocked(updateMemberStatus),
 };

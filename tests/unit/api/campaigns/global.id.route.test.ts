@@ -3,19 +3,19 @@
  */
 import { DELETE } from "@/app/api/campaigns/global/[id]/route";
 import { requireAdmin } from "@/lib/api-helpers";
-import { storage } from "@/lib/storage";
+import * as campaignTemplateRepo from "@/lib/storage/campaignTemplateRepo";
 import {
   makeRouteRequest,
   mockAdminDenied,
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/api-helpers", () => ({ requireAdmin: jest.fn() }));
-jest.mock("@/lib/storage", () => ({
-  storage: { deleteCampaignTemplate: jest.fn() },
+jest.mock("@/lib/storage/campaignTemplateRepo", () => ({
+  deleteCampaignTemplate: jest.fn(),
 }));
 
 const mockedRequireAdmin = jest.mocked(requireAdmin);
-const mockedStorage = jest.mocked(storage);
+const mockedTemplateRepo = jest.mocked(campaignTemplateRepo);
 
 const TEMPLATE_ID = "tpl-1";
 const BASE_URL = `http://localhost/api/campaigns/global/${TEMPLATE_ID}`;
@@ -28,14 +28,14 @@ beforeEach(() => {
 
 describe("DELETE /api/campaigns/global/[id]", () => {
   it("returns 200 when template is deleted", async () => {
-    mockedStorage.deleteCampaignTemplate.mockResolvedValue(true as any);
+    mockedTemplateRepo.deleteCampaignTemplate.mockResolvedValue(true as any);
     const res = await DELETE(makeRouteRequest(BASE_URL, "DELETE"), { params: PARAMS });
     expect(res.status).toBe(200);
     expect((await res.json()).success).toBe(true);
   });
 
   it("returns 404 when template does not exist", async () => {
-    mockedStorage.deleteCampaignTemplate.mockResolvedValue(false as any);
+    mockedTemplateRepo.deleteCampaignTemplate.mockResolvedValue(false as any);
     const res = await DELETE(makeRouteRequest(BASE_URL, "DELETE"), { params: PARAMS });
     expect(res.status).toBe(404);
     expect((await res.json()).error).toMatch(/not found/i);
@@ -54,7 +54,7 @@ describe("DELETE /api/campaigns/global/[id]", () => {
   });
 
   it("returns 500 when storage throws", async () => {
-    mockedStorage.deleteCampaignTemplate.mockRejectedValue(new Error("DB error"));
+    mockedTemplateRepo.deleteCampaignTemplate.mockRejectedValue(new Error("DB error"));
     const res = await DELETE(makeRouteRequest(BASE_URL, "DELETE"), { params: PARAMS });
     expect(res.status).toBe(500);
   });
