@@ -44,7 +44,7 @@ describe('useConfirmDialog', () => {
     const options = makeOptions();
     render(<Harness options={options} />);
     await userEvent.click(screen.getByText('open'));
-    // Second click lands on nothing: the dialog unmounts after the first.
+    // The dialog unmounts after the first click, so onConfirm cannot fire twice.
     await userEvent.dblClick(screen.getByTestId('confirm-dialog-confirm'));
     expect(options.onConfirm).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
