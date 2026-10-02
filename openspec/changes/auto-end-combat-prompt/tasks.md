@@ -2,23 +2,23 @@
 
 ## Preparation
 
-- [ ] **Step 1 — Sync default branch:** `git fetch origin main` (primary checkout stays on `main`)
-- [ ] **Step 2 — Working branch exists and is published:** worktree `.worktrees/auto-end-combat-prompt`, branch `auto-end-combat-prompt` (already pushed with `git push -u origin auto-end-combat-prompt`)
+- [x] **Step 1 — Sync default branch:** `git fetch origin main` (primary checkout stays on `main`)
+- [x] **Step 2 — Working branch exists and is published:** worktree `.worktrees/auto-end-combat-prompt`, branch `auto-end-combat-prompt` (already pushed with `git push -u origin auto-end-combat-prompt`)
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Issue lifecycle: mark in-progress** (#812): run `gh issue edit 812 --add-label "in-progress"`. Then discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. Warn and continue if not found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project update.
-- [ ] Task 1 — Confirm `.worktrees/auto-end-combat-prompt` is the working directory and the branch is on remote
-- [ ] Task 2 — Add `lib/combat/combatEnd.ts` with `getCombatEndSuggestion` (reuse `usesDeathSaves` from `lib/combat/deathSaves.ts`)
-- [ ] Task 3 — Add prompt state, `dismissedRef`, and effect to `lib/components/ActiveCombatView.tsx`
-- [ ] Task 4 — Render second `ConfirmDialog` (unique `titleId`); Yes closes it and calls `endCombat()` directly; No/Escape records dismissal
-- [ ] Task 5 — Verify reload into finished combat prompts, and lair/dying/stable cases per spec
-- [ ] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
-- [ ] Confirm acceptance criteria in `openspec/changes/auto-end-combat-prompt/specs/combat-end-prompt/spec.md` are covered
+- [x] **Issue lifecycle: mark in-progress** (#812): run `gh issue edit 812 --add-label "in-progress"`. Then discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. Warn and continue if not found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project update.
+- [x] Task 1 — Confirm `.worktrees/auto-end-combat-prompt` is the working directory and the branch is on remote
+- [x] Task 2 — Add `lib/combat/combatEnd.ts` with `getCombatEndSuggestion` (reuse `usesDeathSaves` from `lib/combat/deathSaves.ts`)
+- [x] Task 3 — Add `answeredSuggestion` state and derived prompt-open value to `lib/components/ActiveCombatView.tsx`
+- [x] Task 4 — Render second `ConfirmDialog` (unique `titleId`); Yes closes it and calls `endCombat()` directly; No/Escape records dismissal
+- [x] Task 5 — Verify reload into finished combat prompts, and lair/dying/stable cases per spec
+- [x] Look for existing tooling or functions in the codebase that can be reused or extended before writing new logic from scratch
+- [x] Confirm acceptance criteria in `openspec/changes/auto-end-combat-prompt/specs/combat-end-prompt/spec.md` are covered
 
 ## Pre-Commit Code Review
 
@@ -26,13 +26,13 @@
 
 ## Validation
 
-- [ ] Run unit tests: `npm run test:unit`
-- [ ] Run integration tests: `npm run test:integration` (if affected)
+- [x] Run unit tests: `npm run test:unit`
+- [x] Run integration tests: `npm run test:integration` (if affected)
 - [ ] Run E2E tests (if applicable): `npm run test:e2e`
-- [ ] Run type checks: `npx tsc --noEmit`
-- [ ] Run lint: `npm run lint`
-- [ ] Run build: `npm run build`
-- [ ] Run security/code quality checks required by project standards
+- [x] Run type checks: `npx tsc --noEmit`
+- [x] Run lint: `npm run lint`
+- [x] Run build: `npm run build`
+- [x] Run security/code quality checks required by project standards
 - [ ] All completed tasks marked as complete
 - [ ] All steps in [Remote push validation]
 
@@ -55,7 +55,7 @@ If **ANY** required step fails, you **MUST** iterate and address the failure bef
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
 - [ ] Commit all changes to the working branch and push to remote
 - [ ] Open PR from `auto-end-combat-prompt` to `main`. PR body MUST include `Closes #812`.
 - [ ] **Issue lifecycle: mark in-review**: run `gh issue edit 812 --add-label "in-review" --remove-label "in-progress"`, then move the project item to "In Review" via `gh project item-edit` (same discovery as above; warn and skip if not found).

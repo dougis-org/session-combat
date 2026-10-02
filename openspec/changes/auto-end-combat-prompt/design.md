@@ -26,9 +26,9 @@
 
 Rules: monsters-defeated iff ≥1 `monster` and every `monster` has `hp <= 0`. players-down iff ≥1 `player` and every `player` has `lifeState === 'dead'` or (`hp <= 0` and `!usesDeathSaves`). `lair` ignored. Dying/stable/no-lifeState-at-0 players are not down. If both hold, `monsters-defeated` wins.
 
-### Decision 2: Prompt in `ActiveCombatView` with a dismissed ref
+### Decision 2: Prompt in `ActiveCombatView` with answered-suggestion state
 
-- Chosen: `useEffect` on the suggestion; `dismissedRef` stores the suggestion the user declined; open prompt when suggestion is non-null and differs from dismissed; clear dismissed when suggestion is null.
+- Chosen: `answeredSuggestion` state stores the suggestion the user answered; the prompt is open when the derived suggestion is non-null and differs from it; it is cleared (during render) when the suggestion is null. No effect is needed (avoids `react-hooks/set-state-in-effect`).
 - Alternatives considered: Fire only on false→true transitions via previous-value ref (breaks on reload); persist dismissal.
 - Rationale: Derived-state approach handles reload and re-arming with minimal state.
 - Trade-offs: Dismissal is not persisted; reload re-prompts.

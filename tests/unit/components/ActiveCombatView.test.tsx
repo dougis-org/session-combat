@@ -670,4 +670,85 @@ describe('ActiveCombatView — CON save notification', () => {
       expect(endCombat).not.toHaveBeenCalled();
     });
   });
+  describe('Auto end-combat prompt', () => {
+    const PROMPT = 'End combat?';
+    const alive = makeCombatant({ id: 'm1', type: 'monster', hp: 5, initiativeRoll: ROLLED });
+    const downed = { ...alive, hp: 0 };
+    const hero = makeCombatant({ id: 'p1', name: 'Aria', type: 'player', hp: 10, initiativeRoll: ROLLED });
+
+    function combatWith(combatants: CombatantState[], endCombat = jest.fn()) {
+      return makeCombat({ combatState: makeCombatState({ combatants }), endCombat }, combatants);
+    }
+    const prompt = () => screen.queryByRole('dialog', { name: PROMPT });
+
+    it('shows the prompt on initial render of an already-finished combat', () => {
+      render(<ActiveCombatView combat={combatWith([downed, hero])} user={null} />);
+      expect(prompt()).toBeInTheDocument();
+    });
+
+    it('shows the prompt when the last monster drops to 0 HP', () => {
+      const { rerender } = render(<ActiveCombatView combat={combatWith([alive, hero])} user={null} />);
+      expect(prompt()).not.toBeInTheDocument();
+      rerender(<ActiveCombatView combat={combatWith([downed, hero])} user={null} />);
+      expect(prompt()).toBeInTheDocument();
+    });
+
+    it('does not prompt for a players-only combat', () => {
+      render(<ActiveCombatView combat={combatWith([hero])} user={null} />);
+      expect(prompt()).not.toBeInTheDocument();
+    });
+
+    it('prompts on a true TPK but not when players are dying', () => {
+      const dead = { ...hero, hp: 0, lifeState: 'dead' as const };
+      const dying = { ...hero, hp: 0, lifeState: 'dying' as const };
+      const { unmount } = render(<ActiveCombatView combat={combatWith([dead, alive])} user={null} />);
+      expect(prompt()).toBeInTheDocument();
+      unmount();
+      render(<ActiveCombatView combat={combatWith([dying, alive])} user={null} />);
+      expect(prompt()).not.toBeInTheDocument();
+    });
+
+    it('Yes calls endCombat exactly once without opening the End Combat? dialog', async () => {
+      const endCombat = jest.fn();
+      render(<ActiveCombatView combat={combatWith([downed, hero], endCombat)} user={null} />);
+      await userEvent.dblClick(screen.getByRole('button', { name: 'Yes' }));
+      expect(endCombat).toHaveBeenCalledTimes(1);
+      expect(prompt()).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog', { name: 'End Combat?' })).not.toBeInTheDocument();
+    });
+
+    it('No closes the prompt and a later change with the condition still true does not re-prompt', async () => {
+      const endCombat = jest.fn();
+      const { rerender } = render(<ActiveCombatView combat={combatWith([downed, hero], endCombat)} user={null} />);
+      await userEvent.click(screen.getByRole('button', { name: 'No' }));
+      expect(prompt()).not.toBeInTheDocument();
+      rerender(<ActiveCombatView combat={combatWith([downed, { ...hero, hp: 3 }], endCombat)} user={null} />);
+      expect(prompt()).not.toBeInTheDocument();
+      expect(endCombat).not.toHaveBeenCalled();
+    });
+
+    it('Escape dismisses the prompt like No', async () => {
+      const endCombat = jest.fn();
+      render(<ActiveCombatView combat={combatWith([downed, hero], endCombat)} user={null} />);
+      await userEvent.keyboard('{Escape}');
+      expect(prompt()).not.toBeInTheDocument();
+      expect(endCombat).not.toHaveBeenCalled();
+    });
+
+    it('re-arms after the condition clears and recurs', async () => {
+      const { rerender } = render(<ActiveCombatView combat={combatWith([downed, hero])} user={null} />);
+      await userEvent.click(screen.getByRole('button', { name: 'No' }));
+      rerender(<ActiveCombatView combat={combatWith([downed, alive, hero])} user={null} />);
+      expect(prompt()).not.toBeInTheDocument();
+      rerender(<ActiveCombatView combat={combatWith([downed, { ...alive, id: 'm2', hp: 0 }, hero])} user={null} />);
+      expect(prompt()).toBeInTheDocument();
+    });
+
+    it('manual End Combat button still opens its own confirm dialog', async () => {
+      render(<ActiveCombatView combat={combatWith([alive, hero])} user={null} />);
+      await userEvent.click(screen.getByRole('button', { name: 'End Combat' }));
+      expect(screen.getByRole('dialog', { name: 'End Combat?' })).toBeInTheDocument();
+      expect(prompt()).not.toBeInTheDocument();
+    });
+  });
 });
