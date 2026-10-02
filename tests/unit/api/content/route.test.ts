@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { GET, POST } from "@/app/api/content/route";
-import { storage } from "@/lib/storage";
+import * as savedContentRepo from "@/lib/storage/savedContentRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -13,17 +13,13 @@ import {
 import type { SavedContent } from "@/lib/types";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    savedContent: {
-      list: jest.fn(),
-      create: jest.fn(),
-    },
-  },
+jest.mock("@/lib/storage/savedContentRepo", () => ({
+  list: jest.fn(),
+  create: jest.fn(),
 }));
 
-const mockedList = jest.mocked(storage.savedContent.list);
-const mockedCreate = jest.mocked(storage.savedContent.create);
+const mockedList = jest.mocked(savedContentRepo.list);
+const mockedCreate = jest.mocked(savedContentRepo.create);
 
 const CAMPAIGN_ID = "campaign-1";
 const BASE_URL = "http://localhost/api/content";
@@ -74,6 +70,19 @@ describe("GET /api/content", () => {
     expect(body.error).toBe("campaignId is required");
   });
 
+  it.each(["", "%20%20%20"])("returns 400 for blank campaignId %j", async (blank) => {
+    const res = await GET(makeGetReq(blank));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("campaignId is required");
+    expect(mockedList).not.toHaveBeenCalled();
+  });
+
+  it("trims campaignId before calling the repo", async () => {
+    mockedList.mockResolvedValue([]);
+    await GET(makeGetReq("%20campaign-1%20"));
+    expect(mockedList).toHaveBeenCalledWith("campaign-1", "user-123");
+  });
+
   it("returns 200 with list of items", async () => {
     mockedList.mockResolvedValue([MOCK_ITEM]);
     const res = await GET(makeGetReq(CAMPAIGN_ID));
@@ -95,6 +104,26 @@ describe("GET /api/content", () => {
 
 describe("POST /api/content", () => {
   itReturns401(POST, () => makePostReq(VALID_BODY));
+
+  it.each([
+    ["whitespace campaignId", { ...VALID_BODY, campaignId: "   " }],
+    ["whitespace title", { ...VALID_BODY, title: "  " }],
+    ["non-string prompt", { ...VALID_BODY, prompt: 5 }],
+    ["array body", []],
+    ["null body", null],
+  ])("returns 400 for invalid body: %s", async (_name, body) => {
+    const res = await POST(makePostReq(body));
+    expect(res.status).toBe(400);
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for malformed JSON", async () => {
+    const req = makeRouteRequest(BASE_URL, "POST");
+    const bad = new Request(req.url, { method: "POST", headers: req.headers, body: "{not json" });
+    const res = await POST(bad as never);
+    expect(res.status).toBe(400);
+    expect(mockedCreate).not.toHaveBeenCalled();
+  });
 
   it("returns 400 when required fields are missing", async () => {
     const res = await POST(makePostReq({ campaignId: CAMPAIGN_ID }));

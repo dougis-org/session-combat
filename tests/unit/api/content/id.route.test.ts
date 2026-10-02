@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { PUT, DELETE } from "@/app/api/content/[id]/route";
-import { storage } from "@/lib/storage";
+import * as savedContentRepo from "@/lib/storage/savedContentRepo";
 import {
   MOCK_AUTH,
   makeRouteRequest,
@@ -13,17 +13,13 @@ import {
 } from "@/tests/unit/helpers/route.test.helpers";
 
 jest.mock("@/lib/middleware", () => require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware());
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    savedContent: {
-      update: jest.fn(),
-      remove: jest.fn(),
-    },
-  },
+jest.mock("@/lib/storage/savedContentRepo", () => ({
+  update: jest.fn(),
+  remove: jest.fn(),
 }));
 
-const mockedUpdate = jest.mocked(storage.savedContent.update);
-const mockedRemove = jest.mocked(storage.savedContent.remove);
+const mockedUpdate = jest.mocked(savedContentRepo.update);
+const mockedRemove = jest.mocked(savedContentRepo.remove);
 
 const CONTENT_ID = "item-1";
 const BASE_URL = `http://localhost/api/content/${CONTENT_ID}`;
@@ -41,6 +37,29 @@ beforeEach(() => {
 
 describe("PUT /api/content/[id]", () => {
   itReturns401WithParams(PUT, () => makePutReq({ result: "text" }), PARAMS);
+
+  it.each([
+    ["empty patch", {}],
+    ["array body", []],
+    ["null body", null],
+  ])("returns 400 for invalid body: %s", async (_name, body) => {
+    const res = await PUT(makePutReq(body), { params: PARAMS });
+    expect(res.status).toBe(400);
+    expect(mockedUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for blank id", async () => {
+    const res = await PUT(makePutReq({ result: "x" }), { params: Promise.resolve({ id: "  " }) });
+    expect(res.status).toBe(400);
+    expect(mockedUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for malformed JSON", async () => {
+    const req = makePutReq({});
+    const bad = new Request(req.url, { method: "PUT", headers: req.headers, body: "{not json" });
+    const res = await PUT(bad as never, { params: PARAMS });
+    expect(res.status).toBe(400);
+  });
 
   it("returns 400 when result is not a string", async () => {
     const res = await PUT(makePutReq({ result: 42 }), { params: PARAMS });
@@ -100,6 +119,12 @@ describe("PUT /api/content/[id]", () => {
 
 describe("DELETE /api/content/[id]", () => {
   itReturns401WithParams(DELETE, makeDeleteReq, PARAMS);
+
+  it("returns 400 for blank id", async () => {
+    const res = await DELETE(makeDeleteReq(), { params: Promise.resolve({ id: "  " }) });
+    expect(res.status).toBe(400);
+    expect(mockedRemove).not.toHaveBeenCalled();
+  });
 
   it("returns 204 on successful delete", async () => {
     mockedRemove.mockResolvedValue(true);
