@@ -12,7 +12,11 @@ export async function loadConditionCatalog(): Promise<StatusConditionCatalogEntr
         .find({})
         .sort({ name: 1 })
         .toArray();
-      return entries.map(({ name, description }) => ({ name, description }));
+      return entries.map(({ name, description, removedFromPlay }) => ({
+        name,
+        description,
+        ...(removedFromPlay === true && { removedFromPlay }),
+      }));
     },
   );
 }

@@ -19,20 +19,20 @@ const TARGET: CombatantState = {
 function renderModal(overrides: Partial<{
   onClose: jest.Mock;
   onApplyDamage: jest.Mock;
-  onAddCondition: jest.Mock;
+  onRequestCondition: jest.Mock;
 }> = {}) {
   const onClose = overrides.onClose ?? jest.fn();
   const onApplyDamage = overrides.onApplyDamage ?? jest.fn();
-  const onAddCondition = overrides.onAddCondition ?? jest.fn();
+  const onRequestCondition = overrides.onRequestCondition ?? jest.fn();
   render(
     <TargetActionModal
       target={TARGET}
       onClose={onClose as any}
       onApplyDamage={onApplyDamage as any}
-      onAddCondition={onAddCondition as any}
+      onRequestCondition={onRequestCondition as any}
     />
   );
-  return { onClose, onApplyDamage, onAddCondition };
+  return { onClose, onApplyDamage, onRequestCondition };
 }
 
 describe('TargetActionModal', () => {
@@ -67,17 +67,27 @@ describe('TargetActionModal', () => {
     expect(onApplyDamage).toHaveBeenCalledWith(5, 'fire');
   });
 
-  test('transitions to condition screen and fires onAddCondition', async () => {
-    const { onAddCondition } = renderModal();
+  test('Add Condition delegates to onRequestCondition without showing a freeform name input', async () => {
+    const { onRequestCondition } = renderModal();
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /add condition/i }));
-    expect(screen.queryByRole('button', { name: /add condition/i })).not.toBeInTheDocument();
+    expect(onRequestCondition).toHaveBeenCalledTimes(1);
+    expect(screen.queryByPlaceholderText('Condition name')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Duration in rounds (optional)')).not.toBeInTheDocument();
+  });
 
-    await user.type(screen.getByPlaceholderText('Condition name'), 'Stunned');
-    await user.type(screen.getByPlaceholderText('Duration in rounds (optional)'), '3');
+  test.each(['1.5', '0', '-2'])('rejects malformed damage "%s"', async (bad) => {
+    const { onApplyDamage } = renderModal();
+    const user = userEvent.setup();
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
 
-    await user.click(screen.getByRole('button', { name: /^add$/i }));
-    expect(onAddCondition).toHaveBeenCalledWith('Stunned', 3);
+    await user.click(screen.getByRole('button', { name: /apply damage/i }));
+    await user.type(screen.getByPlaceholderText('Damage amount'), bad);
+    await user.click(screen.getByRole('button', { name: /^apply$/i }));
+
+    expect(onApplyDamage).not.toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
   });
 });

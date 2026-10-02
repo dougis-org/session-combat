@@ -379,6 +379,27 @@ describe('ActiveCombatView — initiative auto-open, dismiss, and backdrop', () 
     ).toBeInTheDocument();
   });
 
+  it('excludes banished unrolled monsters from the roll-all count', () => {
+    const banished = { id: 'ban', name: 'Banished', description: 'gone', removedFromPlay: true };
+    const goblin = makeCombatant({ id: 'm1', name: 'Goblin' });
+    const kobold = makeCombatant({ id: 'm3', name: 'Kobold' });
+    const orc = makeCombatant({ id: 'm2', name: 'Orc', conditions: [banished] });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin, kobold, orc] }) }, [goblin, kobold, orc]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+
+    const modal = screen.getByTestId('initiative-modal');
+    expect(within(modal).getByRole('button', { name: /roll d20 for all 2 unrolled monsters/i })).toBeInTheDocument();
+    expect(within(modal).queryByRole('button', { name: /for all 3/i })).not.toBeInTheDocument();
+  });
+
+  it('does not auto-open for an unrolled banished monster', () => {
+    const banished = { id: 'ban', name: 'Banished', description: 'gone', removedFromPlay: true };
+    const orc = makeCombatant({ id: 'm2', name: 'Orc', conditions: [banished] });
+    const combat = makeCombat({ combatState: makeCombatState({ combatants: [orc] }) }, [orc]);
+    render(<ActiveCombatView combat={combat} user={null} />);
+    expect(screen.queryByTestId('initiative-modal')).not.toBeInTheDocument();
+  });
+
   it('renders a fixed, faint, flex-centered backdrop with a content-sized dialog and no inline position', () => {
     const goblin = makeCombatant({ id: 'c1', name: 'Goblin' });
     const combat = makeCombat({ combatState: makeCombatState({ combatants: [goblin] }) }, [goblin]);

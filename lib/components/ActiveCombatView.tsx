@@ -16,6 +16,7 @@ import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useCombatantPopups } from '@/lib/hooks/useCombatantPopups';
 import { Toast } from '@/lib/components/Toast';
 import { usePreferences } from '@/lib/preferences/usePreferences';
+import { isRemovedFromPlay } from '@/lib/combat/removedFromPlay';
 
 function EncounterDescriptionModal({ description, onClose }: { description: string; onClose: () => void }) {
   return (
@@ -109,7 +110,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
   const unrolledMonsterCount = useMemo(() => {
     if (!combatState) return 0;
-    return combatState.combatants.filter(c => c.type === 'monster' && !c.initiativeRoll).length;
+    return combatState.combatants.filter(c => c.type === 'monster' && !c.initiativeRoll && !isRemovedFromPlay(c)).length;
   }, [combatState]);
 
   const {

@@ -77,4 +77,39 @@ describe('useInitiativeModal', () => {
       expect(result.current).not.toHaveProperty(key);
     }
   });
+
+  describe('removed-from-play combatants', () => {
+    const banished = { id: 'ban', name: 'Banished', description: 'gone', removedFromPlay: true };
+
+    test('a banished unrolled combatant does not auto-open the modal', () => {
+      const { result } = setup([makeCombatant({ id: 'c1', name: 'Goblin', conditions: [banished] })]);
+      expect(result.current.initiativeEditId).toBeNull();
+    });
+
+    test('skips a banished combatant and opens the next unrolled one', () => {
+      const { result } = setup([
+        makeCombatant({ id: 'c1', name: 'Goblin', conditions: [banished] }),
+        makeCombatant({ id: 'c2', name: 'Orc' }),
+      ]);
+      expect(result.current.initiativeEditId).toBe('c2');
+    });
+
+    test('handleSetInitiative does not advance to a banished unrolled combatant', () => {
+      const { result } = setup([
+        makeCombatant({ id: 'c1', name: 'Goblin' }),
+        makeCombatant({ id: 'c2', name: 'Orc', conditions: [banished] }),
+      ]);
+      expect(result.current.initiativeEditId).toBe('c1');
+      act(() => { result.current.handleSetInitiative('c1', ROLLED); });
+      expect(result.current.initiativeEditId).toBeNull();
+    });
+
+    test('prompts again once the banished condition is removed', () => {
+      const goblin = makeCombatant({ id: 'c1', name: 'Goblin', conditions: [banished] });
+      const { result, rerender } = setup([goblin]);
+      expect(result.current.initiativeEditId).toBeNull();
+      rerender({ state: makeCombatState({ combatants: [{ ...goblin, conditions: [] }] }) });
+      expect(result.current.initiativeEditId).toBe('c1');
+    });
+  });
 });

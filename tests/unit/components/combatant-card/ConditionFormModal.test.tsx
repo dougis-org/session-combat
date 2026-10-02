@@ -155,4 +155,35 @@ describe('ConditionFormModal', () => {
     await user.click(screen.getByTestId('condition-form-add'));
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Homebrew', description: '' }));
   });
+
+  test('selecting a flagged catalog entry copies removedFromPlay onto the condition', async () => {
+    mockFetchOnce([...CATALOG, { name: 'Banished', description: 'gone', removedFromPlay: true }]);
+    const { onSubmit, user } = setup();
+    await waitFor(() => expect(screen.getByTestId('condition-catalog-select')).toBeInTheDocument());
+    await user.selectOptions(screen.getByTestId('condition-catalog-select'), 'Banished');
+    await user.click(screen.getByTestId('condition-form-add'));
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Banished', description: 'gone', removedFromPlay: true })
+    );
+  });
+
+  test('selecting a non-flagged catalog entry submits no removedFromPlay flag', async () => {
+    mockFetchOnce(CATALOG);
+    const { onSubmit, user } = setup();
+    await waitFor(() => expect(screen.getByTestId('condition-catalog-select')).toBeInTheDocument());
+    await user.selectOptions(screen.getByTestId('condition-catalog-select'), 'Prone');
+    await user.click(screen.getByTestId('condition-form-add'));
+    expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('removedFromPlay');
+  });
+
+  test('a hand-typed custom "Banished" is not flagged', async () => {
+    mockFetchOnce([...CATALOG, { name: 'Banished', description: 'gone', removedFromPlay: true }]);
+    const { onSubmit, user } = setup();
+    await waitFor(() => expect(screen.getByTestId('condition-catalog-select')).toBeInTheDocument());
+    await user.selectOptions(screen.getByTestId('condition-catalog-select'), 'custom');
+    await user.type(screen.getByTestId('condition-name-input'), 'Banished');
+    await user.click(screen.getByTestId('condition-form-add'));
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Banished', description: '' }));
+    expect(onSubmit.mock.calls[0][0]).not.toHaveProperty('removedFromPlay');
+  });
 });

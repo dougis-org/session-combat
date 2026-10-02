@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { InitiativeRoll } from "@/lib/types";
+import type { CombatantState, InitiativeRoll } from "@/lib/types";
 import type { UseCombatReturn } from "@/lib/hooks/useCombat";
 import { sortCombatants } from "@/lib/utils/combat";
+import { isRemovedFromPlay } from "@/lib/combat/removedFromPlay";
+
+const isUnrolled = (c: CombatantState) => !c.initiativeRoll && !isRemovedFromPlay(c);
 
 export interface UseInitiativeModalArgs {
   combatState: UseCombatReturn["combatState"];
@@ -48,7 +51,7 @@ export function useInitiativeModal({
     const sorted = sortCombatants(updatedCombatants);
 
     // Using the same list as getDisplayCombatants to find the next one
-    const nextUnrolled = sorted.find((c) => !c.initiativeRoll);
+    const nextUnrolled = sorted.find(isUnrolled);
     openInitiativeModal(nextUnrolled ? nextUnrolled.id : null);
   };
 
@@ -63,7 +66,7 @@ export function useInitiativeModal({
   // or removed) or the modal closes, and opens the first eligible (unrolled,
   // non-dismissed) combatant found, provided no modal is currently open.
   const unrolledCombatantIds = (combatState?.combatants ?? [])
-    .filter((c) => !c.initiativeRoll)
+    .filter(isUnrolled)
     .map((c) => c.id)
     .join(",");
 
@@ -71,7 +74,7 @@ export function useInitiativeModal({
     if (!combatState || initiativeEditId !== null) return;
     const sorted = sortCombatants(combatState.combatants);
     const target = sorted.find(
-      (c) => !c.initiativeRoll && !dismissedInitiativeIds.current.has(c.id),
+      (c) => isUnrolled(c) && !dismissedInitiativeIds.current.has(c.id),
     );
     if (!target) return;
     openInitiativeModal(target.id);

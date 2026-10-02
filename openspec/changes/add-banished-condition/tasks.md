@@ -9,25 +9,25 @@ Issue: dougis-org/session-combat#813. Worktree: `.worktrees/add-banished-conditi
 
 ## Preflight
 
-- [ ] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
+- [x] **Verify `pr-review-toolkit:review-pr` is available** — check the available skills list for `pr-review-toolkit:review-pr`. If the skill is not listed, halt immediately, inform the user that the plugin is required, provide installation guidance, and do not proceed until the user confirms it is installed.
 
 ## Execution
 
-- [ ] **Confirm worktree and branch:** `cd .worktrees/add-banished-condition`; confirm the branch is on the remote (`git push -u origin add-banished-condition` if not).
-- [ ] **Issue lifecycle: mark in-progress:** `gh issue edit 813 --add-label "in-progress"`. Discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" option (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item is found, warn and continue; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip only the project update.
-- [ ] Follow strict TDD per `tests.md`: write the failing test, make it pass, refactor. Reuse existing helpers and fixtures before writing new ones.
-- [ ] **T1 Types:** add `removedFromPlay?: boolean` to `StatusConditionCatalogEntry` and `StatusCondition` in `lib/types.ts`.
-- [ ] **T2 Catalog:** add the Banished entry (`removedFromPlay: true`, SRD-style *Banishment* description) to `lib/data/conditionCatalog.ts`; update the doc comment; update `tests/unit/lib/scripts/seedConditionCatalog.test.ts` counts (18 -> 19) and add a Banished assertion.
-- [ ] **T3 Repo/API:** update `loadConditionCatalog` in `lib/storage/conditionCatalogRepo.ts` to project `removedFromPlay` only when `true`; confirm `app/api/conditions/catalog/route.ts` passes it through; extend `tests/unit/lib/storage/conditionCatalogRepo.test.ts`.
-- [ ] **T4 Modal:** in `lib/components/combatant-card/ConditionFormModal.tsx`, copy `removedFromPlay` from the selected catalog entry onto the submitted `StatusCondition` (never for custom entries); extend `tests/unit/components/combatant-card/ConditionFormModal.test.tsx`.
-- [ ] **T5 Helper:** create `lib/combat/removedFromPlay.ts` exporting `isRemovedFromPlay(combatant)`; tests in `tests/unit/combat/removedFromPlay.test.ts` including expiry via `processRoundEnd`.
-- [ ] **T6 Turn order:** extend the skip predicate in `nextTurn` (`lib/hooks/useCombat.ts`); tests for skip, round wrap, all-out alert, and no legendary reset for skipped combatants.
-- [ ] **T7 Unrolled exclusion:** apply the helper in `lib/hooks/useInitiativeModal.ts`, `rollUnrolledMonsters` (`lib/hooks/useCombat.ts`), and `unrolledMonsterCount` (`lib/components/ActiveCombatView.tsx`); tests for ignore and return-after-removal.
-- [ ] **T8 Targeting:** filter both lists and skip chips for removed-from-play targets in `lib/components/combatant-card/TargetingPanel.tsx` without mutating `targetIds`; component tests.
-- [ ] **T8b Target-add path:** add `onRequestCondition` to `lib/components/TargetActionModal.tsx` (replace the freeform condition mode and `onAddCondition`); in `TargetingPanel.tsx` render `ConditionFormModal` for the selected target, append the submitted condition via `onUpdateCombatant`, and remove `addConditionToTarget`; update `tests/unit/components/TargetActionModal.test.tsx` and `TargetingPanel` tests.
-- [ ] **T9 Card presentation:** grey the card (`opacity-50`) and show a "Banished" badge in the combatant card header/`lib/components/CombatantCard.tsx`; component tests.
-- [ ] **T10 Call-site sweep:** grep for remaining `!c.initiativeRoll`, `allCombatants.filter`, and `hp <= 0` skip predicates to confirm no site was missed; list any intentional exclusions in the PR.
-- [ ] Confirm acceptance criteria in `specs/removed-from-play-conditions/spec.md` are all covered by tests.
+- [x] **Confirm worktree and branch:** `cd .worktrees/add-banished-condition`; confirm the branch is on the remote (`git push -u origin add-banished-condition` if not).
+- [x] **Issue lifecycle: mark in-progress:** `gh issue edit 813 --add-label "in-progress"`. Discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" option (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. If no project item is found, warn and continue; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip only the project update.
+- [x] Follow strict TDD per `tests.md`: write the failing test, make it pass, refactor. Reuse existing helpers and fixtures before writing new ones.
+- [x] **T1 Types:** add `removedFromPlay?: boolean` to `StatusConditionCatalogEntry` and `StatusCondition` in `lib/types.ts`.
+- [x] **T2 Catalog:** add the Banished entry (`removedFromPlay: true`, SRD-style *Banishment* description) to `lib/data/conditionCatalog.ts`; update the doc comment; update `tests/unit/lib/scripts/seedConditionCatalog.test.ts` counts (18 -> 19) and add a Banished assertion.
+- [x] **T3 Repo/API:** update `loadConditionCatalog` in `lib/storage/conditionCatalogRepo.ts` to project `removedFromPlay` only when `true`; confirm `app/api/conditions/catalog/route.ts` passes it through; extend `tests/unit/lib/storage/conditionCatalogRepo.test.ts`.
+- [x] **T4 Modal:** in `lib/components/combatant-card/ConditionFormModal.tsx`, copy `removedFromPlay` from the selected catalog entry onto the submitted `StatusCondition` (never for custom entries); extend `tests/unit/components/combatant-card/ConditionFormModal.test.tsx`.
+- [x] **T5 Helper:** create `lib/combat/removedFromPlay.ts` exporting `isRemovedFromPlay(combatant)`; tests in `tests/unit/combat/removedFromPlay.test.ts` including expiry via `processRoundEnd`.
+- [x] **T6 Turn order:** extend the skip predicate in `nextTurn` (`lib/hooks/useCombat.ts`); tests for skip, round wrap, all-out alert, and no legendary reset for skipped combatants.
+- [x] **T7 Unrolled exclusion:** apply the helper in `lib/hooks/useInitiativeModal.ts`, `rollUnrolledMonsters` (`lib/hooks/useCombat.ts`), and `unrolledMonsterCount` (`lib/components/ActiveCombatView.tsx`); tests for ignore and return-after-removal.
+- [x] **T8 Targeting:** filter both lists and skip chips for removed-from-play targets in `lib/components/combatant-card/TargetingPanel.tsx` without mutating `targetIds`; component tests.
+- [x] **T8b Target-add path:** add `onRequestCondition` to `lib/components/TargetActionModal.tsx` (replace the freeform condition mode and `onAddCondition`); in `TargetingPanel.tsx` render `ConditionFormModal` for the selected target, append the submitted condition via `onUpdateCombatant`, and remove `addConditionToTarget`; update `tests/unit/components/TargetActionModal.test.tsx` and `TargetingPanel` tests.
+- [x] **T9 Card presentation:** grey the card (`opacity-50`) and show a "Banished" badge in the combatant card header/`lib/components/CombatantCard.tsx`; component tests.
+- [x] **T10 Call-site sweep:** grep for remaining `!c.initiativeRoll`, `allCombatants.filter`, and `hp <= 0` skip predicates to confirm no site was missed; list any intentional exclusions in the PR.
+- [x] Confirm acceptance criteria in `specs/removed-from-play-conditions/spec.md` are all covered by tests.
 
 ## Pre-Commit Code Review
 

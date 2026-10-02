@@ -5,6 +5,7 @@ import { CombatState, CombatantState, Encounter, Character, Party, InitiativeRol
 import { resetIncomingLegendaryPool, sortCombatants, buildLairCombatant, buildCombatantFromSource, buildInitiativeRoll } from '@/lib/utils/combat';
 import { resolveCharactersForCombat } from '@/lib/utils/partySelection';
 import { processRoundEnd } from '@/lib/combat/conditionExpiry';
+import { isRemovedFromPlay } from '@/lib/combat/removedFromPlay';
 import { pushHpHistory, popHpHistory, getHpHistoryStack, clearCombatHistory } from '@/lib/utils/hpHistory';
 import { useToast } from '@/lib/components/Toast';
 
@@ -327,7 +328,7 @@ export function useCombat(options: UseCombatOptions = {}) {
     if (!combatState) return;
 
     const updatedCombatants = combatState.combatants.map(c => {
-      if (c.type === 'monster' && !c.initiativeRoll) {
+      if (c.type === 'monster' && !c.initiativeRoll && !isRemovedFromPlay(c)) {
         const cWithSettings = {
           ...c,
           initiativeAdvantage: advantage ?? c.initiativeAdvantage,
@@ -352,7 +353,8 @@ export function useCombat(options: UseCombatOptions = {}) {
   const nextTurn = () => {
     if (!combatState) return;
 
-    const isDownedMonster = (c: CombatantState) => c.type === 'monster' && c.hp <= 0;
+    const isSkipped = (c: CombatantState) =>
+      (c.type === 'monster' && c.hp <= 0) || isRemovedFromPlay(c);
 
     let nextIndex = combatState.currentTurnIndex;
     let nextRound = combatState.currentRound;
@@ -381,7 +383,7 @@ export function useCombat(options: UseCombatOptions = {}) {
       const candidate = baseCombatants[nextIndex];
       if (!candidate) break;
 
-      if (!isDownedMonster(candidate)) {
+      if (!isSkipped(candidate)) {
         found = true;
         break;
       }

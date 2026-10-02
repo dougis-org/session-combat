@@ -26,25 +26,25 @@ beforeEach(() => {
 });
 
 describe("seedConditionCatalog", () => {
-  it("inserts exactly 18 entries into an empty collection", async () => {
+  it("inserts exactly 19 entries into an empty collection", async () => {
     const { store } = mockCollection();
     const result = await seedConditionCatalog();
-    expect(store.size).toBe(18);
-    expect(result.inserted).toBe(18);
+    expect(store.size).toBe(19);
+    expect(result.inserted).toBe(19);
     expect(result.updated).toBe(0);
   });
 
-  it("is idempotent: running twice still results in exactly 18 entries", async () => {
+  it("is idempotent: running twice still results in exactly 19 entries", async () => {
     const { store } = mockCollection();
     await seedConditionCatalog();
     const second = await seedConditionCatalog();
-    expect(store.size).toBe(18);
+    expect(store.size).toBe(19);
     expect(second.inserted).toBe(0);
-    expect(second.updated).toBe(18);
+    expect(second.updated).toBe(19);
   });
 
   it("every seeded entry has a non-empty name and description", () => {
-    expect(CONDITION_CATALOG).toHaveLength(18);
+    expect(CONDITION_CATALOG).toHaveLength(19);
     for (const entry of CONDITION_CATALOG) {
       expect(entry.name.length).toBeGreaterThan(0);
       expect(entry.description.length).toBeGreaterThan(0);
@@ -55,5 +55,14 @@ describe("seedConditionCatalog", () => {
     expect(CONDITION_CATALOG.map((c) => c.name)).toEqual(
       expect.arrayContaining(["Slowed", "Confused", "Turned"])
     );
+  });
+
+  it("includes Banished flagged removedFromPlay, and no other entry is flagged", () => {
+    const banished = CONDITION_CATALOG.find((c) => c.name === "Banished");
+    expect(banished).toBeDefined();
+    expect(banished!.description.length).toBeGreaterThan(0);
+    expect(banished!.removedFromPlay).toBe(true);
+    const flagged = CONDITION_CATALOG.filter((c) => "removedFromPlay" in c).map((c) => c.name);
+    expect(flagged).toEqual(["Banished"]);
   });
 });

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { CombatantState, StatusCondition } from '@/lib/types';
+import { isRemovedFromPlay } from '@/lib/combat/removedFromPlay';
 import type { DamageType } from '@/lib/constants';
 import { applyHpChange } from '@/lib/combat/applyHpChange';
 import { isValidHpAmount } from '@/lib/combat/hpAmount';
@@ -9,7 +10,7 @@ import { pushHpHistory } from '@/lib/utils/hpHistory';
 import { TargetActionModal } from '@/lib/components/TargetActionModal';
 import { TargetCheckboxColumn } from '@/lib/components/combatant-card/TargetCheckboxColumn';
 import { TargetChip } from '@/lib/components/combatant-card/TargetChip';
-import { parseConditionForm } from '@/lib/components/combatant-card/ConditionFormModal';
+import { ConditionFormModal } from '@/lib/components/combatant-card/ConditionFormModal';
 
 interface TargetingPanelProps {
   combatId: string;
@@ -38,6 +39,7 @@ export function TargetingPanel({
   onCloseTargeting,
 }: TargetingPanelProps) {
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [conditionTargetId, setConditionTargetId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
   const combatantMap = useMemo(
@@ -65,26 +67,19 @@ export function TargetingPanel({
     setSelectedTargetId(null);
   };
 
-  const addConditionToTarget = (name: string, duration?: number) => {
-    const target = selectedTargetId ? combatantMap.get(selectedTargetId) : undefined;
-    // Validate the name strictly; keep the condition but drop an out-of-range
-    // duration rather than discarding the whole thing.
-    const parsedName = parseConditionForm(name, '');
-    if (target && onUpdateCombatant && parsedName) {
-      const validDuration =
-        duration != null && Number.isSafeInteger(duration) && duration >= 1 && duration <= 10_000
-          ? duration
-          : undefined;
-      const condition: StatusCondition = {
-        id: crypto.randomUUID(),
-        name: parsedName.name,
-        description: '',
-        duration: validDuration,
-      };
-      onUpdateCombatant(target.id, { conditions: [...target.conditions, condition] });
-    }
+  const requestConditionForTarget = () => {
+    setConditionTargetId(selectedTargetId);
     setSelectedTargetId(null);
   };
+
+  const addConditionToTarget = (condition: StatusCondition) => {
+    const target = conditionTargetId ? combatantMap.get(conditionTargetId) : undefined;
+    if (target && onUpdateCombatant) {
+      onUpdateCombatant(target.id, { conditions: [...target.conditions, condition] });
+    }
+  };
+
+  const isTargetable = (c: CombatantState) => c.id !== combatant.id && !isRemovedFromPlay(c);
 
   const selectedTarget = selectedTargetId
     ? allCombatants?.find(c => c.id === selectedTargetId)
@@ -98,7 +93,7 @@ export function TargetingPanel({
             <span className="text-sm text-purple-400 font-semibold">Targets:</span>
             {combatant.targetIds.map(targetId => {
               const target = combatantMap.get(targetId);
-              return target ? (
+              return target && !isRemovedFromPlay(target) ? (
                 <TargetChip
                   key={targetId}
                   target={target}
@@ -128,14 +123,14 @@ export function TargetingPanel({
             <TargetCheckboxColumn
               title="Enemies"
               textColor="text-red-300"
-              targets={allCombatants.filter(c => c.id !== combatant.id && c.type !== 'player' && c.type !== 'lair')}
+              targets={allCombatants.filter(c => isTargetable(c) && c.type !== 'player' && c.type !== 'lair')}
               selectedIds={combatant.targetIds ?? []}
               onToggle={toggleTarget}
             />
             <TargetCheckboxColumn
               title="Party"
               textColor="text-blue-300"
-              targets={allCombatants.filter(c => c.id !== combatant.id && c.type === 'player')}
+              targets={allCombatants.filter(c => isTargetable(c) && c.type === 'player')}
               selectedIds={combatant.targetIds ?? []}
               onToggle={toggleTarget}
             />
@@ -148,7 +143,15 @@ export function TargetingPanel({
           target={selectedTarget}
           onClose={() => setSelectedTargetId(null)}
           onApplyDamage={applyDamageToTarget}
-          onAddCondition={addConditionToTarget}
+          onRequestCondition={requestConditionForTarget}
+        />
+      )}
+
+      {conditionTargetId && (
+        <ConditionFormModal
+          combatantName={combatantMap.get(conditionTargetId)?.name ?? ''}
+          onSubmit={addConditionToTarget}
+          onClose={() => setConditionTargetId(null)}
         />
       )}
     </>
