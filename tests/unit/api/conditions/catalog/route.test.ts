@@ -3,7 +3,7 @@
  */
 import { GET } from "@/app/api/conditions/catalog/route";
 import { NextRequest } from "next/server";
-import { storage } from "@/lib/storage";
+import * as conditionCatalogRepo from "@/lib/storage/conditionCatalogRepo";
 
 jest.mock("@/lib/middleware", () => ({
   withAuth: (handler: (...args: unknown[]) => unknown) =>
@@ -11,11 +11,11 @@ jest.mock("@/lib/middleware", () => ({
       handler(request, { userId: "user-123" }),
 }));
 
-jest.mock("@/lib/storage", () => ({
-  storage: { loadConditionCatalog: jest.fn() },
+jest.mock("@/lib/storage/conditionCatalogRepo", () => ({
+  loadConditionCatalog: jest.fn(),
 }));
 
-const mockedStorage = jest.mocked(storage);
+const mockedStorage = jest.mocked(conditionCatalogRepo);
 
 function makeGetRequest(): NextRequest {
   return new NextRequest("http://localhost/api/conditions/catalog", { method: "GET" });

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
 import * as campaignRepo from '@/lib/storage/campaignRepo';
 import { CAMPAIGN_STATUSES } from '@/lib/types';
 import { sanitizeChapters, sanitizeCurrentChapterId, assertCampaignAccess } from '@/lib/utils/campaign';

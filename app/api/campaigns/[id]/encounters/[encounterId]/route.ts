@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
+import * as encounterRepo from '@/lib/storage/encounterRepo';
 import { assertCampaignAccess } from '@/lib/utils/campaign';
 import { validateString } from '@/lib/validation/core';
 
@@ -19,7 +19,7 @@ export const DELETE = withAuthAndParams<Params>(async (_request, auth, { id, enc
 
     if (role !== 'dm') return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-    await storage.removeEncounterFromCampaign(id, encounterId, auth.userId);
+    await encounterRepo.removeEncounterFromCampaign(id, encounterId, auth.userId);
 
     return NextResponse.json({ message: 'Encounter unlinked successfully' });
   } catch (error) {
