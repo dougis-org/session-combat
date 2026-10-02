@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { DELETE } from "@/app/api/campaigns/[id]/encounters/[encounterId]/route";
-import { storage } from "@/lib/storage";
+import * as encounterRepo from "@/lib/storage/encounterRepo";
 import { getMember } from "@/lib/storage/membershipRepo";
 import { Campaign, CampaignMember } from "@/lib/types";
 import {
@@ -16,10 +16,8 @@ jest.mock("@/lib/middleware", () =>
   require("@/tests/unit/helpers/route.test.helpers").createMockMiddleware()
 );
 
-jest.mock("@/lib/storage", () => ({
-  storage: {
-    removeEncounterFromCampaign: jest.fn(),
-  },
+jest.mock("@/lib/storage/encounterRepo", () => ({
+  removeEncounterFromCampaign: jest.fn(),
 }));
 
 jest.mock("@/lib/storage/membershipRepo", () => ({
@@ -33,7 +31,7 @@ jest.mock("@/lib/storage/campaignRepo", () => ({
 import * as campaignRepo from "@/lib/storage/campaignRepo";
 
 const mockedStorage = {
-  removeEncounterFromCampaign: jest.mocked(storage).removeEncounterFromCampaign,
+  removeEncounterFromCampaign: jest.mocked(encounterRepo).removeEncounterFromCampaign,
   getMember: jest.mocked(getMember),
 };
 
