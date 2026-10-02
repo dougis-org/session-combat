@@ -24,7 +24,7 @@
 - Rationale: Pure and unit-testable, matches `deathSaves.ts` style.
 - Trade-offs: One more file.
 
-Rules: monsters-defeated iff ≥1 `monster` and every `monster` has `hp <= 0`. players-down iff ≥1 `player` and every `player` has `lifeState === 'dead'` or (`hp <= 0` and `!usesDeathSaves`). `lair` ignored. Dying/stable/no-lifeState-at-0 players are not down. If both hold, `monsters-defeated` wins.
+Rules: monsters-defeated iff ≥1 `monster` and every `monster` has `hp <= 0`. players-down iff ≥1 `player` and every `player` has `lifeState === 'dead'` (players always use death saves, so 0 HP alone never counts). `lair` ignored. Dying/stable/no-lifeState-at-0 players are not down. If both hold, `monsters-defeated` wins.
 
 ### Decision 2: Prompt in `ActiveCombatView` with answered-suggestion state
 

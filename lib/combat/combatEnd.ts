@@ -1,14 +1,10 @@
 import type { CombatantState } from "@/lib/types";
-import { usesDeathSaves } from "@/lib/combat/deathSaves";
 
 export type CombatEndSuggestion = "monsters-defeated" | "players-down";
 
-function isDownPlayer(c: Pick<CombatantState, "type" | "hp" | "lifeState">): boolean {
-  if (c.lifeState === "dead") return true;
-  // Players that don't use death saves die at 0 HP; death-save users stay in play
-  // while dying/stable and only count as down once marked dead.
-  return c.hp <= 0 && !usesDeathSaves(c);
-}
+// Players always use death saves, so a player at 0 HP stays in play while dying/stable
+// and only counts as down once marked dead.
+const isDownPlayer = (c: Pick<CombatantState, "lifeState">): boolean => c.lifeState === "dead";
 
 /**
  * Suggest ending combat when one side can no longer act. Lair combatants belong

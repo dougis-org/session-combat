@@ -94,6 +94,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     () => (combatState ? getCombatEndSuggestion(combatState.combatants) : null),
     [combatState],
   );
+  // Intentional render-phase reset (React derived-state pattern); guarded, so it cannot loop.
   if (!endSuggestion && answeredSuggestion) setAnsweredSuggestion(null);
   const showAutoEndPrompt = !!endSuggestion && endSuggestion !== answeredSuggestion;
   const initiativeDialogRef = useRef<HTMLDivElement>(null);

@@ -13,7 +13,7 @@
 
 - [x] **Issue lifecycle: mark in-progress** (#812): run `gh issue edit 812 --add-label "in-progress"`. Then discover the GitHub Project (`gh project list --owner dougis-org --format json`), resolve the "In Progress" status option (`gh project field-list <project-number> --owner dougis-org --format json`), and move the item via `gh project item-edit`. Warn and continue if not found; if the token lacks `project` scope, tell the user to run `gh auth refresh -s project` and skip the project update.
 - [x] Task 1 — Confirm `.worktrees/auto-end-combat-prompt` is the working directory and the branch is on remote
-- [x] Task 2 — Add `lib/combat/combatEnd.ts` with `getCombatEndSuggestion` (reuse `usesDeathSaves` from `lib/combat/deathSaves.ts`)
+- [x] Task 2 — Add `lib/combat/combatEnd.ts` with `getCombatEndSuggestion`
 - [x] Task 3 — Add `answeredSuggestion` state and derived prompt-open value to `lib/components/ActiveCombatView.tsx`
 - [x] Task 4 — Render second `ConfirmDialog` (unique `titleId`); Yes closes it and calls `endCombat()` directly; No/Escape records dismissal
 - [x] Task 5 — Verify reload into finished combat prompts, and lair/dying/stable cases per spec
