@@ -21,10 +21,7 @@ Per batch:
 
 ## Test Cases
 
-- [ ] `tests/unit/api/content/route.test.ts`, `id.route.test.ts`: mock `savedContentRepo` (Tasks 1.2).
-- [ ] `tests/unit/api/campaigns/[id]/characters/route.test.ts`, `[cid]/route.test.ts`, `members/[userId]/route.unit.test.ts`: mock `shareRepo` (Task 2.2).
-- [ ] `tests/unit/api/campaigns/global.route.test.ts`, `global.id.route.test.ts`, `global.id.copy.route.test.ts`: mock `campaignTemplateRepo` (Task 3.2).
+- [ ] `tests/unit/api/content/route.test.ts`, `id.route.test.ts`: mock `savedContentRepo` (Task 1.2); add 400-path tests for blank/whitespace `campaignId` and invalid bodies (Task 1.3).
 - [ ] `tests/unit/api/conditions/catalog/route.test.ts`: mock `conditionCatalogRepo` (Task 4.2).
 - [ ] `tests/unit/api/campaigns/[id]/encounters/[encounterId]/route.test.ts`: mock `encounterRepo` (Task 4.2).
-- [ ] `tests/integration/api/mePreferences.test.ts`: passes unchanged after preferences route migration (Task 4.2).
 - [ ] Final grep: no facade import in `app/`, no facade `jest.mock` in `tests/unit/api/` (Task 4.3).

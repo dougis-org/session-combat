@@ -8,31 +8,20 @@ Batches are sequential; each is its own branch/PR linked to its sub-issue. Per b
 - [ ] Task 1.2: Re-mock tests
   - Files: `tests/unit/api/content/route.test.ts`, `tests/unit/api/content/id.route.test.ts`
   - Action: `jest.mock('@/lib/storage/savedContentRepo')`; update mocked references.
-- [ ] Task 1.3: Deliver (review, PR, CI, merge; closes #831)
+- [ ] Task 1.3: Add validation (scope expansion)
+  - Use `lib/validation/` in both content routes; reject blank/whitespace `campaignId`; add tests (400 cases).
+- [ ] Task 1.4: Deliver (review, PR, CI, merge; closes #831)
 
-## Phase 2: Shares and members (#832)
+## Phases 2–3: Shares/members (#832) and campaign templates (#833)
 
-- [ ] Task 2.1: Migrate routes to `shareRepo`
-  - Files: `app/api/campaigns/[id]/characters/route.ts`, `.../characters/[cid]/route.ts`, `.../members/[userId]/route.ts`
-- [ ] Task 2.2: Re-mock tests
-  - Files: `tests/unit/api/campaigns/[id]/characters/route.test.ts`, `.../characters/[cid]/route.test.ts`, `.../members/[userId]/route.unit.test.ts`
-  - Action: split any non-share `storage.*` mocks into their own repo mocks.
-- [ ] Task 2.3: Deliver (closes #832)
-
-## Phase 3: Campaign templates (#833)
-
-- [ ] Task 3.1: Migrate routes to `campaignTemplateRepo`
-  - Files: `app/api/campaigns/global/route.ts`, `global/[id]/route.ts`, `global/[id]/copy/route.ts`
-- [ ] Task 3.2: Re-mock tests
-  - Files: `tests/unit/api/campaigns/global.route.test.ts`, `global.id.route.test.ts`, `global.id.copy.route.test.ts`
-- [ ] Task 3.3: Deliver (closes #833)
+- [x] Already completed on main by #828; issues closed. No work.
 
 ## Phase 4: Misc and cleanup (#834)
 
 - [ ] Task 4.1: Migrate routes
   - `app/api/conditions/catalog/route.ts` -> `conditionCatalogRepo`
   - `app/api/campaigns/[id]/encounters/[encounterId]/route.ts` -> `encounterRepo`
-  - `app/api/me/preferences/route.ts` -> `userPreferencesRepo`
+  - `app/api/me/preferences/route.ts`: already migrated, no work
   - `app/api/campaigns/[id]/route.ts`: delete unused `storage` import
 - [ ] Task 4.2: Re-mock tests
   - Files: `tests/unit/api/conditions/catalog/route.test.ts`, `tests/unit/api/campaigns/[id]/encounters/[encounterId]/route.test.ts`

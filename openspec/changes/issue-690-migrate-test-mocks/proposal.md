@@ -2,14 +2,14 @@
 
 - #690
 - #831
-- #832
-- #833
+- #832 (closed, already done)
+- #833 (closed, already done)
 - #834
 - #499
 
 ## Why
 
-- Problem statement: 10 unit test files still `jest.mock('@/lib/storage')`, mocking the monolithic `storage` facade. The 12 route handlers they cover still import the facade too, so the mocks cannot move to narrow repos until the routes do.
+- Problem statement: unit tests still `jest.mock('@/lib/storage')`, mocking the monolithic `storage` facade, and the route handlers they cover still import it. At origin/main 49e58042 only 5 routes and 4 tests remain (the shares and templates batches, #832/#833, were already completed by #828 under #689 and were closed).
 - Why now: Epic #499 is dismantling the `lib/storage.ts` god object domain-by-domain. These are the last facade importers in `app/`; finishing them unblocks removing the facade.
 - Business/user impact: None user-visible. Tech-debt paydown; narrow-repo mocks fail loudly if a route calls the wrong repo, which facade mocks cannot catch.
 
@@ -30,9 +30,13 @@ Four batches, one sub-issue and one PR each, worked sequentially:
 | Batch | Sub-issue | Repo | Routes | Tests re-mocked |
 |---|---|---|---|---|
 | 1 Saved content | #831 | `savedContentRepo` | `content`, `content/[id]` | `content/route.test.ts`, `content/id.route.test.ts` |
-| 2 Shares/members | #832 | `shareRepo` | `campaigns/[id]/characters`, `characters/[cid]`, `members/[userId]` | 3 tests under `tests/unit/api/campaigns/[id]/` |
-| 3 Campaign templates | #833 | `campaignTemplateRepo` | `campaigns/global`, `global/[id]`, `global/[id]/copy` | `global.route`, `global.id.route`, `global.id.copy.route` tests |
-| 4 Misc | #834 | `conditionCatalogRepo`, `encounterRepo`, `userPreferencesRepo` | `conditions/catalog`, `campaigns/[id]/encounters/[encounterId]`, `me/preferences`, dead import in `campaigns/[id]` | `conditions/catalog/route.test.ts`, `encounters/[encounterId]/route.test.ts` |
+| ~~2 Shares/members~~ | #832 | `shareRepo` | already done by #828; closed | — |
+| ~~3 Campaign templates~~ | #833 | `campaignTemplateRepo` | already done by #828; closed | — |
+| 4 Misc | #834 | `conditionCatalogRepo`, `encounterRepo`, `userPreferencesRepo` | `conditions/catalog`, `campaigns/[id]/encounters/[encounterId]`, dead import in `campaigns/[id]` (`me/preferences` already migrated) | `conditions/catalog/route.test.ts`, `encounters/[encounterId]/route.test.ts` |
+
+### Scope expansion (batch 1, #831)
+
+Verity pre-commit findings (critical: whitespace-only `campaignId` reaches the repo; high: GET/POST/PUT/DELETE bypass `lib/validation/`) were accepted by the owner as in-scope for #831. Batch 1 therefore also adds input validation to the content routes with tests. This is the one intentional behavior change (invalid input now returns 400). Other batches remain zero-behavior-change.
 
 ### Out of Scope
 
@@ -42,8 +46,8 @@ Four batches, one sub-issue and one PR each, worked sequentially:
 
 ## What Changes
 
-- 12 route files under `app/api/` (see table) — import swap and call-site rename only.
-- 10 unit test files — `jest.mock` target and mocked-method references.
+- 5 route files under `app/api/` (see table) — import swap and call-site rename; plus validation in the 2 content routes.
+- 4 unit test files — `jest.mock` target and mocked-method references; new validation tests for content.
 
 ## Risks
 

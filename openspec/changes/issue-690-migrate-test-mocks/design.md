@@ -38,10 +38,16 @@
 - Rationale: consistent with codebase hoisting pattern.
 - Trade-offs: tests mocking multiple domains need multiple mock calls.
 
-### Decision 4: Leave `me/preferences` test coverage as-is
+### Decision 4: Add validation to content routes in batch 1
 
-- Chosen: migrate the route only; rely on `tests/integration/api/mePreferences.test.ts`.
-- Rationale: no unit test mocks the facade for it; adding one is scope creep.
+- Chosen: use existing `lib/validation/` helpers in the content routes (owner-approved, to resolve Verity gate findings).
+- Alternatives considered: waive findings; separate hotfix PR.
+- Rationale: owner chose to fix in-place rather than waive.
+- Trade-offs: batch 1 is not purely mechanical; invalid input now yields 400.
+
+### Note: Batches 2 and 3 dropped
+
+#832 and #833 were already completed by #828; scope reduced accordingly.
 
 ## Proposal to Design Mapping
 
