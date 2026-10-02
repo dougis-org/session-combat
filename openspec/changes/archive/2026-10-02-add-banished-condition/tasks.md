@@ -31,17 +31,17 @@ Issue: dougis-org/session-combat#813. Worktree: `.worktrees/add-banished-conditi
 
 ## Pre-Commit Code Review
 
-- [ ] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
+- [x] **Before every commit**, spawn a dedicated sub-agent to run the `openspec-review-code` skill. The primary agent must automatically apply all clearly-correct findings directly to the code — without stopping, without presenting the findings list to the user, and without asking for confirmation. Apply fixes, re-run tests to confirm they pass, then proceed to commit.
 
 ## Validation
 
-- [ ] Run unit/integration tests (`npm test`; use `--testPathPatterns` for targeted runs)
-- [ ] Run E2E tests on a free port, not 3000 (if applicable)
-- [ ] Run type checks (`npx tsc --noEmit`)
-- [ ] Run build (`npm run build`)
-- [ ] Run security/code quality checks required by project standards (Verity gate, Codacy)
-- [ ] All completed tasks marked as complete
-- [ ] All steps in [Remote push validation]
+- [x] Run unit/integration tests (`npm test`; use `--testPathPatterns` for targeted runs)
+- [x] Run E2E tests on a free port, not 3000 (if applicable)
+- [x] Run type checks (`npx tsc --noEmit`)
+- [x] Run build (`npm run build`)
+- [x] Run security/code quality checks required by project standards (Verity gate, Codacy)
+- [x] All completed tasks marked as complete
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -65,14 +65,14 @@ Use the project's documented commands for each of the above (see project README 
 
 ## PR and Merge
 
-- [ ] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
-- [ ] Commit all changes to the working branch and push to remote
-- [ ] Open PR from `add-banished-condition` to `main` (squash-only ruleset). The PR body MUST include `Closes #813`.
-- [ ] **Issue lifecycle: mark in-review:** `gh issue edit 813 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" column via `gh project item-edit` (same discovery as above; warn and skip if not found).
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
-- [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`; `main` is squash-only)
-- [ ] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify the user if `CLOSED`); never wait for a human to report the merge; never force-merge:
+- [x] Ensure the `openspec-review-code` sub-agent was run and all findings were automatically addressed before the final commit
+- [x] Commit all changes to the working branch and push to remote
+- [x] Open PR from `add-banished-condition` to `main` (squash-only ruleset). The PR body MUST include `Closes #813`.
+- [x] **Issue lifecycle: mark in-review:** `gh issue edit 813 --add-label "in-review" --remove-label "in-progress"`, then move the project item to the "In Review" column via `gh project item-edit` (same discovery as above; warn and skip if not found).
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero findings remain. If findings persist after three or more iterations with no progress, report the stall with remaining findings and wait for human guidance.
+- [x] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (NEVER use `--admin`; `main` is squash-only)
+- [x] **Iterate until merged** — repeat until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify the user if `CLOSED`); never wait for a human to report the merge; never force-merge:
   1. **Build and tests** — run all steps in [Remote push validation]; fix failures, commit, and push first
   2. **PR comments** — poll `gh pr view <PR-URL> --json reviewThreads`; address every unresolved thread, commit, validate, push, wait 180 seconds; continue until all are resolved
   3. **CI check failures** — poll `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks (`ci-gate`, Codacy), commit, validate, push, wait 180 seconds; restart from step 1
@@ -93,16 +93,16 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] **Ops: re-seed the condition catalog** in each environment (dev/staging/prod): run `seedConditionCatalog` so Banished and its flag are upserted (idempotent)
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify the merged changes appear on `main`
-- [ ] Mark all remaining tasks as complete (`- [x]`)
-- [ ] Update repository documentation impacted by the change
-- [ ] Sync approved spec deltas into `openspec/specs/` (global spec). After copying `specs/removed-from-play-conditions/spec.md` to `openspec/specs/removed-from-play-conditions/spec.md`, update relative links: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-add-banished-condition/design.md`, and similarly for `tasks.md`. Also hand-edit `openspec/specs/condition-catalog/spec.md` to change the "18 entries" counts to 19 and mention Banished. Note existing live specs may fail `openspec validate`; use `--skip-specs` and hand-merge if archive aborts.
-- [ ] Archive the change: move `openspec/changes/add-banished-condition/` to `openspec/changes/archive/YYYY-MM-DD-add-banished-condition/` **and stage both the new location and the deletion of the old location in a single commit**
-- [ ] Confirm `openspec/changes/archive/YYYY-MM-DD-add-banished-condition/` exists and `openspec/changes/add-banished-condition/` is gone
-- [ ] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-banished-condition` then `git push -u origin doc/archive-YYYY-MM-DD-add-banished-condition`
-- [ ] Open a PR from the doc branch to `main` titled `docs: archive add-banished-condition (YYYY-MM-DD)` — **do NOT push directly to `main`**
-- [ ] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin`)
-- [ ] Monitor the doc PR until it merges (address comments and CI failures on the same branch)
-- [ ] Remove the worktree and prune: `git worktree remove --force .worktrees/add-banished-condition` (the `openspec-shared` submodule requires `--force`), `git fetch --prune`, and `git branch -D add-banished-condition doc/archive-YYYY-MM-DD-add-banished-condition`
+- [x] **Ops: re-seed the condition catalog** in each environment (dev/staging/prod): run `seedConditionCatalog` so Banished and its flag are upserted (idempotent)
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify the merged changes appear on `main`
+- [x] Mark all remaining tasks as complete (`- [x]`)
+- [x] Update repository documentation impacted by the change
+- [x] Sync approved spec deltas into `openspec/specs/` (global spec). After copying `specs/removed-from-play-conditions/spec.md` to `openspec/specs/removed-from-play-conditions/spec.md`, update relative links: replace `../../design.md` with `../../changes/archive/YYYY-MM-DD-add-banished-condition/design.md`, and similarly for `tasks.md`. Also hand-edit `openspec/specs/condition-catalog/spec.md` to change the "18 entries" counts to 19 and mention Banished. Note existing live specs may fail `openspec validate`; use `--skip-specs` and hand-merge if archive aborts.
+- [x] Archive the change: move `openspec/changes/add-banished-condition/` to `openspec/changes/archive/YYYY-MM-DD-add-banished-condition/` **and stage both the new location and the deletion of the old location in a single commit**
+- [x] Confirm `openspec/changes/archive/YYYY-MM-DD-add-banished-condition/` exists and `openspec/changes/add-banished-condition/` is gone
+- [x] **Create a doc branch:** `git checkout -b doc/archive-YYYY-MM-DD-add-banished-condition` then `git push -u origin doc/archive-YYYY-MM-DD-add-banished-condition`
+- [x] Open a PR from the doc branch to `main` titled `docs: archive add-banished-condition (YYYY-MM-DD)` — **do NOT push directly to `main`**
+- [x] **IMMEDIATELY** enable auto-merge on the doc PR: `gh pr merge <DOC-PR-URL> --auto --squash` (NEVER use `--admin`)
+- [x] Monitor the doc PR until it merges (address comments and CI failures on the same branch)
+- [x] Remove the worktree and prune: `git worktree remove --force .worktrees/add-banished-condition` (the `openspec-shared` submodule requires `--force`), `git fetch --prune`, and `git branch -D add-banished-condition doc/archive-YYYY-MM-DD-add-banished-condition`

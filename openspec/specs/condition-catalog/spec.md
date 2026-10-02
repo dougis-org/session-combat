@@ -4,19 +4,19 @@ This document details *changes* to requirements and is additive to the [`design.
 
 ### Requirement: ADDED Default condition catalog storage
 
-The system SHALL persist a catalog of standard D&D 5e conditions plus commonly-needed spell/feature-inflicted status effects (name + description) in a dedicated MongoDB collection, seeded by a script rather than hardcoded in application code. The catalog contains 18 entries: the 15 standard conditions plus Slowed, Confused, and Turned.
+The system SHALL persist a catalog of standard D&D 5e conditions plus commonly-needed spell/feature-inflicted status effects (name + description) in a dedicated MongoDB collection, seeded by a script rather than hardcoded in application code. The catalog contains 19 entries: the 15 standard conditions plus Slowed, Confused, Turned, and Banished (which carries `removedFromPlay`).
 
 #### Scenario: Catalog is readable after seeding
 
-- **Given** the `conditionCatalog` collection has been populated by the seed script with all 18 default conditions
+- **Given** the `conditionCatalog` collection has been populated by the seed script with all 19 default conditions
 - **When** `storage.loadConditionCatalog()` is called
-- **Then** it returns all 18 entries, each with a non-empty `name` and `description`
+- **Then** it returns all 19 entries, each with a non-empty `name` and `description`
 
 #### Scenario: Re-running the seed script is idempotent
 
-- **Given** the `conditionCatalog` collection already contains the seeded 18 conditions
+- **Given** the `conditionCatalog` collection already contains the seeded 19 conditions
 - **When** the seed script is run again
-- **Then** the collection still contains exactly 18 entries (upserted by name, not duplicated)
+- **Then** the collection still contains exactly 19 entries (upserted by name, not duplicated)
 
 ### Requirement: ADDED Slowed, Confused, and Turned in the default condition catalog
 
