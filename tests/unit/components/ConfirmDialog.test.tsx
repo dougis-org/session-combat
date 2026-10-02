@@ -75,4 +75,29 @@ describe('ConfirmDialog', () => {
     const dialog = screen.getByRole('dialog', { name: 'End Combat?' });
     expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
+
+  it('renders confirm before cancel in DOM order', () => {
+    renderDialog();
+    const confirm = screen.getByTestId('confirm-dialog-confirm');
+    const cancel = screen.getByTestId('confirm-dialog-cancel');
+    expect(confirm.compareDocumentPosition(cancel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('focuses the confirm button on open', () => {
+    renderDialog();
+    expect(screen.getByTestId('confirm-dialog-confirm')).toHaveFocus();
+  });
+
+  it('Tab from confirm moves to cancel and × is out of tab order', async () => {
+    renderDialog();
+    expect(screen.getByRole('button', { name: /close modal/i })).toHaveAttribute('tabindex', '-1');
+    await userEvent.tab();
+    expect(screen.getByTestId('confirm-dialog-cancel')).toHaveFocus();
+  });
+
+  it('danger variant renders red confirm and gray cancel', () => {
+    renderDialog({ variant: 'danger' });
+    expect(screen.getByTestId('confirm-dialog-confirm')).toHaveClass('bg-red-600');
+    expect(screen.getByTestId('confirm-dialog-cancel')).toHaveClass('bg-gray-600');
+  });
 });

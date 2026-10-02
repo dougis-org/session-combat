@@ -660,7 +660,9 @@ describe('ActiveCombatView — CON save notification', () => {
     it('opens the dialog without ending combat', async () => {
       const { endCombat } = setup();
       await openDialog();
-      expect(screen.getByRole('dialog', { name: 'End Combat?' })).toHaveAttribute('aria-labelledby', 'end-combat-confirm-title');
+      const dialog = screen.getByRole('dialog', { name: 'End Combat?' });
+      const labelId = dialog.getAttribute('aria-labelledby') as string;
+      expect(document.getElementById(labelId)).toHaveTextContent('End Combat?');
       expect(endCombat).not.toHaveBeenCalled();
     });
 

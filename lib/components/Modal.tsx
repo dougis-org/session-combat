@@ -9,9 +9,11 @@ interface ModalProps {
   onClose: () => void;
   size?: 'small' | 'medium' | 'large';
   titleId?: string;
+  /** When false, the header "×" is removed from tab order (still clickable). */
+  closeButtonTabbable?: boolean;
 }
 
-export function Modal({ isOpen, title, children, onClose, size = 'medium', titleId = 'modal-title' }: ModalProps) {
+export function Modal({ isOpen, title, children, onClose, size = 'medium', titleId = 'modal-title', closeButtonTabbable = true }: ModalProps) {
 
   useEffect(() => {
     if (!isOpen) return;
@@ -69,6 +71,7 @@ export function Modal({ isOpen, title, children, onClose, size = 'medium', title
             onClick={onClose}
             className="text-gray-400 hover:text-white text-2xl leading-none"
             aria-label="Close modal"
+            tabIndex={closeButtonTabbable ? undefined : -1}
           >
             ×
           </button>

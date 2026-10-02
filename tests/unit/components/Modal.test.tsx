@@ -75,4 +75,27 @@ describe('Modal', () => {
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'custom-title');
     expect(screen.getByText('Test')).toHaveAttribute('id', 'custom-title');
   });
+
+  it('close button is tabbable by default', () => {
+    render(
+      <Modal isOpen={true} title="Test" onClose={jest.fn()}>
+        <p>content</p>
+      </Modal>
+    );
+    expect(screen.getByRole('button', { name: /close modal/i })).not.toHaveAttribute('tabindex', '-1');
+  });
+
+  it('closeButtonTabbable={false} sets tabindex -1 and click still calls onClose once', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    render(
+      <Modal isOpen={true} title="Test" onClose={onClose} closeButtonTabbable={false}>
+        <p>content</p>
+      </Modal>
+    );
+    const close = screen.getByRole('button', { name: /close modal/i });
+    expect(close).toHaveAttribute('tabindex', '-1');
+    await user.click(close);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
