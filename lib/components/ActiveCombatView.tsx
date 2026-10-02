@@ -10,6 +10,7 @@ import { InitiativeEntry } from '@/lib/components/InitiativeEntry';
 import { LairActionsSlot } from '@/lib/components/LairActionsSlot';
 import { CombatSetupAndActiveModals } from '@/lib/components/CombatSetupAndActiveModals';
 import { CombatantState } from '@/lib/types';
+import { getCombatEndSuggestion, type CombatEndSuggestion } from '@/lib/combat/combatEnd';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { useInitiativeModal } from '@/lib/hooks/useInitiativeModal';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
@@ -86,6 +87,16 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     ? combatState?.combatants.find(c => c.id === initiativeEditId)
     : undefined;
   const [showEndCombatConfirm, setShowEndCombatConfirm] = useState(false);
+  // The suggestion the user already answered (Yes or No); cleared once the condition
+  // no longer holds so the prompt re-arms if it recurs.
+  const [answeredSuggestion, setAnsweredSuggestion] = useState<CombatEndSuggestion | null>(null);
+  const endSuggestion = useMemo(
+    () => (combatState ? getCombatEndSuggestion(combatState.combatants) : null),
+    [combatState],
+  );
+  // Intentional render-phase reset (React derived-state pattern); guarded, so it cannot loop.
+  if (!endSuggestion && answeredSuggestion) setAnsweredSuggestion(null);
+  const showAutoEndPrompt = !!endSuggestion && endSuggestion !== answeredSuggestion;
   const initiativeDialogRef = useRef<HTMLDivElement>(null);
   const initiativeTitleId = useId();
   const initiativeNameId = useId();
@@ -363,6 +374,23 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
           onCancel={() => setShowEndCombatConfirm(false)}
         >
           Are you sure you want to end combat?
+        </ConfirmDialog>
+
+        <ConfirmDialog
+          isOpen={showAutoEndPrompt}
+          title="End combat?"
+          titleId="auto-end-combat-prompt-title"
+          confirmLabel="Yes"
+          cancelLabel="No"
+          onConfirm={() => {
+            setAnsweredSuggestion(endSuggestion);
+            void endCombat();
+          }}
+          onCancel={() => setAnsweredSuggestion(endSuggestion)}
+        >
+          {endSuggestion === 'players-down'
+            ? 'All players are down.'
+            : 'All monsters are defeated.'}
         </ConfirmDialog>
       </div>
 
