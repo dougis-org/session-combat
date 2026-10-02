@@ -34,7 +34,7 @@
   - All remaining combatants banished/downed: `nextTurn` already alerts "No combatants remain able to take a turn."
   - The active combatant becomes banished mid-turn: next `nextTurn` advances normally; the current turn is not forcibly ended.
   - Banished combatant with no `initiativeRoll`: must not trigger the auto-open initiative modal or count toward "Roll d20 for all N unrolled Monsters".
-  - Banished combatant already in another combatant's `targetIds`: chip is hidden/pruned (see design).
+  - Banished combatant already in another combatant's `targetIds`: chip is hidden, not pruned (see design).
   - Timed Banished (`duration`) expires at round wrap: condition removed, so the combatant re-enters play on its next initiative slot.
   - Legendary-action pool reset (`resetIncomingLegendaryPool`) must not run for a skipped combatant.
 
