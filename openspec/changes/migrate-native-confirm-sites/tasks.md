@@ -28,7 +28,7 @@ Ownership metadata:
 - [ ] **3. Campaigns** (tests T7–T12): migrate `app/campaigns/page.tsx`, `app/campaigns/[id]/page.tsx` (remove member), `app/campaigns/[id]/encounters/page.tsx` (unlink; keep `unlinkConfirmMessage`), `app/campaigns/[id]/sessions/page.tsx` to `useConfirmDialog` with `variant: 'danger'`, labels per design Decision 2; render `{dialog}` once
 - [ ] **4. Parties and encounters** (tests T13–T16): migrate `app/parties/page.tsx`, `app/encounters/page.tsx` to `useConfirmDialog` with `variant: 'danger'`, labels per design Decision 2; render `{dialog}` once
 - [ ] **5. Test cleanup** (tests T17–T18): remove every `window.confirm`/`global.confirm` mock listed in the proposal (including stale mock in `tests/unit/hooks/useCombat.test.ts`); update any E2E that handles native dialogs for these flows
-- [ ] **6. Final grep:** `rg "\bconfirm\\(" app lib` shows no native call sites; `rg "window.confirm|global.confirm" tests` is empty
+- [ ] **6. Final grep:** `rg "\bconfirm\(" app lib` shows no native call sites; `rg "window.confirm|global.confirm" tests` is empty
 - [ ] Look for existing helpers to reuse before writing new logic; confirm acceptance criteria in `specs/` are covered
 
 ## Pre-Commit Code Review
