@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
-import { SavedContent } from '@/lib/types';
+import * as savedContentRepo from '@/lib/storage/savedContentRepo';
+import { validateIdentifier, validateSavedContentCreate } from '@/lib/validation/savedContent';
 
 export const GET = withAuth(async (request: NextRequest, auth) => {
   try {
     const { searchParams } = new URL(request.url);
-    const campaignId = searchParams.get('campaignId');
-    if (!campaignId) {
-      return NextResponse.json({ error: 'campaignId is required' }, { status: 400 });
+    const campaign = validateIdentifier(searchParams.get('campaignId'), 'campaignId');
+    if (!campaign.valid) {
+      return NextResponse.json({ error: campaign.error }, { status: 400 });
     }
-    const items = await storage.savedContent.list(campaignId, auth.userId);
+    const items = await savedContentRepo.list(campaign.value, auth.userId);
     return NextResponse.json(items);
   } catch (error) {
     console.error('Error fetching saved content:', error);
@@ -20,35 +20,19 @@ export const GET = withAuth(async (request: NextRequest, auth) => {
 
 export const POST = withAuth(async (request: NextRequest, auth) => {
   try {
-    const body = await request.json();
-    const { campaignId, type, title, systemPrompt, userMessage, prompt, chapter } = body;
-
-    if (
-      typeof campaignId !== 'string' || !campaignId.trim() ||
-      typeof type !== 'string' ||
-      typeof title !== 'string' || !title.trim() ||
-      typeof systemPrompt !== 'string' || !systemPrompt.trim() ||
-      typeof userMessage !== 'string' || !userMessage.trim() ||
-      typeof prompt !== 'string' || !prompt.trim()
-    ) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    const validTypes: SavedContent['type'][] = ['npc', 'location', 'shop', 'magic-item', 'room'];
-    if (!(validTypes as string[]).includes(type)) {
-      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    const input = validateSavedContentCreate(body);
+    if (!input.valid) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
     }
 
-    const item = await storage.savedContent.create({
-      userId: auth.userId,
-      campaignId: campaignId.trim(),
-      type: type as SavedContent['type'],
-      title: title.trim(),
-      systemPrompt,
-      userMessage,
-      prompt,
-      chapter: typeof chapter === 'string' ? chapter : undefined,
-    });
+    const item = await savedContentRepo.create({ userId: auth.userId, ...input.value });
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {

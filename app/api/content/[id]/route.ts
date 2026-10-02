@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuthAndParams } from '@/lib/middleware';
-import { storage } from '@/lib/storage';
-import type { SavedContent } from '@/lib/types';
+import * as savedContentRepo from '@/lib/storage/savedContentRepo';
+import { validateIdentifier, validateSavedContentPatch } from '@/lib/validation/savedContent';
 
 type Params = { id: string };
 
 export const PUT = withAuthAndParams<Params>(async (request: NextRequest, auth, { id }) => {
   try {
-    const body = await request.json();
-    const { result, notes } = body;
-
-    if (result !== undefined && typeof result !== 'string') {
-      return NextResponse.json({ error: 'result must be a string' }, { status: 400 });
-    }
-    if (notes !== undefined && typeof notes !== 'string') {
-      return NextResponse.json({ error: 'notes must be a string' }, { status: 400 });
+    const contentId = validateIdentifier(id, 'id');
+    if (!contentId.valid) {
+      return NextResponse.json({ error: contentId.error }, { status: 400 });
     }
 
-    const patch: Pick<SavedContent, 'result' | 'notes'> = {};
-    if (result !== undefined) patch.result = result;
-    if (notes !== undefined) patch.notes = notes;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
 
-    const found = await storage.savedContent.update(id, auth.userId, patch);
+    const patch = validateSavedContentPatch(body);
+    if (!patch.valid) {
+      return NextResponse.json({ error: patch.error }, { status: 400 });
+    }
+
+    const found = await savedContentRepo.update(contentId.value, auth.userId, patch.value);
     if (!found) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -32,7 +35,12 @@ export const PUT = withAuthAndParams<Params>(async (request: NextRequest, auth, 
 
 export const DELETE = withAuthAndParams<Params>(async (_request: NextRequest, auth, { id }) => {
   try {
-    const found = await storage.savedContent.remove(id, auth.userId);
+    const contentId = validateIdentifier(id, 'id');
+    if (!contentId.valid) {
+      return NextResponse.json({ error: contentId.error }, { status: 400 });
+    }
+
+    const found = await savedContentRepo.remove(contentId.value, auth.userId);
     if (!found) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
