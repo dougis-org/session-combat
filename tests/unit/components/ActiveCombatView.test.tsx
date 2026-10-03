@@ -660,8 +660,17 @@ describe('ActiveCombatView — CON save notification', () => {
     it('opens the dialog without ending combat', async () => {
       const { endCombat } = setup();
       await openDialog();
-      expect(screen.getByRole('dialog', { name: 'End Combat?' })).toHaveAttribute('aria-labelledby', 'end-combat-confirm-title');
+      const dialog = screen.getByRole('dialog', { name: 'End Combat?' });
+      const labelId = dialog.getAttribute('aria-labelledby') as string;
+      expect(document.getElementById(labelId)).toHaveTextContent('End Combat?');
       expect(endCombat).not.toHaveBeenCalled();
+    });
+
+    it('uses the danger variant (red confirm, gray cancel)', async () => {
+      setup();
+      await openDialog();
+      expect(screen.getByTestId('confirm-dialog-confirm')).toHaveClass('bg-red-600');
+      expect(screen.getByTestId('confirm-dialog-cancel')).toHaveClass('bg-gray-600');
     });
 
     it('confirm closes the dialog and calls endCombat exactly once, even on double-click', async () => {

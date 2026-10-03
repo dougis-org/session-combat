@@ -13,6 +13,7 @@ import { CombatantState } from '@/lib/types';
 import { getCombatEndSuggestion, type CombatEndSuggestion } from '@/lib/combat/combatEnd';
 import { UseCombatReturn } from '@/lib/hooks/useCombat';
 import { useInitiativeModal } from '@/lib/hooks/useInitiativeModal';
+import { useConfirmDialog } from '@/lib/hooks/useConfirmDialog';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import { useCombatantPopups } from '@/lib/hooks/useCombatantPopups';
 import { Toast } from '@/lib/components/Toast';
@@ -87,7 +88,22 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   const initiativeCombatant = initiativeEditId
     ? combatState?.combatants.find(c => c.id === initiativeEditId)
     : undefined;
-  const [showEndCombatConfirm, setShowEndCombatConfirm] = useState(false);
+  const { confirm: confirmEndCombat, dialog: endCombatDialog } = useConfirmDialog();
+  // Options are captured when the dialog opens; read endCombat through a ref so
+  // confirming uses the latest one if combat state changed while it was open.
+  const endCombatRef = useRef(endCombat);
+  useEffect(() => {
+    endCombatRef.current = endCombat;
+  }, [endCombat]);
+  const handleEndCombatClick = () =>
+    confirmEndCombat({
+      title: 'End Combat?',
+      message: 'Are you sure you want to end combat?',
+      confirmLabel: 'End Combat',
+      cancelLabel: 'Return to Combat',
+      variant: 'danger',
+      onConfirm: () => void endCombatRef.current(),
+    });
   // The suggestion the user already answered (Yes or No); cleared once the condition
   // no longer holds so the prompt re-arms if it recurs.
   const [answeredSuggestion, setAnsweredSuggestion] = useState<CombatEndSuggestion | null>(null);
@@ -267,7 +283,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
             >
               Restart Round
             </button>
-            <button onClick={() => setShowEndCombatConfirm(true)} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+            <button onClick={handleEndCombatClick} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
               End Combat
             </button>
             <Link href="/" className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
@@ -362,20 +378,7 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
 
         {removeConfirmPopup}
 
-        <ConfirmDialog
-          isOpen={showEndCombatConfirm}
-          title="End Combat?"
-          titleId="end-combat-confirm-title"
-          confirmLabel="End Combat"
-          cancelLabel="Return to Combat"
-          onConfirm={() => {
-            setShowEndCombatConfirm(false);
-            void endCombat();
-          }}
-          onCancel={() => setShowEndCombatConfirm(false)}
-        >
-          Are you sure you want to end combat?
-        </ConfirmDialog>
+        {endCombatDialog}
 
         <ConfirmDialog
           isOpen={showAutoEndPrompt}

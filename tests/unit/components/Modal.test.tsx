@@ -75,4 +75,68 @@ describe('Modal', () => {
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'custom-title');
     expect(screen.getByText('Test')).toHaveAttribute('id', 'custom-title');
   });
+
+  it('close button is tabbable by default', () => {
+    render(
+      <Modal isOpen={true} title="Test" onClose={jest.fn()}>
+        <p>content</p>
+      </Modal>
+    );
+    expect(screen.getByRole('button', { name: /close modal/i })).not.toHaveAttribute('tabindex', '-1');
+  });
+
+  it('closeButtonTabbable={false} sets tabindex -1 and click still calls onClose once', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    render(
+      <Modal isOpen={true} title="Test" onClose={onClose} closeButtonTabbable={false}>
+        <p>content</p>
+      </Modal>
+    );
+    const close = screen.getByRole('button', { name: /close modal/i });
+    expect(close).toHaveAttribute('tabindex', '-1');
+    await user.click(close);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('Escape closes only the topmost of stacked modals', async () => {
+    const outer = jest.fn();
+    const inner = jest.fn();
+    render(
+      <>
+        <Modal isOpen title="Outer" titleId="outer" onClose={outer}><p>o</p></Modal>
+        <Modal isOpen title="Inner" titleId="inner" onClose={inner}><p>i</p></Modal>
+      </>
+    );
+    await userEvent.keyboard('{Escape}');
+    expect(inner).toHaveBeenCalledTimes(1);
+    expect(outer).not.toHaveBeenCalled();
+  });
+
+  it('trapFocus wraps Tab and restores focus to the opener on close', async () => {
+    function Harness() {
+      const [open, setOpen] = React.useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>opener</button>
+          <Modal isOpen={open} title="T" onClose={() => setOpen(false)} trapFocus closeButtonTabbable={false}>
+            <button>first</button>
+            <button>last</button>
+          </Modal>
+        </>
+      );
+    }
+    render(<Harness />);
+    const opener = screen.getByText('opener');
+    await userEvent.click(opener);
+    expect(screen.getByText('first')).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByText('last')).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByText('first')).toHaveFocus();
+    await userEvent.tab({ shift: true });
+    expect(screen.getByText('last')).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    expect(opener).toHaveFocus();
+  });
 });
