@@ -89,13 +89,18 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
     ? combatState?.combatants.find(c => c.id === initiativeEditId)
     : undefined;
   const { confirm: confirmEndCombat, dialog: endCombatDialog } = useConfirmDialog();
+  // Options are captured when the dialog opens; read endCombat through a ref so
+  // confirming uses the latest one if combat state changed while it was open.
+  const endCombatRef = useRef(endCombat);
+  endCombatRef.current = endCombat;
   const handleEndCombatClick = () =>
     confirmEndCombat({
       title: 'End Combat?',
       message: 'Are you sure you want to end combat?',
       confirmLabel: 'End Combat',
       cancelLabel: 'Return to Combat',
-      onConfirm: () => void endCombat(),
+      variant: 'danger',
+      onConfirm: () => void endCombatRef.current(),
     });
   // The suggestion the user already answered (Yes or No); cleared once the condition
   // no longer holds so the prompt re-arms if it recurs.

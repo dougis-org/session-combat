@@ -37,3 +37,9 @@ None.
 ### Requirement: Reliability
 
 - See functional scenario: "Default unchanged" — other `Modal` consumers are unaffected.
+
+## Addendum (PR review)
+
+- `Modal` accepts opt-in `trapFocus?: boolean` (default `false`): focuses the first tabbable on open, wraps Tab/Shift+Tab, restores focus to the opener on close. `ConfirmDialog` enables it (initial focus now comes from the trap rather than `autoFocus`, so the opener is captured correctly).
+- With stacked modals, Escape SHALL close only the topmost.
+- End Combat uses `variant: 'danger'` and reads `endCombat` through a ref so confirming uses the latest function.

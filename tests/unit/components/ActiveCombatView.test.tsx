@@ -666,6 +666,13 @@ describe('ActiveCombatView — CON save notification', () => {
       expect(endCombat).not.toHaveBeenCalled();
     });
 
+    it('uses the danger variant (red confirm, gray cancel)', async () => {
+      setup();
+      await openDialog();
+      expect(screen.getByTestId('confirm-dialog-confirm')).toHaveClass('bg-red-600');
+      expect(screen.getByTestId('confirm-dialog-cancel')).toHaveClass('bg-gray-600');
+    });
+
     it('confirm closes the dialog and calls endCombat exactly once, even on double-click', async () => {
       const { endCombat } = setup();
       await openDialog();

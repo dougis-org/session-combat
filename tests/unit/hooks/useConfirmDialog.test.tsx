@@ -79,4 +79,22 @@ describe('useConfirmDialog', () => {
     expect(document.querySelectorAll(`[id="${idA}"]`)).toHaveLength(1);
     expect(document.querySelectorAll(`[id="${idB}"]`)).toHaveLength(1);
   });
+
+  it('a second confirm() call replaces the options of the open dialog', async () => {
+    function Twice() {
+      const { confirm, dialog } = useConfirmDialog();
+      return (
+        <>
+          <button onClick={() => confirm(makeOptions({ title: 'First' }))}>one</button>
+          <button onClick={() => confirm(makeOptions({ title: 'Second' }))}>two</button>
+          {dialog}
+        </>
+      );
+    }
+    render(<Twice />);
+    await userEvent.click(screen.getByText('one'));
+    await userEvent.click(screen.getByText('two'));
+    expect(screen.queryByRole('dialog', { name: 'First' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Second' })).toBeInTheDocument();
+  });
 });

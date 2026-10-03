@@ -100,4 +100,14 @@ describe('ConfirmDialog', () => {
     expect(screen.getByTestId('confirm-dialog-confirm')).toHaveClass('bg-red-600');
     expect(screen.getByTestId('confirm-dialog-cancel')).toHaveClass('bg-gray-600');
   });
+
+  it('keeps Tab and Shift+Tab inside the dialog', async () => {
+    renderDialog();
+    await userEvent.tab();
+    expect(screen.getByTestId('confirm-dialog-cancel')).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByTestId('confirm-dialog-confirm')).toHaveFocus();
+    await userEvent.tab({ shift: true });
+    expect(screen.getByTestId('confirm-dialog-cancel')).toHaveFocus();
+  });
 });

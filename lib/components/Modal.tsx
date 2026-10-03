@@ -1,6 +1,10 @@
 'use client';
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useRef } from 'react';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+
+// Open modals, oldest first. Only the topmost handles Escape.
+const openModalStack: symbol[] = [];
 
 interface ModalProps {
   isOpen: boolean;
@@ -11,12 +15,20 @@ interface ModalProps {
   titleId?: string;
   /** When false, the header "×" is removed from tab order (still clickable). */
   closeButtonTabbable?: boolean;
+  /** Opt in to focus containment: focuses the first tabbable, wraps Tab, restores focus on close. */
+  trapFocus?: boolean;
 }
 
-export function Modal({ isOpen, title, children, onClose, size = 'medium', titleId = 'modal-title', closeButtonTabbable = true }: ModalProps) {
+export function Modal({ isOpen, title, children, onClose, size = 'medium', titleId = 'modal-title', closeButtonTabbable = true, trapFocus = false }: ModalProps) {
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isOpen && trapFocus);
 
   useEffect(() => {
     if (!isOpen) return;
+
+    const modalId = Symbol('modal');
+    openModalStack.push(modalId);
 
     // Prevent body scrolling when modal is open
     const previousOverflow = document.body.style.overflow;
@@ -24,7 +36,7 @@ export function Modal({ isOpen, title, children, onClose, size = 'medium', title
 
     // Handle Escape key
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && openModalStack[openModalStack.length - 1] === modalId) {
         onClose();
       }
     };
@@ -32,6 +44,8 @@ export function Modal({ isOpen, title, children, onClose, size = 'medium', title
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      const index = openModalStack.indexOf(modalId);
+      if (index !== -1) openModalStack.splice(index, 1);
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = previousOverflow;
     };
@@ -58,6 +72,7 @@ export function Modal({ isOpen, title, children, onClose, size = 'medium', title
       onClick={handleOverlayClick}
     >
       <div
+        ref={dialogRef}
         className={`${sizeClasses[size]} w-full mx-4 bg-gray-800 rounded-lg shadow-lg`}
         role="dialog"
         aria-modal="true"
