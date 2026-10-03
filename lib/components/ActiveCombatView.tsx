@@ -92,7 +92,9 @@ export function ActiveCombatView({ combat, user }: ActiveCombatViewProps) {
   // Options are captured when the dialog opens; read endCombat through a ref so
   // confirming uses the latest one if combat state changed while it was open.
   const endCombatRef = useRef(endCombat);
-  endCombatRef.current = endCombat;
+  useEffect(() => {
+    endCombatRef.current = endCombat;
+  }, [endCombat]);
   const handleEndCombatClick = () =>
     confirmEndCombat({
       title: 'End Combat?',
