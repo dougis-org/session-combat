@@ -2,7 +2,7 @@
 
 - Relevant architecture: Next.js API routes (`app/api/**`) call storage; Jest tests use `jest.mock()` to isolate them. `lib/storage.ts` exports a `storage` object whose methods delegate one-to-one to `lib/storage/*Repo.ts`.
 - Dependencies: `savedContentRepo`, `shareRepo`, `campaignTemplateRepo`, `conditionCatalogRepo`, `encounterRepo`, `userPreferencesRepo`.
-- Interfaces/contracts touched: import structure of 12 routes; mock targets of 10 tests. No public API contract changes.
+- Interfaces/contracts touched: import structure of 5 routes; mock targets of 4 tests (reduced from 12/10 after #828). No public API contract changes.
 
 ## Goals / Non-Goals
 
@@ -38,26 +38,34 @@
 - Rationale: consistent with codebase hoisting pattern.
 - Trade-offs: tests mocking multiple domains need multiple mock calls.
 
-### Decision 4: Leave `me/preferences` test coverage as-is
+### Decision 4: Add validation to content routes in batch 1
 
-- Chosen: migrate the route only; rely on `tests/integration/api/mePreferences.test.ts`.
-- Rationale: no unit test mocks the facade for it; adding one is scope creep.
+- Chosen: use existing `lib/validation/` helpers in the content routes (owner-approved, to resolve Verity gate findings).
+- Alternatives considered: waive findings; separate hotfix PR.
+- Rationale: owner chose to fix in-place rather than waive.
+- Trade-offs: batch 1 is not purely mechanical; invalid input now yields 400.
+
+### Note: Batches 2 and 3 dropped
+
+#832 and #833 were already completed by #828; scope reduced accordingly.
 
 ## Proposal to Design Mapping
 
 - Proposal element: route import swaps -> Decision 1 -> validation: typecheck + route tests
 - Proposal element: test re-mocking -> Decision 3 -> validation: `npm run test:unit`
-- Proposal element: four batches -> Decision 2 -> validation: one PR per sub-issue, CI green
+- Proposal element: four batches (two already done) -> Decision 2 -> validation: one PR per sub-issue, CI green
+- Proposal element: batch-1 validation (scope expansion) -> Decision 4 -> validation: new 400-path tests in the content route tests
 
 ## Functional Requirements Mapping
 
 - Requirement: routes use narrow repos -> Decision 1 -> Specs: Route handlers call narrow repos -> verify by existing route tests.
 - Requirement: tests mock narrow repos -> Decision 3 -> Specs: Tests mock narrow repos -> verify by test run and grep.
+- Requirement: content routes validate input (batch 1 only) -> Decision 4 -> Specs: validation covered by tests.md Task 1.3 cases.
 
 ## Non-Functional Requirements Mapping
 
 - Requirement category: operability
-  - Requirement: zero behavior change.
+  - Requirement: zero behavior change, except batch 1 content-route validation (Decision 4), where invalid input now returns 400.
   - Design element: Decisions 1 and 3.
   - Acceptance criteria reference: Specs, Test Suite Isolation.
   - Testability notes: existing suite must pass unchanged in assertions.
