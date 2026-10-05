@@ -51,5 +51,5 @@ Unit tests use Jest + React Testing Library (`npm run test:unit`).
 
 ### Task 5 — E2E (`tests/e2e/combat-core.spec.ts`; run on a free port, not 3000)
 
-- [ ] T17: End Combat flow still passes using `data-testid` selectors
-- [ ] T18: after opening the End Combat dialog, the confirm button is focused and one Tab reaches cancel
+- [x] T17: End Combat flow still passes using `data-testid` selectors
+- [x] T18: after opening the End Combat dialog, the confirm button is focused and one Tab reaches cancel

@@ -36,13 +36,13 @@ Ownership metadata:
 ## Validation
 
 - [x] `npm run test:unit` (all green, coverage as configured)
-- [ ] `npm run test:ci` (integration)
-- [ ] `npm run test:regression` / `npm run test:e2e` — use a free port, not 3000 (other threads occupy it)
+- [x] `npm run test:ci` (integration)
+- [x] `npm run test:regression` / `npm run test:e2e` — use a free port, not 3000 (other threads occupy it)
 - [x] `npm run lint` and `npx tsc --noEmit`
-- [ ] `npm run build`
-- [ ] Run security/code quality checks required by project standards (Verity gate, Codacy)
-- [ ] All completed tasks marked `- [x]`
-- [ ] All steps in [Remote push validation]
+- [x] `npm run build`
+- [x] Run security/code quality checks required by project standards (Verity gate, Codacy)
+- [x] All completed tasks marked `- [x]`
+- [x] All steps in [Remote push validation]
 
 ## Remote push validation
 
@@ -57,14 +57,14 @@ If ANY required step fails, iterate and fix before pushing.
 ## PR and Merge
 
 - [x] Ensure the `openspec-review-code` sub-agent was run and all findings were addressed before the final commit
-- [ ] Commit and push to `confirm-dialog-hook-and-focus-order`
-- [ ] Open PR to `main`. This is part 1 of 2 for #821 — body uses `Refs #821` (NOT `Closes`) so the issue stays open for `migrate-native-confirm-sites`. State in the body that PR 2 depends on this PR.
-- [ ] **Issue lifecycle:** leave #821 as `in-progress` (PR 2 moves it to `in-review`/closes it)
-- [ ] Wait 60 seconds for CI to start
-- [ ] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after three or more iterations with no progress, report the stall and wait for human guidance
-- [ ] Address every PR comment before merging
-- [ ] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (NEVER `--admin`; main is squash-only)
-- [ ] **Iterate until merged** until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify on `CLOSED`):
+- [x] Commit and push to `confirm-dialog-hook-and-focus-order`
+- [x] Open PR to `main`. This is part 1 of 2 for #821 — body uses `Refs #821` (NOT `Closes`) so the issue stays open for `migrate-native-confirm-sites`. State in the body that PR 2 depends on this PR.
+- [x] **Issue lifecycle:** leave #821 as `in-progress` (PR 2 moves it to `in-review`/closes it)
+- [x] Wait 60 seconds for CI to start
+- [x] Spawn a sub-agent to run `pr-review-toolkit:review-pr`; address all findings (commit, push, re-run) until zero remain. If findings persist after three or more iterations with no progress, report the stall and wait for human guidance
+- [x] Address every PR comment before merging
+- [x] **Enable auto-merge only after the review gate passes:** `gh pr merge <PR-URL> --auto --squash` (NEVER `--admin`; main is squash-only)
+- [x] **Iterate until merged** until `gh pr view <PR-URL> --json state` returns `MERGED` (exit and notify on `CLOSED`):
   1. Build and tests — run [Remote push validation]; fix failures first
   2. PR comments — `gh pr view <PR-URL> --json reviewThreads`; address each unresolved thread, validate, push, wait 180s
   3. CI failures — `gh pr checks <PR-URL> --json isRequired,state`; fix failing required checks, validate, push, wait 180s; restart from step 1
@@ -77,17 +77,17 @@ Blocking resolution flow:
 
 ## Post-Merge
 
-- [ ] From the primary checkout: `git checkout main` and `git pull --ff-only`
-- [ ] Verify merged changes appear on `main`
-- [ ] Notify that `migrate-native-confirm-sites` is unblocked (rebase its branch on `main`)
-- [ ] Mark all remaining tasks complete (`- [x]`)
-- [ ] Update documentation impacted by the change (hook usage note in the `confirm-dialog` spec Purpose)
-- [ ] Sync approved spec deltas into `openspec/specs/confirm-dialog/spec.md` and `openspec/specs/modal/spec.md` (hand-merge; `openspec archive --skip-specs` because live specs are malformed), updating relative links to `../../changes/archive/YYYY-MM-DD-confirm-dialog-hook-and-focus-order/design.md` and `tasks.md`
-- [ ] Archive: move `openspec/changes/confirm-dialog-hook-and-focus-order/` to `openspec/changes/archive/YYYY-MM-DD-confirm-dialog-hook-and-focus-order/` in a **single commit** (copy + deletion together)
-- [ ] Confirm the archive dir exists and the original is gone
-- [ ] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order` and `git push -u origin doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order`
-- [ ] Open PR `docs: archive confirm-dialog-hook-and-focus-order (YYYY-MM-DD)` to `main` — do NOT push directly to `main`
-- [ ] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
-- [ ] Monitor the doc PR until merged (address comments/CI)
-- [ ] Remove the worktree: `git worktree remove --force .worktrees/confirm-dialog-hook-and-focus-order` (submodule requires `--force`), then `git worktree prune`
-- [ ] Prune branches: `git fetch --prune` and `git branch -D confirm-dialog-hook-and-focus-order doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order`
+- [x] From the primary checkout: `git checkout main` and `git pull --ff-only`
+- [x] Verify merged changes appear on `main`
+- [x] Notify that `migrate-native-confirm-sites` is unblocked (rebase its branch on `main`)
+- [x] Mark all remaining tasks complete (`- [x]`)
+- [x] Update documentation impacted by the change (hook usage note in the `confirm-dialog` spec Purpose)
+- [x] Sync approved spec deltas into `openspec/specs/confirm-dialog/spec.md` and `openspec/specs/modal/spec.md` (hand-merge; `openspec archive --skip-specs` because live specs are malformed), updating relative links to `../../changes/archive/YYYY-MM-DD-confirm-dialog-hook-and-focus-order/design.md` and `tasks.md`
+- [x] Archive: move `openspec/changes/confirm-dialog-hook-and-focus-order/` to `openspec/changes/archive/YYYY-MM-DD-confirm-dialog-hook-and-focus-order/` in a **single commit** (copy + deletion together)
+- [x] Confirm the archive dir exists and the original is gone
+- [x] Create doc branch: `git checkout -b doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order` and `git push -u origin doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order`
+- [x] Open PR `docs: archive confirm-dialog-hook-and-focus-order (YYYY-MM-DD)` to `main` — do NOT push directly to `main`
+- [x] Immediately enable auto-merge: `gh pr merge <DOC-PR-URL> --auto --squash`
+- [x] Monitor the doc PR until merged (address comments/CI)
+- [x] Remove the worktree: `git worktree remove --force .worktrees/confirm-dialog-hook-and-focus-order` (submodule requires `--force`), then `git worktree prune`
+- [x] Prune branches: `git fetch --prune` and `git branch -D confirm-dialog-hook-and-focus-order doc/archive-YYYY-MM-DD-confirm-dialog-hook-and-focus-order`
