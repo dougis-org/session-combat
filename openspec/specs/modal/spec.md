@@ -48,6 +48,42 @@ The system SHALL not render its content in the DOM when `isOpen` is false.
 - **When** the component renders
 - **Then** "Secret Content" is not present in the DOM
 
+### Requirement: ADDED Optional non-tabbable close button
+
+The system SHALL accept `closeButtonTabbable?: boolean` (default `true`) on `Modal`. When `false`, the header close button SHALL have `tabindex="-1"` while remaining clickable and still calling `onClose`.
+
+#### Scenario: Default unchanged
+
+- **Given** a `Modal` without the prop
+- **When** it renders
+- **Then** the close button has no `tabindex="-1"`
+
+#### Scenario: Opt-out
+
+- **Given** `closeButtonTabbable={false}`
+- **When** it renders and the user clicks the close button
+- **Then** it has `tabindex="-1"` and `onClose` is called once
+
+### Requirement: ADDED Opt-in focus trap
+
+The system SHALL accept `trapFocus?: boolean` (default `false`) on `Modal`. When `true`, it SHALL focus the first tabbable element on open, wrap Tab/Shift+Tab inside the dialog, and restore focus to the previously focused element on close.
+
+#### Scenario: Trap and restore
+
+- **Given** a `Modal` with `trapFocus` opened from a button
+- **When** the user tabs past the last control, then closes the modal
+- **Then** focus wraps to the first control and returns to the opener on close
+
+### Requirement: ADDED Escape closes only the topmost modal
+
+With several modals open, the Escape key SHALL call `onClose` only for the topmost.
+
+#### Scenario: Stacked modals
+
+- **Given** two open `Modal`s
+- **When** the user presses Escape
+- **Then** only the later-opened modal's `onClose` is called
+
 ## MODIFIED Requirements
 
 None.
