@@ -88,6 +88,10 @@ test.describe("Combat flows - core screen and HP", () => {
 
     // End combat — confirm in the in-app dialog, then assert setup screen returns
     await page.getByRole("button", { name: "End Combat" }).click();
+    // Confirm is focused on open and one Tab reaches cancel (× is out of tab order)
+    await expect(page.getByTestId("confirm-dialog-confirm")).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByTestId("confirm-dialog-cancel")).toBeFocused();
     await page.getByTestId("confirm-dialog-confirm").click();
     await expect(page.getByRole("heading", { name: "Start New Combat" })).toBeVisible({ timeout: 10000 });
   });
